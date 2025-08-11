@@ -1,0 +1,3 @@
+docker build --no-cache -t pong-backend-dev -f backend/Dockerfile.dev backend
+docker rm -f backend 2>/dev/null || true
+docker run -d --name backend -p 8443:8443 pong-backend-dev

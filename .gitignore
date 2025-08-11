@@ -1,0 +1,12 @@
+# Node / build
+node_modules
+dist
+build
+#Env & certs
+.env
+*.crt
+*.key
+certs/
+# OS/editor
+*DS_Store
+*.log
