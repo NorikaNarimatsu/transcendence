@@ -1,0 +1,14 @@
+{
+  "name": "frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch --preserveWatchOutput",
+    "serve": "node dev-server.js",
+    "dev": "sh -c \"npm run build:watch & npm run serve\""
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

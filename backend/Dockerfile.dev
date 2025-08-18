@@ -6,6 +6,7 @@ RUN apk add --no-cache openssl
 
 # Copy package files if present
 COPY package*.json ./
+
 # Install deps:
 # - if lockfile exists -> npm ci (fast, reproducible)
 # - otherwise         -> npm install
