@@ -6,5 +6,5 @@ RUN [ -f package-lock.json ] && npm ci --omit=optional || npm install --omit=opt
 
 COPY . .
 
-EXPOSE 5173
+EXPOSE 3000
 CMD ["npm","run","dev"]
