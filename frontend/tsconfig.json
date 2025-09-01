@@ -1,13 +1,12 @@
+// frontend/tsconfig.json
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2019",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "strict": true,
-    "skipLibCheck": true,
-    "outDir": "public",
-    "rootDir": "src",
-    "sourceMap": true
+    "rootDir": "./src",
+    "outDir": "./public/dist",
+    "strict": true
   },
   "include": ["src"]
 }

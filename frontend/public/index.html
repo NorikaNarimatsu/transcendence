@@ -1,12 +1,90 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <title>Pong</title>
+    <style>
+      :root {
+        --primary:  #1900A7;
+        --accent:   #7A63FE;
+        --pink:     #EC8FC7;
+        --blush:    #FFC7E9;
+        --text:     #FFC7E9;
+      }
+      html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
+      #wrap { display: grid; place-items: center; height: 100%; }
+      #hud {
+        position: fixed; top: 0; left: 0; right: 0;
+        display: flex; justify-content: space-between; padding: 10px 16px;
+        font-weight: 700; letter-spacing: .5px; user-select: none;
+        color: var(--text);
+        text-shadow: 0 1px 8px rgba(0,0,0,.35);
+      }
+      #controls {
+        position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
+        opacity: .9; font-size: 14px; color: var(--blush);
+        text-shadow: 0 1px 8px rgba(0,0,0,.35);
+      }
+      #overlay {
+        position: fixed; inset: 0; display: grid; place-items: center;
+        background: color-mix(in srgb, black 40%, transparent);
+      }
+      #card {
+        background: linear-gradient(180deg, var(--primary), var(--accent));
+        color: var(--blush); border: 1px solid var(--pink);
+        padding: 18px; border-radius: 12px; min-width: 280px;
+        box-shadow: 0 8px 20px rgba(0,0,0,.35);
+      }
+      label { display: block; margin-top: 10px; font-size: 14px; color: var(--blush);}
+      input {
+        width: 100%; padding: 8px; border-radius: 8px;
+        border: 1px solid var(--pink); background: #fff; color: #111;
+      }
+      button {
+        margin-top: 14px; padding: 10px 14px; border-radius: 10px;
+        border: 1px solid var(--pink); color: #111; background: var(--blush);
+        cursor: pointer; font-weight: 700;
+      }
+      canvas {
+        /* base bg; actual gradient is drawn in TS each frame */
+        background: linear-gradient(180deg, var(--primary), var(--accent));
+        border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.45);
+      }
+    </style>
+    
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
+    <div id="hud">
+      <div id="leftName">LEFT</div>
+      <div id="score">0 : 0</div>
+      <div id="rightName">RIGHT</div>
+    </div>
+
+    <div id="wrap">
+      <canvas id="game" width="900" height="540"></canvas>
+    </div>
+
+    <div id="controls">W/S (Left) • ↑/↓ (Right) • Space=Start • P=Pause • R=Reset</div>
+
+    <!-- Registration overlay -->
+    <div id="overlay">
+      <div id="card">
+        <h3 style="margin:0 0 8px 0;">Start a Match</h3>
+        <label>Left Player</label>
+        <input id="leftInput" placeholder="e.g. Alice" />
+        <label>Right Player</label>
+        <input id="rightInput" placeholder="e.g. Bob" />
+        <button id="startBtn">Play!</button>
+        <p style="font-size:12px;opacity:.8;margin-top:8px;">
+          Controls: W/S (Left) • ↑/↓ (Right). First to 11 wins.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/dist/main.js"></script>
   </body>
 </html>

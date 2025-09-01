@@ -3,9 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch --preserveWatchOutput",
     "serve": "node dev-server.js",
+    "build:watch": "tsc --watch --preserveWatchOutput",
     "dev": "sh -c \"npm run build:watch & npm run serve\""
   },
   "devDependencies": {
