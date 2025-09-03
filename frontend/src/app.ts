@@ -1,21 +1,24 @@
 // frontend/src/app.ts
+
 import { createDOM } from './ui/dom.js';
 import { HUD } from './ui/hud.js';
 import { Overlay } from './ui/overlay.js';
+import { PageManager } from './ui/pageManager.js';
 import { Keyboard } from './input/keyboard.js';
 import { Game } from './engine/game.js';
+import { RouteHandlers } from './router/routesHandlers.js';
+import { EventHandlers } from './events/eventHandlers.js';
 import { initRouter, goto } from './router/hash.js';
-import { State } from './types.js';
-// frontend/src/app.ts
 
 export function startApp() {
+  // Initialize core components
   const dom = createDOM();
   const hud = new HUD(dom);
-  const kb  = new Keyboard();
-
-  const game = new Game(dom, hud, kb);
+  const keyboard = new Keyboard();
+  const game = new Game(dom, hud, keyboard);
   game.init();
 
+  // Initialize overlay with its callback
   const overlay = new Overlay(dom, (left, right) => {
     hud.setNames(left, right);
     overlay.hide();
@@ -23,87 +26,37 @@ export function startApp() {
     goto('#/game');
   });
 
-  // MODIFIED: Play button now goes to signup instead of menu
-  dom.playButton.addEventListener('click', () => {
-    goto('#/signup');
-  });
+  // Initialize page manager
+  const pages = {
+    welcome: dom.welcomePage,
+    signup: dom.signupPage,
+    profile: dom.profilePage
+  };
+  const gameElements = {
+    wrap: dom.wrap,
+    hud: dom.hud,
+    controls: dom.controls
+  };
+  const pageManager = new PageManager(pages, gameElements);
 
-  // NEW: Continue button on signup page
-  dom.continueBtn.addEventListener('click', () => {
-    const email = dom.emailInput.value;
-    if (email) {
-      // Store email for later use (you can add to localStorage or state)
-      console.log('User email:', email);
-      goto('#/profile');
-    }
-  });
+  // Initialize route handlers
+  const routeHandlers = new RouteHandlers(pageManager, overlay, game);
 
-  // NEW: Play Snake button (placeholder)
-  dom.playSnakeBtn.addEventListener('click', () => {
-    alert('Snake game coming soon!');
-  });
+  // Initialize event handlers
+  const eventHandlers = new EventHandlers(dom, overlay, hud, game);
+  eventHandlers.init();
 
-  // NEW: Play Pong button goes to menu (name entry)
-  dom.playPongBtn.addEventListener('click', () => {
-    goto('#/menu');
-  });
-
+  // Setup routing
   initRouter({
-    welcome() {
-      // Hide everything
-      dom.welcomePage.style.display = 'flex';
-      dom.signupPage.style.display = 'none';
-      dom.profilePage.style.display = 'none';
-      overlay.hide();
-      dom.wrap.style.display = 'none';
-      dom.hud.style.display = 'none';
-      dom.controls.style.display = 'none';
-    },
-    
-    // NEW: Signup route
-    signup() {
-      dom.welcomePage.style.display = 'none';
-      dom.signupPage.style.display = 'block';
-      dom.profilePage.style.display = 'none';
-      overlay.hide();
-      dom.wrap.style.display = 'none';
-      dom.hud.style.display = 'none';
-      dom.controls.style.display = 'none';
-    },
-    
-    // NEW: Profile route
-    profile() {
-      dom.welcomePage.style.display = 'none';
-      dom.signupPage.style.display = 'none';
-      dom.profilePage.style.display = 'flex';
-      overlay.hide();
-      dom.wrap.style.display = 'none';
-      dom.hud.style.display = 'none';
-      dom.controls.style.display = 'none';
-    },
-    
-    menu() {
-      dom.welcomePage.style.display = 'none';
-      dom.signupPage.style.display = 'none';
-      dom.profilePage.style.display = 'none';
-      overlay.show();
-      dom.wrap.style.display = 'none';
-      dom.hud.style.display = 'none';
-      dom.controls.style.display = 'none';
-    },
-    
-    game() {
-      dom.welcomePage.style.display = 'none';
-      dom.signupPage.style.display = 'none';
-      dom.profilePage.style.display = 'none';
-      overlay.hide();
-      dom.wrap.style.display = 'grid';
-      dom.hud.style.display = 'flex';
-      dom.controls.style.display = 'block';
-      if (game.state === State.MENU) game.resetMatch(true);
-      game.startLoop();
-    }
+    welcome: routeHandlers.welcome,
+    signup: routeHandlers.signup,
+    profile: routeHandlers.profile,
+    menu: routeHandlers.menu,
+    game: routeHandlers.gameRoute
   });
 
-  if (!location.hash) goto('#/welcome');
+  // Start on welcome page
+  if (!location.hash) {
+    goto('#/welcome');
+  }
 }
