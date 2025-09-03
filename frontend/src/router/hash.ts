@@ -5,8 +5,8 @@ type Routes = {
   welcome: () => void; 
   signup: () => void;   // NEW
   profile: () => void;  // NEW
-  menu: () => void; 
-  game: () => void;
+  pongmenu: () => void; 
+  ponggame: () => void;
 };
 
 let routes: Routes;
@@ -18,7 +18,7 @@ export function initRouter(r: Routes) {
 }
 
 // MODIFIED: Add new routes to goto function
-export function goto(hash: '#/welcome' | '#/signup' | '#/profile' | '#/menu' | '#/game') {
+export function goto(hash: '#/welcome' | '#/signup' | '#/profile' | '#/pongmenu' | '#/ponggame') {
   if (location.hash !== hash) location.hash = hash;
   else handle();
 }
@@ -29,6 +29,6 @@ function handle() {
   if (h === '#/welcome') routes.welcome();
   else if (h === '#/signup') routes.signup();    // NEW
   else if (h === '#/profile') routes.profile();  // NEW
-  else if (h === '#/menu') routes.menu();
-  else routes.game();
+  else if (h === '#/pong') routes.pongmenu();
+  else routes.ponggame();
 }

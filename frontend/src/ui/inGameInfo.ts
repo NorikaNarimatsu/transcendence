@@ -1,6 +1,6 @@
 import type { DOMRefs } from './dom.js';
 
-export class HUD {
+export class inGameInfo {
   constructor(private dom: DOMRefs) {}
 
   setNames(left: string, right: string) {

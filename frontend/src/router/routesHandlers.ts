@@ -1,9 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        ::::::::            */
+/*   routesHandlers.ts                                  :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: nnarimatsu <nnarimatsu@student.codam.nl      +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2025/09/03 18:32:34 by nnarimatsu    #+#    #+#                 */
+/*   Updated: 2025/09/03 18:32:35 by nnarimatsu    ########   odam.nl         */
+/*                                                                            */
+/* ************************************************************************** */
+
+
+
 // frontend/src/routes/handlers.ts
 
 import { PageManager } from '../ui/pageManager.js';
 import { Overlay } from '../ui/overlay.js';
 import { Game } from '../engine/game.js';
-import { State } from '../types.js';
+import { State } from '../constants.js';
 
 export class RouteHandlers {
   constructor(
@@ -27,8 +41,8 @@ export class RouteHandlers {
     this.overlay.hide();
   }
 
-  menu = () => {
-    this.pageManager.showPage('none'); // No specific page, just overlay
+  pong = () => {
+    this.pageManager.showPage('none');
     this.overlay.show();
   }
 

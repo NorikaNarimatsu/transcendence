@@ -2,19 +2,22 @@
 
 import { goto } from '../router/hash.js';
 import { Overlay } from '../ui/overlay.js';
-import { HUD } from '../ui/hud.js';
+import { inGameInfo } from '../ui/inGameInfo.js';
 import { Game } from '../engine/game.js';
 import type { DOMRefs } from '../ui/dom.js';
 
-export class EventHandlers {
+
+export class EventHandlers
+{
   constructor(
     private dom: DOMRefs,
     private overlay: Overlay,
-    private hud: HUD,
+    private ingameinfo: inGameInfo,
     private game: Game
   ) {}
 
-  init() {
+  init()
+  {
     // Welcome page events
     this.dom.playButton.addEventListener('click', this.handlePlayClick);
     
@@ -39,17 +42,18 @@ export class EventHandlers {
       return;
     }
     
-    // Store email (you can enhance this later)
+    // Store email (connect to database later)
     localStorage.setItem('userEmail', email);
     console.log('User email:', email);
     goto('#/profile');
   }
 
   private handlePlaySnakeClick = () => {
+    // goto('#/menu2');
     alert('Snake game coming soon!');
   }
 
   private handlePlayPongClick = () => {
-    goto('#/menu');
+    goto('#/pongmenu');
   }
 }

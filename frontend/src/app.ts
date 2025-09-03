@@ -1,7 +1,17 @@
-// frontend/src/app.ts
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        ::::::::            */
+/*   app.ts                                             :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: nnarimatsu <nnarimatsu@student.codam.nl      +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2025/09/03 15:42:43 by nnarimatsu    #+#    #+#                 */
+/*   Updated: 2025/09/03 18:15:27 by nnarimatsu    ########   odam.nl         */
+/*                                                                            */
+/* ************************************************************************** */
 
 import { createDOM } from './ui/dom.js';
-import { HUD } from './ui/hud.js';
+import { inGameInfo } from './ui/inGameInfo.js';
 import { Overlay } from './ui/overlay.js';
 import { PageManager } from './ui/pageManager.js';
 import { Keyboard } from './input/keyboard.js';
@@ -13,17 +23,17 @@ import { initRouter, goto } from './router/hash.js';
 export function startApp() {
   // Initialize core components
   const dom = createDOM();
-  const hud = new HUD(dom);
+  const ingameinfo = new inGameInfo(dom);
   const keyboard = new Keyboard();
-  const game = new Game(dom, hud, keyboard);
+  const game = new Game(dom, ingameinfo, keyboard);
   game.init();
 
   // Initialize overlay with its callback
   const overlay = new Overlay(dom, (left, right) => {
-    hud.setNames(left, right);
+    ingameinfo.setNames(left, right);
     overlay.hide();
     game.resetMatch(false);
-    goto('#/game');
+    goto('#/ponggame');
   });
 
   // Initialize page manager
@@ -34,7 +44,7 @@ export function startApp() {
   };
   const gameElements = {
     wrap: dom.wrap,
-    hud: dom.hud,
+    ingameinfo: dom.ingameinfo,
     controls: dom.controls
   };
   const pageManager = new PageManager(pages, gameElements);
@@ -43,7 +53,7 @@ export function startApp() {
   const routeHandlers = new RouteHandlers(pageManager, overlay, game);
 
   // Initialize event handlers
-  const eventHandlers = new EventHandlers(dom, overlay, hud, game);
+  const eventHandlers = new EventHandlers(dom, overlay, ingameinfo, game);
   eventHandlers.init();
 
   // Setup routing
@@ -51,8 +61,8 @@ export function startApp() {
     welcome: routeHandlers.welcome,
     signup: routeHandlers.signup,
     profile: routeHandlers.profile,
-    menu: routeHandlers.menu,
-    game: routeHandlers.gameRoute
+    pongmenu: routeHandlers.pong,
+    ponggame: routeHandlers.gameRoute
   });
 
   // Start on welcome page

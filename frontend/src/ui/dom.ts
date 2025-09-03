@@ -14,7 +14,7 @@ export type DOMRefs = {
   welcomePage: HTMLElement;
   playButton: HTMLButtonElement;
   wrap: HTMLElement;      // ADDED
-  hud: HTMLElement;       // ADDED
+  ingameinfo: HTMLElement;       // ADDED
   controls: HTMLElement;  // ADDED
   signupPage: HTMLElement;
   emailInput: HTMLInputElement;
@@ -46,7 +46,7 @@ export function createDOM(): DOMRefs {
   const welcomePage = document.getElementById('welcome-page') as HTMLElement;
   const playButton  = document.getElementById('play-game-btn') as HTMLButtonElement;
   const wrap     = document.getElementById('wrap') as HTMLElement;
-  const hud      = document.getElementById('hud') as HTMLElement;
+  const ingameinfo      = document.getElementById('ingameinfo') as HTMLElement;
   const controls = document.getElementById('controls') as HTMLElement;
   const signupPage = document.getElementById('signup-page') as HTMLElement;
   const emailInput = document.getElementById('email-input') as HTMLInputElement;
@@ -58,6 +58,6 @@ export function createDOM(): DOMRefs {
   if (!canvas || !ctx || !welcomePage || !playButton || !signupPage || !profilePage)
     throw new Error('Core DOM element not found');
 
-  return { canvas, ctx, overlay, leftInput, rightInput, startBtn, score, leftName, rightName, welcomePage, playButton, wrap, hud, controls,     signupPage, emailInput, continueBtn,
+  return { canvas, ctx, overlay, leftInput, rightInput, startBtn, score, leftName, rightName, welcomePage, playButton, wrap, ingameinfo, controls,     signupPage, emailInput, continueBtn,
     profilePage, playSnakeBtn, playPongBtn };
 }

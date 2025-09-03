@@ -1,1 +1,0 @@
-export enum State { MENU, READY, PLAYING, PAUSED, SCORED, GAMEOVER }
