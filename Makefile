@@ -6,7 +6,7 @@
 #    By: nnarimatsu <nnarimatsu@student.codam.nl      +#+                      #
 #                                                    +#+                       #
 #    Created: 2025/09/01 12:34:28 by nnarimatsu    #+#    #+#                  #
-#    Updated: 2025/09/01 13:26:03 by nnarimatsu    ########   odam.nl          #
+#    Updated: 2025/09/03 14:26:12 by nnarimatsu    ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,16 @@ logs:
 
 ps:
 	docker compose -f docker-compose.yml ps
+
+prune: down
+	@echo "=== Pruning Docker system (removing stopped containers, unused networks, build cache) ==="
+	docker system prune -f
+
+prune-all:
+	@echo "!!! WARNING: This will remove everything, including database volumes !!!"
+	docker compose -f docker-compose.yml down --volumes
+	docker system prune -af
+
 
 help:
 	@echo "make (or make up)  - Create & start containers (build if needed); sets up network/volumes"
