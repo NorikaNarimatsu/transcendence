@@ -1,4 +1,16 @@
 services:
+
+  sqlite:
+      container_name: sqlite
+      build:
+        context: ./sqlite/
+        dockerfile: Dockerfile.dev
+      volumes:
+        - sqlite:/db
+        - public:/data/public
+      networks:
+        - transcendence
+
   backend:
     container_name: backend
     build:
@@ -7,10 +19,17 @@ services:
     # env_file:
     #   - .env
     #restart: always # Turn on when the product is ready, now it shows failures and stop containers cleanly
+    environment:
+      - DB_PATH=/db/database.sqlite
+      - NODE_ENV=development
+    depends_on:
+      - sqlite
     ports:
       - "8443:8443"
     networks:
       - transcendence
+    volumes:
+      - sqlite:/db
 
   frontend:
     container_name: frontend
@@ -31,6 +50,22 @@ networks:
   transcendence:
     name: transcendence_network
     driver: bridge
+    external: false
+
+volumes:
+  sqlite:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/sqlite
+  public:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/public
+
 
 # Not sure how to set up volumes yet
 # volumes:
