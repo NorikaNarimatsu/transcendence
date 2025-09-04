@@ -1,8 +1,12 @@
 FROM node:20-alpine
 WORKDIR /app
 
-COPY package*.json ./
-RUN [ -f package-lock.json ] && npm ci --omit=optional || npm install --omit=optional
+# COPY package*.json ./
+# RUN [ -f package-lock.json ] && npm ci --omit=optional || npm install --omit=optional
+COPY package.json package-lock.json
+
+# Install deps
+RUN npm ci --omit=optional
 
 COPY . .
 

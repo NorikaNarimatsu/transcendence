@@ -4,17 +4,12 @@ WORKDIR /app
 # We need openssl in dev to make a self-signed cert automatically
 RUN apk add --no-cache openssl
 
-# Copy package files if present
-COPY package*.json ./
+# Copy package files
+COPY package.json package-lock.json
 
-# Install deps:
-# - if lockfile exists -> npm ci (fast, reproducible)
-# - otherwise         -> npm install
-RUN if [ -f package-lock.json ]; then \
-      npm ci --omit=optional; \
-    else \
-      npm install --omit=optional; \
-    fi
+# Install deps
+RUN npm ci --omit=optional
+
 # Copy the rest (including entrypoint + future source files)
 COPY . .
 
