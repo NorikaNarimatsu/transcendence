@@ -5,7 +5,7 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 # Copy package files
-COPY package.json package-lock.json
+COPY package.json package-lock.json ./
 
 # Install deps
 RUN npm ci --omit=optional
