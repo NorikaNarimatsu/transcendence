@@ -1,0 +1,22 @@
+FROM node:20-alpine
+WORKDIR /app
+
+# We need openssl in dev to make a self-signed cert automatically
+RUN apk add --no-cache openssl
+
+# Copy package files if present
+COPY package*.json ./
+
+# Install deps:
+# - if lockfile exists -> npm ci (fast, reproducible)
+# - otherwise         -> npm install
+RUN if [ -f package-lock.json ]; then \
+      npm ci --omit=optional; \
+    else \
+      npm install --omit=optional; \
+    fi
+# Copy the rest (including entrypoint + future source files)
+COPY . .
+
+EXPOSE 8443
+CMD ["sh", "/app/entrypoint.sh"]
