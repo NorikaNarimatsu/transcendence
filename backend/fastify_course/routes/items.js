@@ -1,4 +1,5 @@
-const items = require('../item');
+// const items = require('../item');
+const { getItem, getItems, addItem, deleteItem, updateItem } = require('../controllers/item_controller')
 
 // Item schema
 const Item = {
@@ -15,10 +16,11 @@ const getItemsOpts = {
         response: {
             200: {
                 type: 'array',
-                items: Item
-            }
-        }
-    }
+                items: Item,
+            },
+        },
+    },
+    handler: getItems,
 }
 
 // Options for get single items
@@ -26,27 +28,70 @@ const getItemOpts = {
     schema: {
         response: {
             200: Item,
-        }
-    }
+        },
+    },
+    handler: getItem,
 }
+
+const postItemOpts = {
+    schema: {
+        body: {
+            type: 'object',
+            required: ['name'],
+            properties: {
+                name: { type: 'string' },
+            }
+        },
+        response: {
+            201: Item,
+        },
+    },
+    handler: addItem,
+}
+
+
+const deleteItemOpts = {
+    schema: {
+        response: {
+            200: {
+                type: 'object',
+                properties: {
+                    message: {type: 'string'},
+                }
+            },
+        },
+    },
+    handler: deleteItem,
+}
+
+const updateItemOpts = {
+    schema: {
+        response: {
+            200: Item,
+        },
+    },
+    handler: updateItem,
+}
+
 
 function itemRoutes(fastify, options, done) {
 
     // Get all items
-    fastify.get('/items', getItemsOpts, (req, res) => {
-        res.send(items);
-    });
+    fastify.get('/items', getItemsOpts)
 
     // Get single item
-    fastify.get('/items/:id', getItemOpts, (req, res) => {
-        const {id} = req.params;
+    fastify.get('/items/:id', getItemOpts)
 
-        const item = items.find(item => item.id === id);
+    // Add item
+    fastify.post('/items', postItemOpts)
 
-        res.send(item);
-    });
+    // Delete item
+    fastify.delete('/items/:id', deleteItemOpts)
 
-    
+    // Update item
+    fastify.put('/items/:id', updateItemOpts)
+
+
     done()
 }
 
