@@ -1,5 +1,6 @@
-// const items = require('../item');
-const { getItem, getItems, addItem, deleteItem, updateItem } = require('../controllers/item_controller')
+import { getItem, getItems, addItem, deleteItem, updateItem } from '../controllers/item_controller.js'
+import itemController from '../controllers/item_controller.js'
+
 
 // Item schema
 const Item = {
@@ -95,14 +96,12 @@ const updateItemOpts = {
 //     done()
 // }
 
-const itemController = require('../controllers/item_controller');
+// import itemController from '../controllers/item_controller.js'
 
-async function itemRoutes(fastify, options) {
+export default async function itemRoutes(fastify, options) {
     fastify.get('/items', itemController.getItems);
     fastify.get('/items/:id', itemController.getItem);
     fastify.post('/items', itemController.addItem);
     fastify.put('/items/:id', itemController.updateItem);
     fastify.delete('/items/:id', itemController.deleteItem);
   }
-
-module.exports = itemRoutes
