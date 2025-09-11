@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+WORKDIR /db
+
+# Alpine uses apk, not apt-get
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache sqlite && \
+    rm -rf /var/cache/apk/*
+
+COPY ./init-db.sh /db/init-db.sh
+COPY ./transcendence.sql /db/transcendence.sql
+
+RUN chmod +x /db/init-db.sh
+
+ENTRYPOINT ["/bin/sh", "/db/init-db.sh"]
