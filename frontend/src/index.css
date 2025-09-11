@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Pixelify+Sans:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.bg-pink-grid {
+    background-color: #ffc7e9;
+    background-image: linear-gradient(white 1px, transparent 1px),
+        linear-gradient(90deg, white 1px, transparent 1px);
+    background-size: 50px 50px;
+}
+
+.shadow-no-blur {
+    box-shadow: -4px 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.shadow-no-blur-70 {
+    box-shadow: -4px 4px 0 rgba(0, 0, 0, 0.70);
+}
+
+.shadow-no-blur:active {
+    transform: translate(-4px, 4px);
+    box-shadow: none;
+}
