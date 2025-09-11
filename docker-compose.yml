@@ -1,43 +1,33 @@
 services:
-  backend:
+  backend_app:
     container_name: backend
     build:
-      context: ./backend
-      dockerfile: Dockerfile.dev # later change name
-    # env_file:
-    #   - .env
-    #restart: always # Turn on when the product is ready, now it shows failures and stop containers cleanly
+      dockerfile: backend.Dockerfile
+      context: backend/
     ports:
       - "8443:8443"
     networks:
-      - transcendence
+      - transcendence_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8443/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
 
-  frontend:
+  frontend_app:
     container_name: frontend
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev # later change name
-    # env_file:
-    #   - .env
+      dockerfile: frontend.Dockerfile
+      context: frontend/
     ports:
       - "3000:3000"
-    #restart: always # Turn on when the product is ready, now it shows failures and stop containers cleanly
-    depends_on:
-      - backend
     networks:
-      - transcendence
+      - transcendence_network
+    depends_on:
+      backend_app:
+        condition: service_healthy
 
 networks:
-  transcendence:
+  transcendence_network:
     name: transcendence_network
     driver: bridge
-
-# Not sure how to set up volumes yet
-# volumes:
-#   frontend_volume:
-#   backend_volume:
-#   database_volume:
-
-# nameing note (Dockerfile.dev vs Dockerfile)
-# https://www.geeksforgeeks.org/devops/what-is-dockerfiledev/
-

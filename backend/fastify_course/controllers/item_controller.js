@@ -12,7 +12,7 @@ if (!fs.existsSync(dataFolderPath)) {
 }
 
 // The database will be saved here
-const db = new Database('./data/items.db');
+const db = new Database('database/db/transcendence.db');
 
 // Check if the `items` table exists
 const tableExists = db.prepare(`
@@ -32,21 +32,21 @@ if (!tableExists) {
   console.log('Table "items" created.');
 }
 
-let items = require('../item')
+// let items = require('../item')
 
-// Seed data only if the table is empty
-const rowCount = db.prepare('SELECT COUNT(*) AS count FROM items').get().count;
-if (rowCount === 0) {
-  db.exec(`
-    INSERT INTO items (uuid, name) VALUES 
-      ('${uuidv4()}', 'Item 1'), 
-      ('${uuidv4()}', 'Item 2'), 
-      ('${uuidv4()}', 'Item 3');
-  `);
-  console.log('Seed data inserted into "items" table.');
-} else {
-  console.log(`Table "items" already contains ${rowCount} rows.`);
-}
+// // Seed data only if the table is empty
+// const rowCount = db.prepare('SELECT COUNT(*) AS count FROM items').get().count;
+// if (rowCount === 0) {
+//   db.exec(`
+//     INSERT INTO items (uuid, name) VALUES 
+//       ('${uuidv4()}', 'Item 1'), 
+//       ('${uuidv4()}', 'Item 2'), 
+//       ('${uuidv4()}', 'Item 3');
+//   `);
+//   console.log('Seed data inserted into "items" table.');
+// } else {
+//   console.log(`Table "items" already contains ${rowCount} rows.`);
+// }
 
 // Controller functions
 ////////////////////////////// GET //////////////////////////////
