@@ -74,25 +74,35 @@ const updateItemOpts = {
 }
 
 
-function itemRoutes(fastify, options, done) {
+// function itemRoutes(fastify, options, done) {
 
-    // Get all items
-    fastify.get('/items', getItemsOpts)
+//     // Get all items
+//     fastify.get('/items', itemController.getAllItems)
 
-    // Get single item
-    fastify.get('/items/:id', getItemOpts)
+//     // Get single item
+//     fastify.get('/items/:id', itemController.getItemById)
 
-    // Add item
-    fastify.post('/items', postItemOpts)
+//     // Add item
+//     fastify.post('/items', itemController.postItem)
 
-    // Delete item
-    fastify.delete('/items/:id', deleteItemOpts)
+//     // Delete item
+//     fastify.delete('/items/:id', deleteItemOpts)
 
-    // Update item
-    fastify.put('/items/:id', updateItemOpts)
+//     // Update item
+//     fastify.put('/items/:id', updateItemOpts)
 
 
-    done()
-}
+//     done()
+// }
+
+const itemController = require('../controllers/item_controller');
+
+async function itemRoutes(fastify, options) {
+    fastify.get('/items', itemController.getItems);
+    fastify.get('/items/:id', itemController.getItem);
+    fastify.post('/items', itemController.addItem);
+    fastify.put('/items/:id', itemController.updateItem);
+    fastify.delete('/items/:id', itemController.deleteItem);
+  }
 
 module.exports = itemRoutes
