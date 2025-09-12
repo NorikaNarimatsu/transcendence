@@ -1,57 +1,13 @@
 ///NEW
 // import helmet from "@fastify/helmet";
-
-
-////////////////////////SETTING UP THE DATABASE//////////////////////////////
-
-console.log("Setting up the database...");
-
-
-import Database from "better-sqlite3";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Ensure the `database/db` folder exists
-const databaseFolderPath = path.join(__dirname, "database/db");
-if (!fs.existsSync(databaseFolderPath)) {
-  fs.mkdirSync(databaseFolderPath, { recursive: true });
-  console.log("Database folder created at:", databaseFolderPath);
-}
-
-console.log("Database path confirmed...");
-
-// The database will be saved here
-const db = new Database(path.join(databaseFolderPath, "transcendence.db"));
-
-// Check if the `items` table exists
-const tableExists = db.prepare(`
-  SELECT name FROM sqlite_master WHERE type='table' AND name='items';
-`).get();
-
-if (!tableExists) {
-  db.exec(`
-    CREATE TABLE items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      uuid TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL
-    );
-  `);
-  console.log('Table "items" created.');
-}
-
-export default db; // to use this: import db from './path/to/this/file.js';
-
-////////////////////////STARTING THE FASTIFY SERVER//////////////////////////////
+import Fastify from "fastify";
+import cors from '@fastify/cors';
+import { initializeDatabase } from './database/initDatabase.js';
 
 const PORT = Number(process.env.PORT || 8443);
+export const db = initializeDatabase();
 
 
-import Fastify from "fastify";
 // Create Fastify instance
 const app = Fastify({
   logger: true,
@@ -62,6 +18,12 @@ const app = Fastify({
 });
 
 console.log("Fastify server is set...");
+
+await app.register(cors, {
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true // Allow cookies to be sent check to gosia
+});
 
 // // Register security headers
 // await app.register(helmet, { contentSecurityPolicy: { useDefaults: true } });
@@ -83,7 +45,6 @@ app.register(paths)
 //   app.log.error(err);
 //   process.exit(1);
 // }
-
 
 
 const start = async () => {

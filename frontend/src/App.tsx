@@ -28,3 +28,18 @@ export default function App() {
 }
 
 
+
+// Backend test
+
+// import { BackendTest } from './components/BackendTest';
+
+// function App() {
+//   return (
+//     <div>
+//       <h1>Transcendence</h1>
+//       <BackendTest />
+//     </div>
+//   );
+// }
+
+

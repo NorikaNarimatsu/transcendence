@@ -5,7 +5,7 @@ FROM node:20-alpine
 # Set the working directory
 WORKDIR /app
 
-RUN apk add --no-cache curl python3 make g++ sqlite
+RUN apk add --no-cache curl python3 make g++
 
 # Copy package.json and package-lock.json first to leverage Docker caching
 COPY package.json package-lock.json ./
