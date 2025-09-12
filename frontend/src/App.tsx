@@ -29,9 +29,10 @@ export default function App() {
 
 
 
-// Backend test
 
-// import { BackendTest } from './components/BackendTest';
+////////////////// Backend test //////////////////
+
+// import { BackendTest } from './components/Test';
 
 // function App() {
 //   return (
@@ -43,3 +44,15 @@ export default function App() {
 // }
 
 
+////////////////// Connection test //////////////////
+
+// import { ItemsList } from './components/Test';
+
+// export default function App() {
+//   return (
+//     <div>
+//       <h1>Transcendence</h1>
+//       <ItemsList />
+//     </div>
+//   );
+// }
