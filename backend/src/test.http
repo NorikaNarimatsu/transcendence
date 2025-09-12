@@ -24,3 +24,11 @@ Content-Type: application/json
 {
     "name": "Abacate"
 }
+
+### ADD WITH VALIDATION ITEM
+POST https://localhost:8443/validate-name
+Content-Type: application/json
+
+{
+  "name": "Norikaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

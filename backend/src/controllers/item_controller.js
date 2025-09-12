@@ -1,48 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../server.js';
 
-// const uuid = uuidv4();
-
-
-// const fs = require('fs');
-// const path = require('path');
-// const Database = require('better-sqlite3');
-
-// // Ensure the `data` folder exists
-// const dataFolderPath = path.join(__dirname, '../data');
-// if (!fs.existsSync(dataFolderPath)) {
-//   fs.mkdirSync(dataFolderPath, { recursive: true });
-//   console.log('Data folder created at:', dataFolderPath);
-// }
-
-// // The database will be saved here
-// const db = new Database('database/db/transcendence.db');
-
-// // Check if the `items` table exists
-// const tableExists = db.prepare(`
-//   SELECT name FROM sqlite_master WHERE type='table' AND name='items';
-// `).get();
-
-// if (!tableExists) {
-//   // Create the `items` table if it doesn't exist
-//   db.exec(`
-//     CREATE TABLE items (
-//       id INTEGER PRIMARY KEY AUTOINCREMENT,
-//       uuid TEXT UNIQUE NOT NULL,
-//       name TEXT NOT NULL
-//     );
-//   `);
-
-//   console.log('Table "items" created.');
-// }
-
-// Controller functions
 ////////////////////////////// GET //////////////////////////////
 export function getItems(req, res) {
   const items = db.prepare('SELECT * FROM items').all();
   res.send(items);
 };
-
 
 export function getItem(req, res) {
   const { id } = req.params;
@@ -54,7 +17,6 @@ export function getItem(req, res) {
   }
 };
 
-
 ////////////////////////////// POST //////////////////////////////
 
 export function addItem(req, res) {
@@ -63,7 +25,6 @@ export function addItem(req, res) {
   const result = db.prepare('INSERT INTO items (uuid, name) VALUES (?, ?)').run(uuid, name);
   res.status(201).send({ id: result.lastInsertRowid, name });
 };
-
 
 ////////////////////////////// PUT //////////////////////////////
 
@@ -78,7 +39,6 @@ export function updateItem(req, res) {
   }
 };
 
-
 ////////////////////////////// DELETE //////////////////////////////
 
 export function deleteItem(req, res) {
@@ -91,6 +51,42 @@ export function deleteItem(req, res) {
   }
 };
 
+////////////////////////////// NEW VALIDATION //////////////////////////////
+
+export const validateItem = (name) => {
+  if (!name.match(/^[A-Za-z]+$/))
+    throw new Error('Name must contain only letters');
+  if (name.length < 2 || name.length > 20)
+    throw new Error('Name must be between 2 and 20 characters');
+  return true;
+};
+
+// Combined function using existing addItem
+export const validateAndAddItem = async (request, reply) => {
+  const { name } = request.body; // request.body now contains: { name: "whatever user typed" }
+  try {
+    validateItem(name);    
+    return addItem(request, reply);
+  } catch (error) {
+    request.log.error(error);
+    return reply.code(400).send({
+      message: error.message || 'Validation failed'
+    });
+  }
+};
+
+// Frontend                        Backend
+//    |                               |
+//    |-- POST /validate-name ------->|
+//    |   { "name": "Norika" }        |
+//    |                               |
+//    |                         Validates name
+//    |                         Stores in DB
+//    |                               |
+//    |<- Response 200 ---------------|
+//    |   { "message": "success" }    |
+
+////////////////////////////// CONTROLLER //////////////////////////////
 
 const itemController = {
     getItems,
@@ -98,6 +94,9 @@ const itemController = {
     addItem,
     deleteItem,
     updateItem,
+    validateAndAddItem //new
 };
 
 export default itemController;
+
+

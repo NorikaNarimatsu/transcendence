@@ -73,3 +73,49 @@ export function ItemsList() {
     </div>
   );
 }
+
+////////////////// Name validation test //////////////////
+
+export function NameTest() {
+  const [name, setName] = useState(''); //name state variable contains input value
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // fetch() creates HTTPS POST request (Request includes headers and body)
+      const response = await fetch('https://localhost:8443/validate-name', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name }),
+      });
+
+      const data = await response.json();
+      setMessage(data.message);
+      if (response.ok) {
+        setName(''); // Clear input on success
+      }
+    } catch (error) {
+      setMessage('Failed to submit name');
+    }
+  };
+
+  return (
+    <div>
+      <h2>Name Validation Test</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter your name"
+        />
+        <button type="submit">Submit</button>
+      </form>
+      {message && <p>{message}</p>}
+    </div>
+  );
+}

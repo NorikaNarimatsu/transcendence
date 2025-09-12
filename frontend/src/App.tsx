@@ -56,3 +56,16 @@ export default function App() {
 //     </div>
 //   );
 // }
+
+////////////////// Name test //////////////////
+// import { NameTest } from './components/Test';
+
+// export default function App() {
+//   return (
+//     <main className="min-h-screen flex flex-col">
+//       <div className="flex-1 bg-pink-grid flex items-center justify-center">
+//         <NameTest />
+//       </div>
+//     </main>
+//   );
+// }

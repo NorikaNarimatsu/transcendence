@@ -74,34 +74,11 @@ const updateItemOpts = {
     handler: updateItem,
 }
 
-
-// function itemRoutes(fastify, options, done) {
-
-//     // Get all items
-//     fastify.get('/items', itemController.getAllItems)
-
-//     // Get single item
-//     fastify.get('/items/:id', itemController.getItemById)
-
-//     // Add item
-//     fastify.post('/items', itemController.postItem)
-
-//     // Delete item
-//     fastify.delete('/items/:id', deleteItemOpts)
-
-//     // Update item
-//     fastify.put('/items/:id', updateItemOpts)
-
-
-//     done()
-// }
-
-// import itemController from '../controllers/item_controller.js'
-
 export default async function itemRoutes(fastify, options) {
     fastify.get('/items', itemController.getItems);
     fastify.get('/items/:id', itemController.getItem);
     fastify.post('/items', itemController.addItem);
     fastify.put('/items/:id', itemController.updateItem);
     fastify.delete('/items/:id', itemController.deleteItem);
+    fastify.post('/validate-name', itemController.validateAndAddItem);
   }
