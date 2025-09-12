@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 8443
 
 # Start the backend server
-CMD ["node", "src/server.js"]
+CMD ["npm", "run", "dev"]   

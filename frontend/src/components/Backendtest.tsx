@@ -7,7 +7,7 @@ export function BackendTest() {
     const testBackend = async () => {
       try {
         // Makes HTTP request to backend's health endpoint
-        const response = await fetch('http://localhost:8443/health');
+        const response = await fetch('https://localhost:8443/health');
 
         // parses JSON response
         const data = await response.json();
