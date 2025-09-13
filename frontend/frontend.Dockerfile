@@ -12,6 +12,7 @@ COPY package*.json ./
 
 # Install dependencies for Linux environment
 RUN npm ci
+RUN npm install
 
 # Copy the rest of the application
 COPY . .

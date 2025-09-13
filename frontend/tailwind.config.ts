@@ -8,12 +8,16 @@ export default {
   theme: { //Theme contains Tailwind's design tokens (colors, spacing, fonts, breakpoints, etc)
     extend: { //Extend means adding to the default value instead of replacing it.
 		colors: {
-			brand: {
-				deep_blue: '#1900a7',
-				light_pink: '#ffc7e9',
-				dark_pink: '#ec8fc7',
-				purple: '#7a63fe',
+			blue: {
+				deep: '#1900a7',
 			},
+			pink: {
+				light: '#ffc7e9',
+				dark: '#ec8fc7',
+			},
+			purple: {
+				purple: '#7a63fe',
+			}
 		},
 		fontFamily: {
 			pixelify: ['"Pixelify Sans"', 'sans-serif'],
