@@ -8,8 +8,11 @@ GET https://localhost:8443/items/1 HTTP/1.1
 ### ADD 1 ITEM
 POST https://localhost:8443/items HTTP/1.1
 Content-Type: application/json
+
 {
-    "name": "gosia"
+    "name": "newperson",
+    "email": "gosia@gmail.com",
+    "password": "letters"
 }
 
 
@@ -32,3 +35,24 @@ Content-Type: application/json
 {
   "name": "Norikaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 }
+
+
+//# Enter the backend container
+# docker exec -it backend /bin/sh
+
+# # Navigate to database directory
+# cd /app/src/database/db
+
+# # Open SQLite shell
+# sqlite3 transcendence.
+
+# norika_machome@macbookpro transcendence_sep3 % docker exec -it backend /bin/sh
+
+# /app # cd /app/src/database/db
+# /app/src/database/db # 
+# /app/src/database/db # sqlite3 transcendence.db
+# SQLite version 3.49.2 2025-05-07 10:39:52
+# Enter ".help" for usage hints.
+# sqlite> .mode column
+# sqlite> .headers on
+# sqlite> SELECT * FROM items;

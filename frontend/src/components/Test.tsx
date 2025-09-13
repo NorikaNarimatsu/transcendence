@@ -2,6 +2,8 @@
 
 
 import { useEffect, useState } from 'react';
+import type { JSX } from 'react';
+
 
 export function BackendTest() {
   const [status, setStatus] = useState<string>('Testing connection...');
@@ -75,47 +77,76 @@ export function ItemsList() {
 }
 
 ////////////////// Name validation test //////////////////
-
-export function NameTest() {
-  const [name, setName] = useState(''); //name state variable contains input value
+export function TEST() : JSX.Element{
+  const [email, setEmail] = useState(''); //name state variable contains input value
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    try {
-      // fetch() creates HTTPS POST request (Request includes headers and body)
-      const response = await fetch('https://localhost:8443/validate-name', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name }),
-      });
+  try {
+    const response = await fetch('https://localhost:8443/signup_validate_email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+     },
+      body: JSON.stringify({ email }),
+  });
 
-      const data = await response.json();
-      setMessage(data.message);
-      if (response.ok) {
-        setName(''); // Clear input on success
-      }
-    } catch (error) {
+    const data = await response.json();
+    setMessage(data.message);
+    if (response.ok) {
+      setMessage('Yaaay');
+      return (<div>Yaaay</div>); // Clear input on success
+    }
+  } catch (error) {
       setMessage('Failed to submit name');
+      return (<div>Nayyyy</div>); // Clear input on success
     }
   };
-
-  return (
-    <div>
-      <h2>Name Validation Test</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter your name"
-        />
-        <button type="submit">Submit</button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
-  );
 }
+
+
+
+// export function NameTest() {
+//   const [name, setName] = useState(''); //name state variable contains input value
+//   const [message, setMessage] = useState('');
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+    
+//     try {
+//       // fetch() creates HTTPS POST request (Request includes headers and body)
+//       const response = await fetch('https://localhost:8443/validate-name', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ name }),
+//       });
+
+//       const data = await response.json();
+//       setMessage(data.message);
+//       if (response.ok) {
+//         setName(''); // Clear input on success
+//       }
+//     } catch (error) {
+//       setMessage('Failed to submit name');
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <h2>Name Validation Test</h2>
+//       <form onSubmit={handleSubmit}>
+//         <input
+//           type="text"
+//           value={name}
+//           onChange={(e) => setName(e.target.value)}
+//           placeholder="Enter your name"
+//         />
+//         <button type="submit">Submit</button>
+//       </form>
+//       {message && <p>{message}</p>}
+//     </div>
+//   );
+// }
