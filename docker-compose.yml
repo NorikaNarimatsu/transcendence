@@ -1,43 +1,62 @@
 services:
-  backend:
+  backend_app:
     container_name: backend
     build:
-      context: ./backend
-      dockerfile: Dockerfile.dev # later change name
-    # env_file:
-    #   - .env
-    #restart: always # Turn on when the product is ready, now it shows failures and stop containers cleanly
+      dockerfile: backend.Dockerfile
+      context: backend/
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+      - backend_data:/app/src/database/db
+      - ./backend/https:/app/https:ro
     ports:
       - "8443:8443"
     networks:
-      - transcendence
+      - transcendence_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:8443/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 2
 
-  frontend:
+# https://github.com/vitejs/vite/discussions/15532
+  frontend_app:
     container_name: frontend
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev # later change name
-    # env_file:
-    #   - .env
+      context: frontend/
+      dockerfile: frontend.Dockerfile
     ports:
       - "3000:3000"
-    #restart: always # Turn on when the product is ready, now it shows failures and stop containers cleanly
-    depends_on:
-      - backend
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
     networks:
-      - transcendence
+      - transcendence_network
+    depends_on:
+      backend_app:
+        condition: service_healthy
+
+volumes:
+  frontend_node_modules:
+  backend_node_modules:
+  backend_data:
 
 networks:
-  transcendence:
+  transcendence_network:
     name: transcendence_network
     driver: bridge
 
-# Not sure how to set up volumes yet
-# volumes:
-#   frontend_volume:
-#   backend_volume:
-#   database_volume:
 
-# nameing note (Dockerfile.dev vs Dockerfile)
-# https://www.geeksforgeeks.org/devops/what-is-dockerfiledev/
-
+#old frontend setting
+ # frontend_app:
+  #   container_name: frontend
+  #   build:
+  #     dockerfile: frontend.Dockerfile
+  #     context: frontend/
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - transcendence_network
+  #   depends_on:
+  #     backend_app:
+  #       condition: service_healthy

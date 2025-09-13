@@ -1,36 +1,73 @@
-import fs from "node:fs";
+// import helmet from "@fastify/helmet";
 import Fastify from "fastify";
-import helmet from "@fastify/helmet";
+import cors from '@fastify/cors';
+import { initializeDatabase } from './database/initDatabase.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Read cert/key made by entrypoint.sh
+
 const PORT = Number(process.env.PORT || 8443);
-const certPath = process.env.TLS_CERT_PATH;
-const keyPath  = process.env.TLS_KEY_PATH;
+export const db = initializeDatabase();
 
-if (!certPath || !keyPath) {
-  console.error("TLS_CERT_PATH / TLS_KEY_PATH not set");
-  process.exit(1);
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// Debug certificate paths
+const certPath = path.join(__dirname, '../https/cert.pem');
+const keyPath = path.join(__dirname, '../https/key.pem');
+// Log absolute paths for debugging
+console.log('Current directory:', __dirname);
+console.log('Certificate path:', path.resolve(certPath));
+console.log('Key path:', path.resolve(keyPath));
+
+// Create Fastify instance
 const app = Fastify({
   logger: true,
   https: {
-    cert: fs.readFileSync(certPath),
-    key:  fs.readFileSync(keyPath)
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath)
   }
 });
 
-// Basic security headers (CSP defaults)
-await app.register(helmet, { contentSecurityPolicy: { useDefaults: true } });
+console.log("Fastify server is set...");
 
-// Health check
-app.get("/health", async () => ({ ok: true }));
+await app.register(cors, {
+  origin: 'http://localhost:3000', //not sure https
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true // Allow cookies to be sent check to gosia
+});
 
-// Start server
-try {
-  await app.listen({ port: PORT, host: "0.0.0.0" });
-  app.log.info(`HTTPS backend listening on ${PORT}`);
-} catch (err) {
-  app.log.error(err);
-  process.exit(1);
-}
+// // Register security headers
+// await app.register(helmet, { contentSecurityPolicy: { useDefaults: true } });
+
+// Health check endpoint
+app.get("/health", async (request, reply) => {
+  reply.send({ status: "ok" });
+});
+
+import paths from './routes/paths.js';
+
+app.register(paths)
+
+// Start the server
+// try {
+//   await app.listen({ port: PORT, host: "0.0.0.0" });
+//   app.log.info(`HTTP backend listening on port ${PORT}`);
+// } catch (err) {
+//   app.log.error(err);
+//   process.exit(1);
+// }
+
+
+const start = async () => {
+  try {
+      await app.listen({ port: PORT, host: "0.0.0.0" }); // Explicitly bind to 0.0.0.0
+      console.log(`Server is running at https://localhost:${PORT}`); // Log server start
+  } catch (error) {
+      app.log.error(error);
+      process.exit(1);
+  }
+};
+
+start();
