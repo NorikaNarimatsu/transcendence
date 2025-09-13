@@ -20,13 +20,17 @@ export function initializeDatabase() {
     const tableExists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='items';`).get();
 
     if (!tableExists) {
-    db.exec(`
-        CREATE TABLE items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uuid TEXT UNIQUE NOT NULL,
-        name TEXT NOT NULL
-        );
-    `);
+        db.exec(`
+            CREATE TABLE items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                uuid TEXT UNIQUE NOT NULL,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("Items table created successfully");
     }
     return db;
 }

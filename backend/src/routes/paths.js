@@ -74,6 +74,7 @@ const updateItemOpts = {
     handler: updateItem,
 }
 
+
 export default async function itemRoutes(fastify, options) {
     fastify.get('/items', itemController.getItems);
     fastify.get('/items/:id', itemController.getItem);
@@ -81,4 +82,6 @@ export default async function itemRoutes(fastify, options) {
     fastify.put('/items/:id', itemController.updateItem);
     fastify.delete('/items/:id', itemController.deleteItem);
     fastify.post('/validate-name', itemController.validateAndAddItem);
-  }
+    fastify.post('/email_check', itemController.validateAndAddEmail);
+
+}

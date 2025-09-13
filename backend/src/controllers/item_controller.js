@@ -2,52 +2,54 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from '../server.js';
 
 ////////////////////////////// GET //////////////////////////////
-export function getItems(req, res) {
+export function getItems(request, response) {
   const items = db.prepare('SELECT * FROM items').all();
-  res.send(items);
+  response.send(items);
 };
 
-export function getItem(req, res) {
-  const { id } = req.params;
+export function getItem(request, response) {
+  const { id } = request.params;
   const item = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
   if (!item) {
-    res.status(404).send({ error: 'Item not found' });
+    response.status(404).send({ error: 'Item not found' });
   } else {
-    res.send(item);
+    response.send(item);
   }
 };
 
 ////////////////////////////// POST //////////////////////////////
 
-export function addItem(req, res) {
-  const { name } = req.body;
+export function addItem(request, response) {
+  const { name, email, password } = request.body;
   const uuid = uuidv4(); // Generate a unique UUID
-  const result = db.prepare('INSERT INTO items (uuid, name) VALUES (?, ?)').run(uuid, name);
-  res.status(201).send({ id: result.lastInsertRowid, name });
+  const responseult = db.prepare('INSERT INTO items (uuid, name, email, password) VALUES (?, ?, ?, ?)').run(uuid, name, email, password);
+  response.status(201).send({ id: responseult.lastInsertRowid, name , email, created_at: new Date().toISOString()});
 };
 
 ////////////////////////////// PUT //////////////////////////////
 
-export function updateItem(req, res) {
-  const { id } = req.params;
-  const { name } = req.body;
-  const result = db.prepare('UPDATE items SET name = ? WHERE id = ?').run(name, id);
-  if (result.changes === 0) {
-    res.status(404).send({ error: 'Item not found' });
+export function updateItem(request, response) {
+  const { id } = request.params;
+  const { name } = request.body;
+  const { email } = request.body;
+  const { password } = request.body;
+  const responseult = db.prepare('UPDATE items SET name = ? WHERE id = ?').run(name, id);
+  if (responseult.changes === 0) {
+    response.status(404).send({ error: 'Item not found' });
   } else {
-    res.send({ id, name });
+    response.send({ id, name, email, password });
   }
 };
 
 ////////////////////////////// DELETE //////////////////////////////
 
-export function deleteItem(req, res) {
-  const { id } = req.params;
-  const result = db.prepare('DELETE FROM items WHERE id = ?').run(id);
-  if (result.changes === 0) {
-    res.status(404).send({ error: 'Item not found' });
+export function deleteItem(request, response) {
+  const { id } = request.params;
+  const responseult = db.prepare('DELETE FROM items WHERE id = ?').run(id);
+  if (responseult.changes === 0) {
+    response.status(404).send({ error: 'Item not found' });
   } else {
-    res.status(204).send({message: `Item has been removed`});
+    response.status(204).send({message: `Item has been removed`});
   }
 };
 
@@ -62,14 +64,14 @@ export const validateItem = (name) => {
 };
 
 // Combined function using existing addItem
-export const validateAndAddItem = async (request, reply) => {
+export const validateAndAddItem = async (request, response) => {
   const { name } = request.body; // request.body now contains: { name: "whatever user typed" }
   try {
     validateItem(name);    
-    return addItem(request, reply);
+    return addItem(request, response);
   } catch (error) {
     request.log.error(error);
-    return reply.code(400).send({
+    return response.code(400).send({
       message: error.message || 'Validation failed'
     });
   }
@@ -81,10 +83,26 @@ export const validateAndAddItem = async (request, reply) => {
 //    |   { "name": "Norika" }        |
 //    |                               |
 //    |                         Validates name
-//    |                         Stores in DB
+//    |                         Storesponse in DB
 //    |                               |
-//    |<- Response 200 ---------------|
+//    |<- responseponse 200 ---------------|
 //    |   { "message": "success" }    |
+
+
+////////////////////////////// NEW VALIDATION //////////////////////////////
+export const validateAndAddEmail = async (request, response) => {
+  const { email } = request.body;
+  try {
+    const isExisting = db.prepare('SELECT * FROM items WHERE email = ?').get(email)
+    if (isExisting)
+      return response.code(200).send();
+    else
+      return response.code(404).send();
+  } catch (error) {
+    // request.log.error(error);
+    return response.code(500).send();
+  }
+}
 
 ////////////////////////////// CONTROLLER //////////////////////////////
 
@@ -94,7 +112,8 @@ const itemController = {
     addItem,
     deleteItem,
     updateItem,
-    validateAndAddItem //new
+    validateAndAddItem, //new
+    validateAndAddEmail
 };
 
 export default itemController;
