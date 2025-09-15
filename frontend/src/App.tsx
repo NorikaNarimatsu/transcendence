@@ -6,6 +6,7 @@ import TypewriterText from './components/TypewriterAnimation';
 
 export default function App(): JSX.Element{
   const [showSubtitle, setShowSubtitle] = useState(false);
+  const [showButton, setShowButton] = useState(false);
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -29,10 +30,17 @@ export default function App(): JSX.Element{
                 speed={80}
                 delay={500}
                 cursorHideDelay={2000}
+                onComplete={() => setShowButton(true)}
               />
             )}
           </p>
-        <ButtonDarkPink to="/signup">Let's play</ButtonDarkPink>
+          <div className={`transition-all duration-1000 ease-in-out ${
+            showButton
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-4'
+          }`}>
+            <ButtonDarkPink to="/signup">Let's play</ButtonDarkPink>
+          </div>
         </div>
       </section>
 
