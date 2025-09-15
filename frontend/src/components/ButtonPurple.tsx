@@ -20,7 +20,7 @@ export default function Button({ children, to, onClick, ...props}: ButtonProps){
 
     return (
         <button
-            className="inline-block border-2 border-blue-deep bg-purple-purple px-4 py-1 font-pixelify text-white text-2xl shadow-no-blur-50-reverse text-right"
+            className="w-full inline-block border-2 border-blue-deep bg-purple-purple px-4 py-1 font-pixelify text-white text-2xl shadow-no-blur-50-reverse text-right"
             onClick={handleClick}
             {...props}
             >

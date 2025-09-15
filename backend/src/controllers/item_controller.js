@@ -11,7 +11,7 @@ export function getItem(request, response) {
   const { id } = request.params;
   const item = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
   if (!item) {
-    response.status(404).send({ error: 'Item not found' });
+    response.code(404).send({ error: 'Item not found' });
   } else {
     response.send(item);
   }
@@ -23,7 +23,7 @@ export function addItem(request, response) {
   const { name, email, password } = request.body;
   const uuid = uuidv4(); // Generate a unique UUID
   const responseult = db.prepare('INSERT INTO items (uuid, name, email, password) VALUES (?, ?, ?, ?)').run(uuid, name, email, password);
-  response.status(201).send({ id: responseult.lastInsertRowid, name , email, created_at: new Date().toISOString()});
+  response.code(201).send({ id: responseult.lastInsertRowid, name , email, created_at: new Date().toISOString()});
 };
 
 ////////////////////////////// PUT //////////////////////////////
@@ -35,7 +35,7 @@ export function updateItem(request, response) {
   const { password } = request.body;
   const responseult = db.prepare('UPDATE items SET name = ? WHERE id = ?').run(name, id);
   if (responseult.changes === 0) {
-    response.status(404).send({ error: 'Item not found' });
+    response.code(404).send({ error: 'Item not found' });
   } else {
     response.send({ id, name, email, password });
   }
@@ -47,9 +47,9 @@ export function deleteItem(request, response) {
   const { id } = request.params;
   const responseult = db.prepare('DELETE FROM items WHERE id = ?').run(id);
   if (responseult.changes === 0) {
-    response.status(404).send({ error: 'Item not found' });
+    response.code(404).send({ error: 'Item not found' });
   } else {
-    response.status(204).send({message: `Item has been removed`});
+    response.code(204).send({message: `Item has been removed`});
   }
 };
 

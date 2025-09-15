@@ -31,6 +31,10 @@ export default function LoginPage(){
       } else if (response.status === 404) {
         navigate('/signupUnkownUser', { state: { email } });
       }
+      else {
+        console.log('Unexpected status:', response.status);
+        setError('Unexpected response: ${response.status}');
+      }
     } catch (err) {
       setError('Failed to validate email');
     }
@@ -41,11 +45,10 @@ export default function LoginPage(){
         <div className="bg-pink-dark shadow-no-blur-70 flex m-8 overflow-hidden">
           {/* Left column for form */}
           <section className="p-8 flex flex-col justify-between min-w-80">
-          <form onSubmit={handleSubmit}>
-              <div className="mb-4">
+          <form onSubmit={handleSubmit} className="flex flex-col h-full">
+              <div>
                 <h1 className="text-4xl text-blue-deep font-pixelify mb-[20px] text-shadow font-bold">
-                  SIGN UP
-                </h1>
+                  SIGN UP</h1>
                 {/* Email input */}
                 <div className="relative">
                   <img
@@ -58,14 +61,15 @@ export default function LoginPage(){
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name_0000@gmail.com"
-                    className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse tracking-widest"
+                    className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest"
                     required
                   />
                 </div>
                 {/* Message displays */}
                 {error && <p className="text-red-500 mt-2">{error}</p>}
               </div>
-              
+              <div className="flex-grow"></div>
+              <div className="flex-shrink-0">
               {/* Continue button */}
               <button type="submit" className="w-full">
                 <ButtonPurple>
@@ -76,6 +80,7 @@ export default function LoginPage(){
                   </span>
                 </ButtonPurple>
               </button>
+              </div>
             </form>
           </section>
           
