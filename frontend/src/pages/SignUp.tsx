@@ -44,8 +44,7 @@ export default function LoginPage(){
           <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <h1 className="text-4xl text-blue-deep font-pixelify mb-[20px] text-shadow font-bold">
-                  SIGN UP
-                </h1>
+                  SIGN UP</h1>
                 {/* Email input */}
                 <div className="relative">
                   <img
@@ -58,14 +57,13 @@ export default function LoginPage(){
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name_0000@gmail.com"
-                    className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse tracking-widest"
+                    className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest"
                     required
                   />
                 </div>
                 {/* Message displays */}
                 {error && <p className="text-red-500 mt-2">{error}</p>}
               </div>
-              
               {/* Continue button */}
               <button type="submit" className="w-full">
                 <ButtonPurple>
@@ -76,6 +74,7 @@ export default function LoginPage(){
                   </span>
                 </ButtonPurple>
               </button>
+              
             </form>
           </section>
           
