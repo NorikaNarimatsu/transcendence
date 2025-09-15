@@ -6,12 +6,15 @@ import App from './App.tsx'
 import Login from './pages/Login.tsx'
 import SignUp from './pages/SignUp.tsx'
 import SignUp2 from './pages/SignUp2.tsx'
+import PongGame from './pages/PongGame.tsx'
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
   { path: '/login', element: <Login /> },
   { path: '/signup', element: <SignUp /> },
   { path: '/signupUnkownUser', element: <SignUp2 />},
+  { path: '/pongGame', element: <PongGame />},
+  // { path: '/profilepage', element: <ProfilePage />},
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
