@@ -5,6 +5,9 @@ import { initializeDatabase } from './database/initDatabase.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fastifyWebsocket from '@fastify/websocket';
+import webSocketRoute from "./routes/webSocketRoute.js";
+
 
 
 const PORT = Number(process.env.PORT || 8443);
@@ -31,6 +34,9 @@ const app = Fastify({
 });
 
 console.log("Fastify server is set...");
+
+await app.register(fastifyWebsocket);
+await webSocketRoute(app);
 
 await app.register(cors, {
   origin: 'http://localhost:3000', //not sure https

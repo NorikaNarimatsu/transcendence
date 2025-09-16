@@ -38,7 +38,7 @@ Content-Type: application/json
 
 
 //# Enter the backend container
-# docker exec -it backend /bin/sh
+# docker exec -it backend /bin/bash
 
 # # Navigate to database directory
 # cd /app/src/database/db
