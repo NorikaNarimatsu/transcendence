@@ -4,7 +4,7 @@ import ButtonPurple from '../components/ButtonPurple'
 import eye_icon from '../assets/icons/eye.png'
 import arrow_icon from '../assets/icons/arrow.png'
 
-export default function LoginPage(){
+export default function LoginPage(): JSX.Element{
   return (
     <main className="min-h-screen flex flex-col">
       <div className="flex-1 bg-pink-grid flex items-center justify-center">
