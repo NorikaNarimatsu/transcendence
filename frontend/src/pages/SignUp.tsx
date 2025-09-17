@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import signup_image from '../assets/SignUp.jpg';
 import ButtonPurple from '../components/ButtonPurple'
 import mail_icon from '../assets/icons/mail.png'
@@ -7,7 +6,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 
-export default function LoginPage(){
+export default function SignUp(){
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -17,24 +16,21 @@ export default function LoginPage(){
     setError('');
 
     try {
-      const response = await fetch('https://localhost:8443/email_check', {
+      const response = await fetch('https://localhost:8443/validateEmail', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json',},
         body: JSON.stringify({ email }),
       });
-
-      // const data = await response.json();
-      if (response.status === 200) {
+      if (response.status === 200)
         navigate('/login', { state: { email } });
-      } else if (response.status === 404) {
+      else if (response.status === 404)
         navigate('/signupUnkownUser', { state: { email } });
-      }
     } catch (err) {
       setError('Failed to validate email');
     }
   };
+  
   return (
     <main className="min-h-screen flex flex-col">
       <div className="flex-1 bg-pink-grid flex items-center justify-center">
