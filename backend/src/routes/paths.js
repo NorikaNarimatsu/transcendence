@@ -82,6 +82,9 @@ export default async function itemRoutes(fastify, options) {
     fastify.put('/items/:id', itemController.updateItem);
     fastify.delete('/items/:id', itemController.deleteItem);
     fastify.post('/validate-name', itemController.validateAndAddItem);
-    fastify.post('/email_check', itemController.validateAndAddEmail);
+    fastify.post('/validateEmail', itemController.validateEmail);
+    fastify.post('/validatePassword', itemController.validatePassword);
+    fastify.post('/addNewUser', itemController.addNewUser);
+    fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
 
 }

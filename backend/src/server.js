@@ -42,23 +42,16 @@ await app.register(cors, {
 // await app.register(helmet, { contentSecurityPolicy: { useDefaults: true } });
 
 // Health check endpoint
-app.get("/health", async (request, reply) => {
-  reply.send({ status: "ok" });
+app.get("/health", {
+  logLevel: 'error',
+  handler: async (request, reply) => {
+    reply.send({ status: "ok" });
+  }
 });
 
 import paths from './routes/paths.js';
 
 app.register(paths)
-
-// Start the server
-// try {
-//   await app.listen({ port: PORT, host: "0.0.0.0" });
-//   app.log.info(`HTTP backend listening on port ${PORT}`);
-// } catch (err) {
-//   app.log.error(err);
-//   process.exit(1);
-// }
-
 
 const start = async () => {
   try {

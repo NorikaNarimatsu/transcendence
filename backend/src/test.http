@@ -17,7 +17,7 @@ Content-Type: application/json
 
 
 ### Delete 1 ITEM
-DELETE https://localhost:8443/items/4 HTTP/1.1
+DELETE https://localhost:8443/items/5 HTTP/1.1
 
 
 ### Update a 2nd ITEM
