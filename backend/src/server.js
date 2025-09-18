@@ -9,7 +9,6 @@ import fastifyWebsocket from '@fastify/websocket';
 import webSocketRoute from "./routes/webSocketRoute.js";
 
 
-
 const PORT = Number(process.env.PORT || 8443);
 export const db = initializeDatabase();
 
@@ -20,20 +19,20 @@ const __dirname = path.dirname(__filename);
 const certPath = path.join(__dirname, '../https/cert.pem');
 const keyPath = path.join(__dirname, '../https/key.pem');
 // Log absolute paths for debugging
-console.log('Current directory:', __dirname);
-console.log('Certificate path:', path.resolve(certPath));
-console.log('Key path:', path.resolve(keyPath));
+// console.log('Current directory:', __dirname);
+// console.log('Certificate path:', path.resolve(certPath));
+// console.log('Key path:', path.resolve(keyPath));
 
 // Create Fastify instance
 const app = Fastify({
-  logger: true,
+  logger: false,
   https: {
     key: fs.readFileSync(keyPath),
     cert: fs.readFileSync(certPath)
   }
 });
 
-console.log("Fastify server is set...");
+// console.log("Fastify server is set...");
 
 await app.register(fastifyWebsocket);
 await webSocketRoute(app);
@@ -55,16 +54,6 @@ app.get("/health", async (request, reply) => {
 import paths from './routes/paths.js';
 
 app.register(paths)
-
-// Start the server
-// try {
-//   await app.listen({ port: PORT, host: "0.0.0.0" });
-//   app.log.info(`HTTP backend listening on port ${PORT}`);
-// } catch (err) {
-//   app.log.error(err);
-//   process.exit(1);
-// }
-
 
 const start = async () => {
   try {
