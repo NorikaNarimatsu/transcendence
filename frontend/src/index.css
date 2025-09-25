@@ -11,6 +11,13 @@
     background-size: 50px 50px;
 }
 
+.bg-pink-dark-grid {
+    background-color: #ec8fc7;
+    background-image: linear-gradient(white 1px, transparent 1px),
+        linear-gradient(90deg, white 1px, transparent 1px);
+    background-size: 50px 50px;
+}
+
 .shadow-no-blur {
     box-shadow: -4px 4px 0 rgba(0, 0, 0, 0.25);
 }
@@ -78,4 +85,53 @@
 	height: 30px;
 	background-color: white;
 	border-radius: 20px;
+}
+
+
+/*Snake Game*/
+
+.snake {
+    width: 100px;
+    height: 20px;
+    background-color: #ec8fc7;
+    border-radius: 10px;
+    border-width: 3px;
+    border-style: solid;
+}
+
+.snake-blue {
+    background-color: #1900a7;
+}
+
+.snake-pink {
+    background-color: #ec8fc7;
+}
+
+.snake-border-blue{
+    border-color: #1900a7;
+}
+
+.snake-border-pink {
+    border-color: #ec8fc7;
+}
+
+.snake-head {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.snake-head-blue {
+    background-color: #1900a7;
+}
+
+.snake-head-pink {
+    background-color: #ec8fc7;
+}
+
+.snake-food {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #1900a7;
 }
