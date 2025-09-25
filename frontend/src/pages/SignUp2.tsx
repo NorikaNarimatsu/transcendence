@@ -15,7 +15,22 @@ export default function signupUnkownUser() {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [nameError, setNameError] = useState('');
   
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    
+    // Real-time validation
+    if (value.length < 2 && value.length > 0) {
+      setNameError('Nickname must be at least 2 characters long'); }
+    else if (value.length > 10) {
+      setNameError('Nickname must be max 10 characters long');
+    } else {
+      setNameError('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -57,7 +72,7 @@ export default function signupUnkownUser() {
                 </button>
 
                 {/* Form inputs */}
-                <div className='relative mb-4'>
+                <div className='relative mb-6'> {/* Increased margin bottom to accommodate error */}
                   <img
                     src={person_icon}
                     alt="Person icon"
@@ -66,11 +81,19 @@ export default function signupUnkownUser() {
                   <input 
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter Name"
-                    className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest"
+                    onChange={handleNameChange}
+                    placeholder="Enter Nickname"
+                    className={`w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 ${
+                      nameError ? 'border-red-500' : 'border-black'
+                    } focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest`}
+                    maxLength={11}
                     required
                   />
+                  {nameError && (
+                    <p className="absolute left-0 top-full mt-1 text-red-500 text-xs">
+                      {nameError}
+                    </p>
+                  )}
                 </div>
 
                 <div className="relative mb-4">
