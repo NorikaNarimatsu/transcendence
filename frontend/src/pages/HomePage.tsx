@@ -1,17 +1,6 @@
-import { useNavigate } from 'react-router-dom';
 import ButtonPurple from '../components/ButtonPurple';
 
 export default function HomePage() {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    navigate('/');
-  };
-
-  const handlePlayGame = () => {
-    navigate('/pongGame');
-  };
-
   return (
     <main className="min-h-screen flex flex-col">
       <div className="flex-1 bg-pink-grid flex items-center justify-center">
@@ -26,13 +15,15 @@ export default function HomePage() {
           {/* Main content */}
           <section className="flex-1 mb-8">
             <div className="grid grid-cols-2 gap-4">
-              <button 
-                  onClick={handlePlayGame}
-                  className="bg-blue-deep p-4 rounded-lg shadow-no-blur-50 hover:opacity-90 transition-opacity"
-                >
+              <ButtonPurple 
+                to="/pongGame"
+                className="bg-blue-deep p-4 rounded-lg shadow-no-blur-50 hover:opacity-90 transition-opacity"
+              >
+                <div>
                   <h2 className="text-2xl text-white font-dotgothic mb-2">Play Game</h2>
                   <p className="text-white font-dotgothic">Start a new Pong match</p>
-                </button>
+                </div>
+              </ButtonPurple>
               <div className="bg-blue-deep p-4 rounded-lg shadow-no-blur-50">
                 <h2 className="text-2xl text-white font-dotgothic mb-2">Profile</h2>
                 <p className="text-white font-dotgothic">View your stats</p>
@@ -42,11 +33,9 @@ export default function HomePage() {
 
           {/* Logout button */}
           <footer className="self-end">
-            <button onClick={handleLogout}>
-              <ButtonPurple>
-                <span className="font-dotgothic">Logout</span>
-              </ButtonPurple>
-            </button>
+            <ButtonPurple to="/">
+              <span className="font-dotgothic">Logout</span>
+            </ButtonPurple>
           </footer>
         </div>
       </div>
