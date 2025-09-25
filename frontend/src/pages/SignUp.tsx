@@ -25,7 +25,7 @@ export default function SignUp(){
       });
       if (response.status === 200)
         navigate('/login', { state: { email } });
-      else if (response.status === 404)
+      else if (response.status === 204)
         navigate('/signupUnkownUser', { state: { email } });
     } catch (err) {
       console.error('Fetch error:', err);

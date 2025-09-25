@@ -99,7 +99,7 @@ export const validateEmail = async (request, response) => {
     if (isExistingEmail)
       return response.code(200).send();
     else
-      return response.code(404).send();
+      return response.code(204).send();
   } catch (error) {
     return response.code(500).send();
   }

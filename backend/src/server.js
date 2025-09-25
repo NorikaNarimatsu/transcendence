@@ -23,7 +23,7 @@ console.log('Key path:', path.resolve(keyPath));
 
 // Create Fastify instance
 const app = Fastify({
-  logger: true,
+  logger: false,
   https: {
     key: fs.readFileSync(keyPath),
     cert: fs.readFileSync(certPath)
@@ -36,12 +36,10 @@ await app.register(cors, {
   origin: [
     'https://localhost:5173',  // Vite dev server
     'http://localhost:5173',   // HTTP fallback
-    'https://127.0.0.1:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3000',   
+    'http://localhost:3000',
     'https://localhost:3000'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true // allow cookies to be sent to gosia
 });
 
