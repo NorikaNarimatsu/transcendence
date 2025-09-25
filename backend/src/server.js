@@ -1,10 +1,10 @@
 // import helmet from "@fastify/helmet";
 import Fastify from "fastify";
 import cors from '@fastify/cors';
-import { initializeDatabase } from './database/initDatabase.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { initializeDatabase } from './database/initDatabase.js';
 
 
 const PORT = Number(process.env.PORT || 8443);
@@ -33,9 +33,16 @@ const app = Fastify({
 console.log("Fastify server is set...");
 
 await app.register(cors, {
-  origin: 'http://localhost:3000', //not sure https
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true // Allow cookies to be sent check to gosia
+  origin: [
+    'https://localhost:5173',  // Vite dev server
+    'http://localhost:5173',   // HTTP fallback
+    'https://127.0.0.1:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',   
+    'https://localhost:3000'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true // allow cookies to be sent to gosia
 });
 
 // // Register security headers

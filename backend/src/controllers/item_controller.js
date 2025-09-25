@@ -95,7 +95,7 @@ export const validateAndAddItem = async (request, response) => {
 export const validateEmail = async (request, response) => {
   const { email } = request.body;
   try {
-    const isExistingEmail = db.prepare('SELECT * FROM items WHERE email = ?').get(email)
+    const isExistingEmail = db.prepare('SELECT * FROM items WHERE email = ?').get(email);
     if (isExistingEmail)
       return response.code(200).send();
     else
@@ -125,7 +125,7 @@ export function addNewUser(request, response) {
   try {
   const uuid = uuidv4(); // Generate a unique UUID
   const responseult = db.prepare('INSERT INTO items (uuid, name, email, password) VALUES (?, ?, ?, ?)').run(uuid, name, email, password);
-  response.status(201).send({ id: responseult.lastInsertRowid, name , email, created_at: new Date().toISOString()});
+  response.code(201).send({ id: responseult.lastInsertRowid, name , email, created_at: new Date().toISOString()});
   } catch (error) {
     request.log.error('Failed to add new user:', error);
     return response.code(500).send();

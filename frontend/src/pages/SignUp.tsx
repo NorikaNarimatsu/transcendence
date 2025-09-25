@@ -19,7 +19,8 @@ export default function SignUp(){
       const response = await fetch('https://localhost:8443/validateEmail', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',},
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ email }),
       });
       if (response.status === 200)
@@ -27,6 +28,7 @@ export default function SignUp(){
       else if (response.status === 404)
         navigate('/signupUnkownUser', { state: { email } });
     } catch (err) {
+      console.error('Fetch error:', err);
       setError('Failed to validate email');
     }
   };
@@ -63,17 +65,17 @@ export default function SignUp(){
               <div className="flex-grow"></div>
               <div className="flex-shrink-0">
               {/* Continue button */}
-              <button type="submit" className="w-full">
-                <ButtonPurple>
+              {/* <button type="submit" className="w-full"> */}
+                <ButtonPurple type='submit'>
                   <span className="flex items-center justify-end gap-2">
                     Continue
                     <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
                     <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
                   </span>
                 </ButtonPurple>
-              </button>
-              </div>
-            </form>
+              {/* </button> */}
+            </div>
+          </form>
           </section>
           
           {/* Right column for image */}

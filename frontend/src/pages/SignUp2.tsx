@@ -106,15 +106,15 @@ export default function signupUnkownUser() {
                 {error && <p className="text-red-500 mt-2">{error}</p>}
               </div>
 
-              <button type="submit" className="w-full">
-                <ButtonPurple>
+              {/* <button type="submit" className="w-full"> */}
+                <ButtonPurple type='submit'>
                   <span className="flex items-center justify-end gap-2">
                     Continue
                     <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
                     <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
                   </span>
                 </ButtonPurple>
-              </button>
+              {/* </button> */}
             </form>
           </section>
 

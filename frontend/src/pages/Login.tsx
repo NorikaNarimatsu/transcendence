@@ -92,15 +92,15 @@ export default function LoginPage(){
             </div>
             
             {/* Continue button */} {/*TODO: CHANGE to path, THIS ONE DEPENDS ON THE DATABASE, DOES THE USER EXIST ALREADY OR NOT?*/}
-            <button type="submit" className="w-full">
-                <ButtonPurple>
+            {/* <button type="submit" className="w-full"> */}
+                <ButtonPurple type='submit'>
                   <span className="flex items-center justify-end gap-2">
                     Continue
                     <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
                     <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
                   </span>
                 </ButtonPurple>
-              </button>
+              {/* </button> */}
             </form>
           </section>
           
