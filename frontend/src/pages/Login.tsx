@@ -47,7 +47,7 @@ export default function LoginPage(){
       });
 
       if (response.ok) {
-        navigate('/home');
+        navigate('/playerProfile');
       } else {
         const data = await response.json();
         setError(data.message || 'Invalid password');

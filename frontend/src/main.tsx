@@ -9,17 +9,15 @@ import SignUp2 from './pages/SignUp2.tsx'
 import PongGame from './pages/PongGame.tsx'
 import SnakeGame from './pages/SnakeGame.tsx'
 import PlayerProfile from './pages/PlayerProfile.tsx'
-import HomePage from './pages/HomePage.tsx' //TODO: To be removed.(Norika made this page, but there is a new PlayerProfile page in the making.)
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
   { path: '/login', element: <Login /> },
   { path: '/signup', element: <SignUp /> },
   { path: '/signupUnkownUser', element: <SignUp2 />},
-  { path: '/pongGame', element: <PongGame />},
-  { path: '/snakeGame', element: <SnakeGame />},
+  { path: '/playerProfile/pongGame', element: <PongGame />},
+  { path: '/playerProfile/snakeGame', element: <SnakeGame />},
   { path: '/playerProfile', element: <PlayerProfile />},
-  { path: '/home', element: <HomePage/>}, //TODO: To be removed.(Norika made this page, but there is a new PlayerProfile page in the making.)
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

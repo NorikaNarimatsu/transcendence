@@ -1,18 +1,20 @@
 import type { JSX } from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import avatar1 from '../assets/avatars/Avatar 1.png'
 import bgimage from '../assets/Player_Page.jpg'
 import arrow_icon from '../assets/icons/arrow.png'
 
 export default function PlayerProfile(): JSX.Element{
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const getButtonsForCategory = (category: string) => {
         switch(category) {
             case 'Games' :
                 return [
-                    { name: 'Play Pong', action: () => console.log('Starting Pong') },
-                    { name: 'Play Snake', action: () => console.log('Starting Snake') }
+                    { name: 'Play Pong', action: () => navigate('./pongGame') },
+                    { name: 'Play Snake', action: () => navigate('./snakeGame') }
                 ];
             case 'Friends' :
                 return [
