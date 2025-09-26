@@ -23,7 +23,7 @@ console.log('Key path:', path.resolve(keyPath));
 
 // Create Fastify instance
 const app = Fastify({
-  logger: false,
+  logger: true,
   https: {
     key: fs.readFileSync(keyPath),
     cert: fs.readFileSync(certPath)

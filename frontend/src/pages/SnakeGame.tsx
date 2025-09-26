@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 const GRID_SIZE_X = 20; // number of cells horizontally
 const GRID_SIZE_Y = 12; // number of cells vertically
 const CELL_SIZE = 50; // 50x50px
-const SNAKE_VELOCITY = 120; // can be change to modify difficult!
+const SNAKE_VELOCITY = 120; // can be change to modify difficult! - slower = 500 - impossible = 5
 
 type Position = { x: number; y: number };
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
@@ -22,7 +22,7 @@ function getRandomPosition(): Position {
 }
 
 export default function SnakeGame(): JSX.Element{
-
+    const [userName, setUserName] = useState('');
     // 1. Game State
     // Multiplayer Addition
     const [gameMode, setGameMode] = useState<null | 'single' | 'multi'>(null);
@@ -42,6 +42,21 @@ export default function SnakeGame(): JSX.Element{
     // To avoid stale closures in setInterval
     const directionRef = useRef(direction);
     directionRef.current = direction;
+
+    // get user name
+    useEffect(() => {
+        fetch('/api/user/profile')
+            .then(res => res.json())
+            .then(data => {
+                setUserName(data.name);
+            // setUserAvatar(data.avatarUrl);
+        })
+        .catch(err => {
+            // handle error, fallback to default
+            setUserName('Player');
+            // setUserAvatar(avatar1);
+        });
+    }, []);
 
     // 2. Game Loop
     useEffect(() => {
@@ -156,6 +171,13 @@ export default function SnakeGame(): JSX.Element{
         return () => window.removeEventListener('keydown', handleKey);
     }, [direction, direction2, gameOver, waitingToStart]);
 
+    let winnerName = userName;
+    if (isMultiplayer) {
+        if (score > score2) winnerName = userName;
+        else if (score < score2) winnerName = "Gosia";
+        else winnerName = "It's a tie!";
+    }
+
     // 6. Render
     if (gameMode === null) {
         return (
@@ -214,7 +236,7 @@ export default function SnakeGame(): JSX.Element{
             {/* Top bar */}
             <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
                 <div className="flex items-center justify-start gap-2">
-                    <h1 className="player-name">Eduarda</h1>
+                    <h1 className="player-name">{userName}</h1>
                     <img src={avatar1} alt="Avatar 1" className="avatar" />
                 </div>
                 <div className="flex justify-center">
@@ -319,12 +341,13 @@ export default function SnakeGame(): JSX.Element{
                         )
                     ))}
                     {/* Food */}
-                    { <div
+                    {
+                    <div
                         className="snake-food"
                         style={{
                             position: 'absolute',
-                            left: food.x * CELL_SIZE,
-                            top: food.y * CELL_SIZE,
+                            left: food.x * CELL_SIZE + 10,
+                            top: food.y * CELL_SIZE + 10,
                             width: CELL_SIZE * 0.6,
                             height: CELL_SIZE * 0.6,
                             background: '#7c3aed',
@@ -332,7 +355,7 @@ export default function SnakeGame(): JSX.Element{
                         }}
                     />
                     }
-                    {waitingToStart && (
+                    { waitingToStart && (
                         <div
                             style={{
                                 position: 'absolute',
@@ -367,6 +390,11 @@ export default function SnakeGame(): JSX.Element{
                             }}
                         >
                             Game Over!
+                            {isMultiplayer && (
+                                <div style={{ fontSize: '2rem'}}>
+                                    Winner: {winnerName}
+                                </div>
+                            )}
                             <div
                                 style={{
                                     display: 'flex',
@@ -397,8 +425,8 @@ export default function SnakeGame(): JSX.Element{
             </section>
             {/* Bottom bar */}
             <footer className="h-40 bg-blue-deep">
-                 <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl text-center m-[15px]">SNAKE GAME</h1>
-             </footer>
+                <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl text-center m-[15px]">SNAKE GAME</h1>
+            </footer>
         </main>
     );
 }

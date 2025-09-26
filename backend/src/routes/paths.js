@@ -1,5 +1,6 @@
 import { getItem, getItems, addItem, deleteItem, updateItem } from '../controllers/item_controller.js'
 import itemController from '../controllers/item_controller.js'
+import userController from '../controllers/user_controller.js';
 
 
 // Item schema
@@ -86,5 +87,6 @@ export default async function itemRoutes(fastify, options) {
     fastify.post('/validatePassword', itemController.validatePassword);
     fastify.post('/addNewUser', itemController.addNewUser);
     fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
+    fastify.get('/api/user/profile', userController.getProfile);
 
 }
