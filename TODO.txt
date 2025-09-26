@@ -1,3 +1,4 @@
 Frontend:
 - Impose a character limit for the names (if it is to big it is going to mess up the layout in the Game Page (Pong Game)).
 - Include all Avatars. (Update PongGame file to not hardcode include avatars but to fetch them from the backend/database).
+- screen with game instructions
