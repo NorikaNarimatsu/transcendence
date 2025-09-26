@@ -27,6 +27,7 @@ export function initializeDatabase() {
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
+                avatarUrl TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         `);

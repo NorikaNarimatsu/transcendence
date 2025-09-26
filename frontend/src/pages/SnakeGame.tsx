@@ -1,11 +1,13 @@
 import type { JSX } from 'react';
 import ButtonPurple from '../components/ButtonPurple';
 import ButtonPink from '../components/ButtonDarkPink';
-import avatar1 from '../assets/avatars/Avatar 1.png' // this need to be asked to DB user profile
+import avatar1 from '../assets/avatars/Avatar 1.png'
 import avatar2 from '../assets/avatars/Avatar 2.png' // just necessary in a multiplayer
 
 import { useState, useEffect, useRef } from 'react';
 
+let winner: number;
+const userEmail = "test@gmail.com"; // Just for test need to be replace with dynamic value from login/session
 const GRID_SIZE_X = 20; // number of cells horizontally
 const GRID_SIZE_Y = 12; // number of cells vertically
 const CELL_SIZE = 50; // 50x50px
@@ -21,8 +23,9 @@ function getRandomPosition(): Position {
     };
 }
 
-export default function SnakeGame(): JSX.Element{
+export default function SnakeGame(): JSX.Element {
     const [userName, setUserName] = useState('');
+    const [userAvatar, setUserAvatar] = useState('');
     // 1. Game State
     // Multiplayer Addition
     const [gameMode, setGameMode] = useState<null | 'single' | 'multi'>(null);
@@ -45,16 +48,16 @@ export default function SnakeGame(): JSX.Element{
 
     // get user name
     useEffect(() => {
-        fetch('/api/user/profile')
+        fetch(`/api/user/profile?email=${encodeURIComponent(userEmail)}`)
             .then(res => res.json())
             .then(data => {
                 setUserName(data.name);
-            // setUserAvatar(data.avatarUrl);
+                setUserAvatar(data.avatarUrl);
         })
         .catch(err => {
             // handle error, fallback to default
             setUserName('Player');
-            // setUserAvatar(avatar1);
+            setUserAvatar('batata');
         });
     }, []);
 
@@ -80,6 +83,7 @@ export default function SnakeGame(): JSX.Element{
                     prevSnake.some(seg => seg.x === newPosition.x && seg.y === newPosition.y) ||
                     (isMultiplayer && snake2.some(seg => seg.x === newPosition.x && seg.y === newPosition.y))
                 ) {
+                    winner = 2;
                     setGameOver(true);
                     return prevSnake;
                 }
@@ -113,6 +117,7 @@ export default function SnakeGame(): JSX.Element{
                         prevSnake2.some(seg => seg.x === newPosition2.x && seg.y === newPosition2.y) ||
                         snake.some(seg => seg.x === newPosition2.x && seg.y === newPosition2.y)
                     ) {
+                        winner = 1;
                         setGameOver(true);
                         return prevSnake2;
                     }
@@ -173,9 +178,8 @@ export default function SnakeGame(): JSX.Element{
 
     let winnerName = userName;
     if (isMultiplayer) {
-        if (score > score2) winnerName = userName;
-        else if (score < score2) winnerName = "Gosia";
-        else winnerName = "It's a tie!";
+        if (winner == 1) winnerName = userName;
+        else if (winner == 2) winnerName = "Guest";
     }
 
     // 6. Render
@@ -237,7 +241,7 @@ export default function SnakeGame(): JSX.Element{
             <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
                 <div className="flex items-center justify-start gap-2">
                     <h1 className="player-name">{userName}</h1>
-                    <img src={avatar1} alt="Avatar 1" className="avatar" />
+                    <img src={userAvatar} alt="Avatar 1" className="avatar" />
                 </div>
                 <div className="flex justify-center">
                     <p className="player-name">
@@ -247,7 +251,7 @@ export default function SnakeGame(): JSX.Element{
                 { isMultiplayer && (
                     <div className="flex items-center justify-end gap-2">
                         <img src={avatar2} alt="Avatar 2" className="avatar" />
-                        <h2 className="player-name">Gosia</h2>
+                        <h2 className="player-name">Guest</h2>
                     </div>
                 )}
             </header>

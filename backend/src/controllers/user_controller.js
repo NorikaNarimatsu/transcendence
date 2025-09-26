@@ -2,17 +2,19 @@ import { db } from '../server.js';
 
 const userController = {
     getProfile: async (request, reply) => {
-        // reply.send({
-        //     name: "Eduarda",
-        // });
         try {
-            const row = db.prepare('SELECT name FROM items LIMIT 1').get();
+            const email = request.query.email;
+            if (!email) {
+                reply.status(400).send({ error: 'Email is required' });
+                return;
+            }
+            const row = db.prepare('SELECT name, avatarUrl FROM items WHERE email = ?').get(email);
             if (!row) {
                 reply.status(404).send({ error: 'User not found' });
             } else {
                 reply.send({
                     name: row.name,
-                    avatarUrl: '/avatars/Avatar 1.png' // default avatar, change for db
+                    avatarUrl: row.avatarUrl,
                 });
             }
         } catch (err) {

@@ -2,6 +2,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from '../server.js';
 import { get } from 'http';
 
+//////// Avatar Array //////
+const avatars = [
+  '/avatars/Avatar 1.png',
+  '/avatars/Avatar 2.png',
+  '/avatars/teste.jpeg'
+];
+
 ////////////////////////////// GET //////////////////////////////
 export function getItems(request, response) {
   const items = db.prepare('SELECT * FROM items').all();
@@ -20,12 +27,30 @@ export function getItem(request, response) {
 
 ////////////////////////////// POST //////////////////////////////
 
+// export function addItem(request, response) {
+//   const { name, email, password } = request.body;
+//   const finalAvatarUrl = avatarUrl || avatars[Math.floor(Math.random() * avatars.length)];
+//   const uuid = uuidv4(); // Generate a unique UUID
+//   const responseult = db.prepare('INSERT INTO items (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, password, finalAvatarUrl);
+//   response.code(201).send({ id: responseult.lastInsertRowid, name , email, avatarUrl: finalAvatarUrl, created_at: new Date().toISOString()});
+// };
+
+
 export function addItem(request, response) {
   const { name, email, password } = request.body;
+  const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
   const uuid = uuidv4(); // Generate a unique UUID
-  const responseult = db.prepare('INSERT INTO items (uuid, name, email, password) VALUES (?, ?, ?, ?)').run(uuid, name, email, password);
-  response.code(201).send({ id: responseult.lastInsertRowid, name , email, created_at: new Date().toISOString()});
-};
+  const result = db.prepare(
+    'INSERT INTO items (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)'
+  ).run(uuid, name, email, password, randomAvatarUrl);
+  response.code(201).send({
+    id: result.lastInsertRowid,
+    name,
+    email,
+    avatarUrl: randomAvatarUrl,
+    created_at: new Date().toISOString()
+  });
+}
 
 ////////////////////////////// PUT //////////////////////////////
 
@@ -34,11 +59,14 @@ export function updateItem(request, response) {
   const { name } = request.body;
   const { email } = request.body;
   const { password } = request.body;
-  const responseult = db.prepare('UPDATE items SET name = ? WHERE id = ?').run(name, id);
+  const { avatarUrl } = request.body;
+  const responseult = db.prepare(
+    'UPDATE items SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE id = ?'
+  ).run(name, avatarUrl, id);
   if (responseult.changes === 0) {
     response.code(404).send({ error: 'Item not found' });
   } else {
-    response.send({ id, name, email, password });
+    response.send({ id, name, email, password, avatarUrl });
   }
 };
 
@@ -122,10 +150,17 @@ export const validatePassword = async (request, response) => {
 
 export function addNewUser(request, response) {
   const { name, email, password } = request.body;
+  const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
   try {
-  const uuid = uuidv4(); // Generate a unique UUID
-  const responseult = db.prepare('INSERT INTO items (uuid, name, email, password) VALUES (?, ?, ?, ?)').run(uuid, name, email, password);
-  response.code(201).send({ id: responseult.lastInsertRowid, name , email, created_at: new Date().toISOString()});
+    const uuid = uuidv4(); // Generate a unique UUID
+    const result = db.prepare('INSERT INTO items (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, password, randomAvatarUrl);
+    response.code(201).send({
+      id: result.lastInsertRowid,
+      name,
+      email,
+      avatarUrl: randomAvatarUrl,
+      created_at: new Date().toISOString()
+    });
   } catch (error) {
     request.log.error('Failed to add new user:', error);
     return response.code(500).send();
