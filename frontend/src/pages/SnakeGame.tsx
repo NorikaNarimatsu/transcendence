@@ -24,8 +24,14 @@ function getRandomPosition(): Position {
 export default function SnakeGame(): JSX.Element{
 
     // 1. Game State
+    // Multiplayer Addition
     const [gameMode, setGameMode] = useState<null | 'single' | 'multi'>(null);
     const [isMultiplayer, setIsMultiplayer] = useState(false);
+    const [snake2, setSnake2] = useState<Position[]>([{ x: 5, y: 5 }]);
+    const [direction2, setDirection2] = useState<Direction>('LEFT');
+    const [score2, setScore2] = useState(0);
+
+    // Single Player
     const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }]);
     const [direction, setDirection] = useState<Direction>('RIGHT');
     const [food, setFood] = useState<Position>(getRandomPosition());
@@ -41,6 +47,7 @@ export default function SnakeGame(): JSX.Element{
     useEffect(() => {
         if (gameOver || waitingToStart) return;
         const interval = setInterval(() => {
+            // Always update snake 1
             setSnake(prevSnake => {
                 const head = prevSnake[0];
                 let newPosition: Position;
@@ -51,18 +58,18 @@ export default function SnakeGame(): JSX.Element{
                     case 'RIGHT': newPosition = { x: head.x + 1, y: head.y }; break;
                 }
 
-                // 3. Collision detection
+                // Collision detection for snake 1
                 if (
-                    newPosition.x < 0 || newPosition.x >= GRID_SIZE_X  ||
+                    newPosition.x < 0 || newPosition.x >= GRID_SIZE_X ||
                     newPosition.y < 0 || newPosition.y >= GRID_SIZE_Y ||
-                    prevSnake.some(seg => seg.x === newPosition.x && seg.y === newPosition.y)
+                    prevSnake.some(seg => seg.x === newPosition.x && seg.y === newPosition.y) ||
+                    (isMultiplayer && snake2.some(seg => seg.x === newPosition.x && seg.y === newPosition.y))
                 ) {
                     setGameOver(true);
                     return prevSnake;
                 }
 
                 let newSnake = [newPosition, ...prevSnake];
-                // 4. Eating food
                 if (newPosition.x === food.x && newPosition.y === food.y) {
                     setFood(getRandomPosition());
                     setScore(score => score + 1);
@@ -71,34 +78,83 @@ export default function SnakeGame(): JSX.Element{
                 }
                 return newSnake;
             });
+
+            // Only update snake 2 in multiplayer mode
+            if (isMultiplayer) {
+                setSnake2(prevSnake2 => {
+                    const head2 = prevSnake2[0];
+                    let newPosition2: Position;
+                    switch (direction2) {
+                        case 'UP': newPosition2 = { x: head2.x, y: head2.y - 1 }; break;
+                        case 'DOWN': newPosition2 = { x: head2.x, y: head2.y + 1 }; break;
+                        case 'LEFT': newPosition2 = { x: head2.x - 1, y: head2.y }; break;
+                        case 'RIGHT': newPosition2 = { x: head2.x + 1, y: head2.y }; break;
+                    }
+
+                    // Collision detection for snake 2
+                    if (
+                        newPosition2.x < 0 || newPosition2.x >= GRID_SIZE_X ||
+                        newPosition2.y < 0 || newPosition2.y >= GRID_SIZE_Y ||
+                        prevSnake2.some(seg => seg.x === newPosition2.x && seg.y === newPosition2.y) ||
+                        snake.some(seg => seg.x === newPosition2.x && seg.y === newPosition2.y)
+                    ) {
+                        setGameOver(true);
+                        return prevSnake2;
+                    }
+
+                    let newSnake2 = [newPosition2, ...prevSnake2];
+                    if (newPosition2.x === food.x && newPosition2.y === food.y) {
+                        setFood(getRandomPosition());
+                        setScore2(score2 => score2 + 1);
+                    } else {
+                        newSnake2.pop();
+                    }
+                    return newSnake2;
+                });
+            }
         }, SNAKE_VELOCITY);
         return () => clearInterval(interval);
-    }, [food, gameOver, waitingToStart]);
+    }, [food, gameOver, waitingToStart, isMultiplayer, direction2, snake2, snake]);
 
     // 5. Keyboard Input
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
             if (waitingToStart && e.code === 'Space') {
-                // Start the game
+                // Start the game Single
                 setWaitingToStart(false);
                 setGameOver(false);
                 setScore(0);
                 setSnake([{ x: 10, y: 10 }]);
                 setFood(getRandomPosition());
                 setDirection('RIGHT');
+                if (isMultiplayer === true)
+                {
+                    setSnake2([{ x: 5, y: 5 }]);
+                    setDirection2('LEFT');
+                    setScore2(0);
+                }
                 return;
             }
             if (gameOver || waitingToStart) return;
+            // Player 1 (arrow keys)
             switch (e.key) {
                 case 'ArrowUp': if (direction !== 'DOWN') setDirection('UP'); break;
                 case 'ArrowDown': if (direction !== 'UP') setDirection('DOWN'); break;
                 case 'ArrowLeft': if (direction !== 'RIGHT') setDirection('LEFT'); break;
                 case 'ArrowRight': if (direction !== 'LEFT') setDirection('RIGHT'); break;
             }
+            // Player 2 (WASD)
+            switch (e.key) {
+                case 'w': if (direction2 !== 'DOWN') setDirection2('UP'); break;
+                case 's': if (direction2 !== 'UP') setDirection2('DOWN'); break;
+                case 'a': if (direction2 !== 'RIGHT') setDirection2('LEFT'); break;
+                case 'd': if (direction2 !== 'LEFT') setDirection2('RIGHT'); break;
+
+            }
         };
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
-    }, [direction, gameOver, waitingToStart]);
+    }, [direction, direction2, gameOver, waitingToStart]);
 
     // 6. Render
     if (gameMode === null) {
@@ -162,12 +218,16 @@ export default function SnakeGame(): JSX.Element{
                     <img src={avatar1} alt="Avatar 1" className="avatar" />
                 </div>
                 <div className="flex justify-center">
-                    <p className="player-name">{score}</p>
+                    <p className="player-name">
+                        {isMultiplayer ? `${score} - ${score2}` : score}
+                    </p>
                 </div>
-                {/* <div className="flex items-center justify-end gap-2">
-                    <img src={avatar2} alt="Avatar 2" className="avatar" />
-                    <h2 className="player-name">Gosia</h2>
-                </div> */}
+                { isMultiplayer && (
+                    <div className="flex items-center justify-end gap-2">
+                        <img src={avatar2} alt="Avatar 2" className="avatar" />
+                        <h2 className="player-name">Gosia</h2>
+                    </div>
+                )}
             </header>
             {/* Game Area */}
             <section className="flex-1 bg-pink-dark-grid bg-pink-dark flex items-center justify-center">
@@ -178,7 +238,7 @@ export default function SnakeGame(): JSX.Element{
                         height: GRID_SIZE_Y * CELL_SIZE,
                     }}
                 >
-                    {/* Snake */}
+                    {/* Snake  Single*/}
                     {snake.map((seg, idx) => (
                         idx === 0 ? (
                             // Head segment: parent is body, child is head
@@ -218,7 +278,46 @@ export default function SnakeGame(): JSX.Element{
                                 }}
                             />
                         )
-                    ))} 
+                    ))}
+                    {/* Snake 2 only Multiplayer */}
+                    { isMultiplayer && snake2.map((seg, idx) => (
+                        idx === 0 ? (
+                            <div
+                                key={idx}
+                                className="snake snake-pink snake-border-blue absolute"
+                                style={{
+                                    left: seg.x * CELL_SIZE,
+                                    top: seg.y * CELL_SIZE,
+                                    width: CELL_SIZE,
+                                    height: CELL_SIZE,
+                                    zIndex: 2,
+                                }}
+                            >
+                                <div
+                                    className="snake-head snake-head-blue absolute"
+                                    style={{
+                                        left: 12,
+                                        top: '60%',
+                                        transform: 'translateY(-70%)',
+                                        width: CELL_SIZE * 0.4,
+                                        height: CELL_SIZE * 0.4,
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <div
+                                key={idx}
+                                className="snake snake-pink snake-border-blue absolute"
+                                style={{
+                                    left: seg.x * CELL_SIZE,
+                                    top: seg.y * CELL_SIZE,
+                                    width: CELL_SIZE,
+                                    height: CELL_SIZE,
+                                    zIndex: 1,
+                                }}
+                            />
+                        )
+                    ))}
                     {/* Food */}
                     { <div
                         className="snake-food"
@@ -302,47 +401,4 @@ export default function SnakeGame(): JSX.Element{
              </footer>
         </main>
     );
-
-//     return (
-//         <main className="min-h-screen flex flex-col">
-//             {/* Top bar | LEARNED: Had to use a CSS grid instead of Flex to make sure that the score is always centered in the page.*/}
-//             <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
-//                 {/* Player 1 - TODO: API call. Who is the player/avatar?*/}
-//                 <div className="flex items-center justify-start gap-2">
-//                     <h1 className="player-name">Eduarda</h1>
-//                     <img src={avatar1} alt="Avatar 1" className="avatar" />
-//                 </div>
-                
-//                 {/* Scores - TODO: API call? - Always centered */}
-//                 <div className="flex justify-center">
-//                     <p className="player-name">0 - 0</p>
-//                 </div>
-                
-//                 {/* Player 2 - TODO: API call. Who is the player/avatar?*/}
-//                 <div className="flex items-center justify-end gap-2">
-//                     <img src={avatar2} alt="Avatar 2" className="avatar" />
-//                     <h2 className="player-name">Gosia</h2>
-//                 </div>
-//             </header>
-//             {/* Game Area */}
-//             <section className="flex-1 bg-pink-dark-grid bg-pink-dark flex items-center justify-center">
-//                 <div className="relative bg-pink-light w-[1000px] h-[600px] shadow-no-blur-70">
-//                     {/* Snake1 */}
-//                     <div className="snake snake-blue snake-border-pink absolute left-6 top-1/2 transform -translate-y-1/2">
-//                         <div className="snake-head snake-head-pink absolute right-1 top-1/2 transform -translate-y-1/2"></div>
-//                     </div>
-//                     {/* Snake2 */}
-//                     <div className="snake snake-pink snake-border-blue absolute right-6 top-1/2 transform  -translate-y-1/2">
-//                         <div className="snake-head snake-head-blue absolute left-1 top-1/2 transform -translate-y-1/2"></div>
-//                     </div>
-//                     {/* Food */}
-//                     <div className="snake-food absolute left-1/2 top-1/2"></div>
-//                 </div>
-//             </section>
-//             {/* Bottom bar */}
-//             <footer className="h-40 bg-blue-deep">
-//                 <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl text-center m-[15px]">SNAKE GAME</h1>
-//             </footer>
-//         </main>
-//     )
 }
