@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 const GRID_SIZE_X = 20; // number of cells horizontally
 const GRID_SIZE_Y = 12; // number of cells vertically
 const CELL_SIZE = 50; // 50x50px
-const SNAKE_VELOCITY = 120;
+const SNAKE_VELOCITY = 120; // can be change to modify difficult!
 
 type Position = { x: number; y: number };
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
@@ -24,12 +24,14 @@ function getRandomPosition(): Position {
 export default function SnakeGame(): JSX.Element{
 
     // 1. Game State
+    const [gameMode, setGameMode] = useState<null | 'single' | 'multi'>(null);
+    const [isMultiplayer, setIsMultiplayer] = useState(false);
     const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }]);
     const [direction, setDirection] = useState<Direction>('RIGHT');
     const [food, setFood] = useState<Position>(getRandomPosition());
     const [score, setScore] = useState(0);
-    const [gameOver, setGameOver] = useState(false);
     const [waitingToStart, setWaitingToStart] = useState(true);
+    const [gameOver, setGameOver] = useState(false);
 
     // To avoid stale closures in setInterval
     const directionRef = useRef(direction);
@@ -41,29 +43,29 @@ export default function SnakeGame(): JSX.Element{
         const interval = setInterval(() => {
             setSnake(prevSnake => {
                 const head = prevSnake[0];
-                let newHead: Position;
+                let newPosition: Position;
                 switch (directionRef.current) {
-                    case 'UP': newHead = { x: head.x, y: head.y - 1 }; break;
-                    case 'DOWN': newHead = { x: head.x, y: head.y + 1 }; break;
-                    case 'LEFT': newHead = { x: head.x - 1, y: head.y }; break;
-                    case 'RIGHT': newHead = { x: head.x + 1, y: head.y }; break;
+                    case 'UP': newPosition = { x: head.x, y: head.y - 1 }; break;
+                    case 'DOWN': newPosition = { x: head.x, y: head.y + 1 }; break;
+                    case 'LEFT': newPosition = { x: head.x - 1, y: head.y }; break;
+                    case 'RIGHT': newPosition = { x: head.x + 1, y: head.y }; break;
                 }
 
                 // 3. Collision detection
                 if (
-                    newHead.x < 0 || newHead.x >= GRID_SIZE_X  ||
-                    newHead.y < 0 || newHead.y >= GRID_SIZE_Y ||
-                    prevSnake.some(seg => seg.x === newHead.x && seg.y === newHead.y)
+                    newPosition.x < 0 || newPosition.x >= GRID_SIZE_X  ||
+                    newPosition.y < 0 || newPosition.y >= GRID_SIZE_Y ||
+                    prevSnake.some(seg => seg.x === newPosition.x && seg.y === newPosition.y)
                 ) {
                     setGameOver(true);
                     return prevSnake;
                 }
 
-                let newSnake = [newHead, ...prevSnake];
+                let newSnake = [newPosition, ...prevSnake];
                 // 4. Eating food
-                if (newHead.x === food.x && newHead.y === food.y) {
+                if (newPosition.x === food.x && newPosition.y === food.y) {
                     setFood(getRandomPosition());
-                    setScore(s => s + 1);
+                    setScore(score => score + 1);
                 } else {
                     newSnake.pop();
                 }
@@ -99,6 +101,58 @@ export default function SnakeGame(): JSX.Element{
     }, [direction, gameOver, waitingToStart]);
 
     // 6. Render
+    if (gameMode === null) {
+        return (
+            <main className="min-h-screen flex flex-col bg-pink-dark">
+                <section className="flex-1 bg-pink-dark-grid bg-pink-dark flex items-center justify-center">
+                    <div
+                        style={{
+                            width: GRID_SIZE_X * CELL_SIZE,
+                            height: GRID_SIZE_Y * CELL_SIZE,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <div className="flex justify-center items-center gap-8">
+                            <ButtonPink
+                                style={{
+                                    minWidth: '180px',
+                                    fontSize: '2rem',
+                                    padding: '0.5rem 1.5rem',
+                                }}
+                                onClick={() => {
+                                    setGameMode('single');
+                                    setIsMultiplayer(false);
+                                }}
+                            >
+                                Single Player
+                            </ButtonPink>
+                            <ButtonPurple
+                                style={{
+                                    minWidth: '180px',
+                                    fontSize: '2rem',
+                                    padding: '0.5rem 1.5rem',
+                                }}
+                                onClick={() => {
+                                    setGameMode('multi');
+                                    setIsMultiplayer(true);
+                                }}
+                            >
+                                Multiplayer
+                            </ButtonPurple>
+                        </div>
+                    </div>
+                </section>
+                <footer className="h-40 bg-blue-deep">
+                    <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl text-center m-[15px]">
+                        Choose Mode
+                    </h1>
+                </footer>
+            </main>
+        );
+    }
+
     return (
         <main className="min-h-screen flex flex-col">
             {/* Top bar */}
@@ -172,8 +226,9 @@ export default function SnakeGame(): JSX.Element{
                             position: 'absolute',
                             left: food.x * CELL_SIZE,
                             top: food.y * CELL_SIZE,
-                            width: CELL_SIZE / 2,
-                            height: CELL_SIZE / 2,
+                            width: CELL_SIZE * 0.6,
+                            height: CELL_SIZE * 0.6,
+                            background: '#7c3aed',
                             zIndex: 3, // for food apear on top of snake segments
                         }}
                     />
@@ -231,7 +286,7 @@ export default function SnakeGame(): JSX.Element{
                                         setDirection('RIGHT');
                                     }}
                                 >
-                                    New Game
+                                    Again
                                 </ButtonPink>
                                 <ButtonPurple to="/home">
                                     Return to Profile
