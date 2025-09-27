@@ -26,12 +26,25 @@
     box-shadow: -6px 6px 0 rgba(0, 0, 0, 0.70);
 }
 
+.shadow-no-blur-60 {
+    box-shadow: -4px 4px 0 rgba(0, 0, 0, 0.60);
+}
+
+.shadow-no-blur-60:active {
+    transform: translate(-4px, 4px);
+    box-shadow: none;
+}
+
 .shadow-no-blur-50-reverse {
     box-shadow: 4px 4px 0 rgba(25, 0, 167, 0.5);
 }
 
 .shadow-no-blur-50-reverse-no-active {
     box-shadow: 4px 4px 0 rgba(25, 0, 167, 0.5);
+}
+
+.shadow-no-blur-50-purple-bigger {
+    box-shadow: -6px 6px 0 rgba(25, 0, 167, 0.5);
 }
 
 .shadow-no-blur:active {
@@ -45,7 +58,7 @@
 }
 
 .text-shadow {
-    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    text-shadow: -4px 4px 4px rgba(25, 0, 167, 0.40);
 }
 
 .placeholder-color::placeholder {
@@ -68,9 +81,14 @@
 
 .avatar {
     width: 100px;
+    height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-color: #ffc7e9;
+    border-width: 4px;
+    border-radius: 50%;
+    border-style: dotted;
 }
 
 .paddle {
@@ -134,4 +152,72 @@
     height: 10px;
     border-radius: 50%;
     background-color: #1900a7;
+}
+
+/*Player Profile*/
+
+.border-purple {
+    border-width: 3px;
+    border-color: #7a63fe;
+}
+
+.button-pp-blue {
+    font-family: 'Pixelify Sans', cursive;
+    font-size: 2rem;
+    text-align: left;
+    padding-left: 10px;
+    color: white;
+    background-color: #1900a7;
+    width: 300px;
+    height: 50px;
+}
+
+.button-pp-blue-settings {
+    font-family: 'Pixelify Sans', cursive;
+    text-align: left;
+    padding-left: 10px;
+    color: white;
+    background-color: #7a63fe;
+    width: 300px;
+    height: 25px;
+}
+
+.button-pp-purple {
+    font-family: 'Pixelify Sans', cursive;
+    font-size: 2rem;
+    color: white;
+    background-color: #7a63fe;
+    width: 300px;
+    height: 50px;
+    border-radius: 50px;
+    border-style: solid;
+    border-color: #1900a7;
+    border-width: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-border-blue {
+    color: white;
+    text-shadow: 
+        -1px -1px 0 #1900a7,
+        0px -1px 0 #1900a7,
+        1px -1px 0 #1900a7,
+        1px 0px 0 #1900a7,
+        1px 1px 0 #1900a7,
+        0px 1px 0 #1900a7,
+        -1px 1px 0 #1900a7,
+        -1px 0px 0 #1900a7,
+        /* Second layer for thickness */
+        -2px -2px 0 #1900a7,
+        2px -2px 0 #1900a7,
+        -2px 2px 0 #1900a7,
+        2px 2px 0 #1900a7;
+}
+
+.border-img {
+    border-width: 3px;
+    border-color: #1900a7;
+    border-width: 3px;
 }
