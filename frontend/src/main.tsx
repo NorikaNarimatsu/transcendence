@@ -9,7 +9,7 @@ import SignUp2 from './pages/SignUp2.tsx'
 import PongGame from './pages/PongGame.tsx'
 import SnakeGame from './pages/SnakeGame.tsx'
 import PlayerProfile from './pages/PlayerProfile.tsx'
-// import TournamentRegistration from './pages/Tournament';
+import TournamentTree from './tournament/tournamentTree';
 
 
 const router = createBrowserRouter([
@@ -20,7 +20,7 @@ const router = createBrowserRouter([
   { path: '/playerProfile/pongGame', element: <PongGame />},
   { path: '/playerProfile/snakeGame', element: <SnakeGame />},
   { path: '/playerProfile', element: <PlayerProfile />},
-  // { path: '/tournamentRegistration', element: <TournamentRegistration />}
+  { path: '/tournament', element: <TournamentTree />}
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

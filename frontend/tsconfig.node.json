@@ -5,6 +5,7 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "jsx": "react-jsx", // Added by Norika can work without
 
     /* Bundler mode */
     "moduleResolution": "bundler",
