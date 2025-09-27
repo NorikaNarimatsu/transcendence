@@ -26,6 +26,8 @@ Frontend:
 - avator, from fetch request
 - make avator array based on links from github as raw data
 - Logout buttom for game
+- password eye check implementation
+
 
 Login:
 - Signup2 page, if email already exist, error Message

@@ -38,7 +38,7 @@ export default function LoginPage(){
     setError('');
 
     try {
-      const response = await fetch('https://localhost:8443/validatePassword', {
+      const response = await fetch('https://localhost:8443/validatePasswordbyEmail', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
