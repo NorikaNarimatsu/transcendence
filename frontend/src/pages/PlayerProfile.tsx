@@ -374,149 +374,162 @@ export default function PlayerProfile(): JSX.Element {
                         )}
                         {/* Tournament Registration Modal */}
                         {showTournamentRegistration && (
-                            <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center">
-                                <div className="bg-pink-light p-6 rounded-lg w-[350px] flex flex-col items-center overflow-y-auto max-h-[90vh]">
-                                    <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">
-                                        Registration
-                                    </h3>
-                                    <label className="font-pixelify text-blue-deep mb-2">
-                                        Number of players (3-8):
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min={3}
-                                        max={8}
-                                        value={tournamentPlayers}
-                                        onChange={e => {
-                                            setTournamentPlayers(Number(e.target.value));
-                                            setTournamentError('');
-                                            setSelectedParticipants([]);
-                                        }}
-                                        className="w-full px-3 py-2 mb-3 border rounded font-pixelify text-center"
-                                    />
-                                    {tournamentError && (
-                                        <p className="text-red-500 font-pixelify text-sm mb-3 text-center">
-                                            {tournamentError}
-                                        </p>
-                                    )}
-                                    <div className="mb-4 w-full">
-                                        <span className="font-pixelify text-blue-deep mb-2">Select Participants:</span>
-                                        <div className="flex flex-wrap gap-2 mt-2 max-h-[180px] overflow-y-auto">
-                                            {allUsers.map(user => (
-                                                <button
-                                                    key={user.id}
-                                                    disabled={selectedParticipants.some(p => p.id === user.id) || selectedParticipants.length >= tournamentPlayers}
-                                                    onClick={() => {
-                                                        if (user.name === 'Guest') {
-                                                            setSelectedParticipants([...selectedParticipants, user]);
-                                                        } else {
-                                                            setVerifyingUser(user);
-                                                        }
-                                                    }}
-                                                    className={`px-3 py-2 rounded border ${selectedParticipants.some(p => p.id === user.id) ? 'bg-gray-300' : 'bg-blue-light text-white hover:bg-blue-medium'}`}
-                                                >
-                                                    {user.avatarUrl && (
-                                                        <img src={user.avatarUrl} alt={user.name} className="inline-block w-6 h-6 rounded-full mr-2" />
-                                                    )}
-                                                    {user.name}
-                                                </button>
-                                            ))}
+                        <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-20">
+                            <div
+                                className="bg-pink-light p-6 rounded-lg w-[370px] max-h-[95vh] flex flex-col items-center overflow-y-auto shadow-xl border-2 border-blue-deep"
+                                style={{ boxSizing: 'border-box' }}
+                            >
+                                <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center w-full"
+                                    style={{ marginTop: 50, paddingTop: 0, lineHeight: '2.2rem' }}>
+                                    Registration
+                                </h3>
+                                <label className="font-pixelify text-blue-deep mb-2 w-full text-left">
+                                    Number of players (3-8):
+                                </label>
+                                <input
+                                    type="number"
+                                    min={3}
+                                    max={8}
+                                    value={tournamentPlayers}
+                                    onChange={e => {
+                                        setTournamentPlayers(Number(e.target.value));
+                                        setTournamentError('');
+                                        setSelectedParticipants([]);
+                                    }}
+                                    className="w-full px-3 py-2 mb-3 border rounded font-pixelify text-center bg-pink-light"
+                                    style={{ fontSize: '1.3rem' }}
+                                />
+                                {tournamentError && (
+                                    <p className="text-red-500 font-pixelify text-sm mb-3 text-center">
+                                        {tournamentError}
+                                    </p>
+                                )}
+                                <div className="mb-4 w-full">
+                                    <span className="font-pixelify text-blue-deep mb-2 block">Select Participants:</span>
+                                    <div className="flex flex-wrap gap-2 mt-2 max-h-[180px] overflow-y-auto">
+                                        {allUsers.map(user => (
                                             <button
-                                                disabled={selectedParticipants.some(p => p.name === 'Guest') || selectedParticipants.length >= tournamentPlayers}
-                                                onClick={() => setSelectedParticipants([...selectedParticipants, { id: 0, name: 'Guest' }])}
-                                                className="px-3 py-2 rounded border bg-pink-medium text-white hover:bg-pink-dark"
+                                                key={user.id}
+                                                disabled={selectedParticipants.some(p => p.id === user.id) || selectedParticipants.length >= tournamentPlayers}
+                                                onClick={() => {
+                                                    if (user.name === 'Guest') {
+                                                        setSelectedParticipants([...selectedParticipants, user]);
+                                                    } else {
+                                                        setVerifyingUser(user);
+                                                    }
+                                                }}
+                                                className={`px-3 py-2 rounded border ${selectedParticipants.some(p => p.id === user.id) ? 'bg-gray-300' : 'bg-blue-light text-white hover:bg-blue-medium'} font-pixelify w-[120px]`}
+                                                style={{ fontSize: '1.1rem' }}
                                             >
-                                                🎮 Guest
+                                                {user.avatarUrl && (
+                                                    <img src={user.avatarUrl} alt={user.name} className="inline-block w-6 h-6 rounded-full mr-2" />
+                                                )}
+                                                {user.name}
+                                            </button>
+                                        ))}
+                                        <button
+                                            disabled={selectedParticipants.some(p => p.name === 'Guest') || selectedParticipants.length >= tournamentPlayers}
+                                            onClick={() => setSelectedParticipants([...selectedParticipants, { id: 0, name: 'Guest' }])}
+                                            className="px-3 py-2 rounded border bg-pink-medium text-white hover:bg-pink-dark font-pixelify w-[120px]"
+                                            style={{ fontSize: '1.1rem' }}
+                                        >
+                                            🎮 Guest
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="mb-4 w-full">
+                                    <span className="font-pixelify text-blue-deep mb-2 block">Selected:</span>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {selectedParticipants.map(user => (
+                                            <span key={user.id + user.name} className="flex items-center gap-1 bg-pink-light px-2 py-1 rounded font-pixelify text-blue-deep" style={{ fontSize: '1.1rem' }}>
+                                                {user.avatarUrl && (
+                                                    <img src={user.avatarUrl} alt={user.name} className="w-5 h-5 rounded-full" />
+                                                )}
+                                                {user.name}
+                                                <button
+                                                    onClick={() => setSelectedParticipants(selectedParticipants.filter(p => p.id !== user.id || p.name !== user.name))}
+                                                    className="ml-1 text-xs text-red-600"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        if (selectedParticipants.length !== tournamentPlayers) {
+                                            setTournamentError('Select the correct number of participants.');
+                                        } else {
+                                            setShowTournamentRegistration(false);
+                                            navigate(`/tournament?players=${tournamentPlayers}&ids=${selectedParticipants.map(u => u.id).join(',')}`);
+                                        }
+                                    }}
+                                    disabled={selectedParticipants.length !== tournamentPlayers}
+                                    className="button-pp-blue shadow-no-blur flex items-center justify-center w-full mb-2 font-pixelify"
+                                    style={{
+                                        fontSize: '1.2rem',
+                                        minHeight: '40px',
+                                        opacity: selectedParticipants.length === tournamentPlayers ? 1 : 0.5
+                                    }}
+                                >
+                                    Start
+                                </button>
+                                <button
+                                    onClick={() => setShowTournamentRegistration(false)}
+                                    className="mt-2 px-6 py-2 bg-gray-500 text-white rounded font-pixelify hover:bg-gray-600 transition w-full"
+                                    style={{ fontSize: '1.2rem' }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                            {/* Password Verification Modal for Tournament */}
+                            {verifyingUser && (
+                                <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-30">
+                                    <div className="bg-pink-light p-6 rounded-lg w-[300px]">
+                                        <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">
+                                            Verify Password for {verifyingUser.name}
+                                        </h3>
+                                        <input
+                                            type="password"
+                                            value={verifyPassword}
+                                            onChange={e => {
+                                                setVerifyPassword(e.target.value);
+                                                setVerifyError('');
+                                            }}
+                                            placeholder="Enter password"
+                                            className="w-full px-3 py-2 mb-3 border rounded font-pixelify"
+                                            onKeyPress={e => e.key === 'Enter' && handleVerifyPassword()}
+                                        />
+                                        {verifyError && (
+                                            <p className="text-red-500 font-pixelify text-sm mb-3 text-center">
+                                                {verifyError}
+                                            </p>
+                                        )}
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleVerifyPassword}
+                                                disabled={!verifyPassword.trim()}
+                                                className="flex-1 px-4 py-2 bg-blue-light text-white font-pixelify rounded hover:bg-blue-medium transition-colors disabled:bg-gray-400"
+                                            >
+                                                Verify
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setVerifyingUser(null);
+                                                    setVerifyPassword('');
+                                                    setVerifyError('');
+                                                }}
+                                                className="flex-1 px-4 py-2 bg-gray-500 text-white font-pixelify rounded hover:bg-gray-600 transition-colors"
+                                            >
+                                                Cancel
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="mb-4 w-full">
-                                        <span className="font-pixelify text-blue-deep mb-2">Selected:</span>
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            {selectedParticipants.map(user => (
-                                                <span key={user.id + user.name} className="flex items-center gap-1 bg-pink-light px-2 py-1 rounded">
-                                                    {user.avatarUrl && (
-                                                        <img src={user.avatarUrl} alt={user.name} className="w-5 h-5 rounded-full" />
-                                                    )}
-                                                    {user.name}
-                                                    <button
-                                                        onClick={() => setSelectedParticipants(selectedParticipants.filter(p => p.id !== user.id || p.name !== user.name))}
-                                                        className="ml-1 text-xs text-red-600"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => {
-                                            if (selectedParticipants.length !== tournamentPlayers) {
-                                                setTournamentError('Select the correct number of participants.');
-                                            } else {
-                                                setShowTournamentRegistration(false);
-                                                navigate(`/tournament?players=${tournamentPlayers}&ids=${selectedParticipants.map(u => u.id).join(',')}`);
-                                            }
-                                        }}
-                                        disabled={selectedParticipants.length !== tournamentPlayers}
-                                        className="font-pixelify text-blue-deep mb-2"
-                                    >
-                                        Start Tournament
-                                    </button>
-                                    <button
-                                        onClick={() => setShowTournamentRegistration(false)}
-                                        className="mt-2 px-6 py-2 bg-gray-500 text-white rounded font-pixelify hover:bg-gray-600 transition"
-                                    >
-                                        Cancel
-                                    </button>
                                 </div>
-                                {/* Password Verification Modal for Tournament */}
-                                {verifyingUser && (
-                                    <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-10">
-                                        <div className="bg-pink-light p-6 rounded-lg w-[300px]">
-                                            <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">
-                                                Verify Password for {verifyingUser.name}
-                                            </h3>
-                                            <input
-                                                type="password"
-                                                value={verifyPassword}
-                                                onChange={e => {
-                                                    setVerifyPassword(e.target.value);
-                                                    setVerifyError('');
-                                                }}
-                                                placeholder="Enter password"
-                                                className="w-full px-3 py-2 mb-3 border rounded font-pixelify"
-                                                onKeyPress={e => e.key === 'Enter' && handleVerifyPassword()}
-                                            />
-                                            {verifyError && (
-                                                <p className="text-red-500 font-pixelify text-sm mb-3 text-center">
-                                                    {verifyError}
-                                                </p>
-                                            )}
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={handleVerifyPassword}
-                                                    disabled={!verifyPassword.trim()}
-                                                    className="flex-1 px-4 py-2 bg-blue-light text-white font-pixelify rounded hover:bg-blue-medium transition-colors disabled:bg-gray-400"
-                                                >
-                                                    Verify
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setVerifyingUser(null);
-                                                        setVerifyPassword('');
-                                                        setVerifyError('');
-                                                    }}
-                                                    className="flex-1 px-4 py-2 bg-gray-500 text-white font-pixelify rounded hover:bg-gray-600 transition-colors"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                            )}
+                        </div>
+                    )}
                         </div>
                     </div>
                 </div>
