@@ -24,8 +24,8 @@ export default function signupUnkownUser() {
     // Real-time validation
     if (value.length < 2 && value.length > 0) {
       setNameError('Nickname must be at least 2 characters long'); }
-    else if (value.length > 10) {
-      setNameError('Nickname must be max 10 characters long');
+    else if (value.length > 7) {
+      setNameError('Nickname must be max 7 characters long');
     } else {
       setNameError('');
     }
@@ -86,7 +86,7 @@ export default function signupUnkownUser() {
                     className={`w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 ${
                       nameError ? 'border-red-500' : 'border-black'
                     } focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest`}
-                    maxLength={11}
+                    maxLength={8}
                     required
                   />
                   {nameError && (

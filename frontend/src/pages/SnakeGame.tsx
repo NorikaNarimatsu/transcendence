@@ -419,7 +419,7 @@ export default function SnakeGame(): JSX.Element {
                                 >
                                     Again
                                 </ButtonPink>
-                                <ButtonPurple to="/home">
+                                <ButtonPurple to="/playerProfile">
                                     Return to Profile
                                 </ButtonPurple>
                             </div>

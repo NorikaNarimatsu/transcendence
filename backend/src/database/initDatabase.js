@@ -8,8 +8,10 @@ const __dirname = path.dirname(__filename);
 
 export function initializeDatabase() {
 
-    // Ensure the `database/db` folder exists
-    const databaseFolderPath = path.join(__dirname, "db");
+    // Ensure the `database` folder exists
+    // const databaseFolderPath = path.join(__dirname, "db");
+    const databaseFolderPath = __dirname;
+
     if (!fs.existsSync(databaseFolderPath)) {
         fs.mkdirSync(databaseFolderPath, { recursive: true });
         console.log("Database folder created at:", databaseFolderPath);
@@ -31,6 +33,7 @@ export function initializeDatabase() {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        // add table for other parts
         console.log("Items table created successfully");
     }
     return db;

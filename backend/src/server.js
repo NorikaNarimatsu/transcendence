@@ -16,10 +16,10 @@ const __dirname = path.dirname(__filename);
 // Debug certificate paths
 const certPath = path.join(__dirname, '../https/cert.pem');
 const keyPath = path.join(__dirname, '../https/key.pem');
-// Log absolute paths for debugging
-console.log('Current directory:', __dirname);
-console.log('Certificate path:', path.resolve(certPath));
-console.log('Key path:', path.resolve(keyPath));
+// // Log absolute paths for debugging
+// console.log('Current directory:', __dirname);
+// console.log('Certificate path:', path.resolve(certPath));
+// console.log('Key path:', path.resolve(keyPath));
 
 // Create Fastify instance
 const app = Fastify({
