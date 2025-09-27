@@ -7,7 +7,7 @@ import avatar2 from '../assets/avatars/Avatar 2.png' // just necessary in a mult
 import { useState, useEffect, useRef } from 'react';
 
 let winner: number;
-const userEmail = "test@gmail.com"; // Just for test need to be replace with dynamic value from login/session
+const userEmail = "test1@gmail.com"; // Just for test need to be replace with dynamic value from login/session
 const GRID_SIZE_X = 20; // number of cells horizontally
 const GRID_SIZE_Y = 12; // number of cells vertically
 const CELL_SIZE = 50; // 50x50px
