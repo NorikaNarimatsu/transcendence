@@ -87,7 +87,7 @@ export default function PongGame(): JSX.Element {
         </div>
         <div className="flex items-center justify-end gap-2">
           <img src={avatar2} alt="Avatar 2" className="avatar" />
-          <h2 className="player-name">{player2 || 'Sara'}</h2>
+          <h2 className="player-name">{player2 || 'AI'}</h2>
         </div>
       </header>
 
