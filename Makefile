@@ -30,6 +30,7 @@ prune-all:
 	@echo "!!! WARNING: This will remove everything, including database volumes !!!"
 	docker compose -f docker-compose.yml down --volumes
 	docker system prune -af
+	rm -rf backend/src/database/transcendence.db
 help:
 	@echo "make (or make up)  - Create & start containers (build if needed); sets up network/volumes"
 	@echo "make down          - Stop and remove containers and the Compose network (keeps named volumes)"
