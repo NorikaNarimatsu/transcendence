@@ -1,8 +1,8 @@
 import type { JSX } from 'react';
-import ButtonPurple from '../components/ButtonPurple';
-import ButtonPink from '../components/ButtonDarkPink';
-import avatar1 from '../assets/avatars/Avatar 1.png'
-import avatar2 from '../assets/avatars/Avatar 2.png' // just necessary in a multiplayer
+import ButtonPurple from '../../components/ButtonPurple';
+import ButtonPink from '../../components/ButtonDarkPink';
+// import avatar1 from '../assets/avatars/Avatar 2.png'
+import avatar2 from '../../assets/avatars/Avatar 2.png'; // just necessary in a multiplayer
 
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';

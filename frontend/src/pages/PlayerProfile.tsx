@@ -4,19 +4,19 @@ import avatar1 from '../assets/avatars/Avatar 1.png';
 import bgimage from '../assets/Player_Page.jpg';
 import arrow_icon from '../assets/icons/arrow.png';
 
-import { TournamentRegistration } from '../tournament/tournamentRegistration';
-import { PasswordVerification } from './PasswordVerification';
-import { CategoryButtons } from '../components/CategoryButtons';
-import { AddFriends } from '../components/AddFriends';
-import { PlayerSelection } from '../components/PlayerSelection';
+import { TournamentRegistration } from '../components/profileTournamentRegistration';
+import { PasswordVerification } from '../components/profilePasswordVerification';
+import { CategoryButtons } from '../components/profileCategoryButtons';
+import { AddFriends } from '../components/profileAddFriends';
+import { PlayerSelection } from '../components/profilePlayerSelection';
 
 interface User {
     id: number;
     name: string;
     avatarUrl?: string;
 }
-
-export default function PlayerProfile(): Element {
+// Not sure why JSC gives warning here
+export default function PlayerProfile(): JSX.Element {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const [showPlayerSelection, setShowPlayerSelection] = useState(false);

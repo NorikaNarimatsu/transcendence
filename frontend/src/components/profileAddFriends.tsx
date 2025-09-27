@@ -1,19 +1,17 @@
-import React from 'react';
-
 interface User {
     id: number;
     name: string;
     avatarUrl?: string;
 }
 
-interface AddFriendsModal {
+interface AddFriendsProps {
     open: boolean;
     allUsers: User[];
     onSendRequest: (user: User) => void;
     onClose: () => void;
 }
 
-export function AddFriends({ open, allUsers, onSendRequest, onClose }: AddFriendsModal) {
+export function AddFriends({ open, allUsers, onSendRequest, onClose }: AddFriendsProps) {
     if (!open) return null;
 
     return (

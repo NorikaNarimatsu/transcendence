@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import signup_image from '../assets/SignUp.jpg';
-import ButtonPurple from '../components/ButtonPurple';
-import mail_icon from '../assets/icons/mail.png';
-import person_icon from '../assets/icons/person.png';
-import eye_icon from '../assets/icons/eye.png';
-import arrow_icon from '../assets/icons/arrow.png';
+import signup_image from '../../assets/SignUp.jpg';
+import ButtonPurple from '../../components/ButtonPurple';
+import mail_icon from '../../assets/icons/mail.png';
+import person_icon from '../../assets/icons/person.png';
+import eye_icon from '../../assets/icons/eye.png';
+import arrow_icon from '../../assets/icons/arrow.png';
 
 export default function signupUnkownUser() {
   const location = useLocation();

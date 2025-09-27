@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { JSX } from 'react';
-import avatar1 from '../assets/avatars/Avatar 1.png';
-import avatar2 from '../assets/avatars/Avatar 2.png';
-import { PongEngine } from '../games/PongEngine';
-import type { GameState, GameConfig } from '../games/PongEngine';
-import { calculateGameConfig } from '../games/pongConfig';
+import avatar1 from '../../assets/avatars/Avatar 1.png';
+import avatar2 from '../../assets/avatars/Avatar 2.png';
+import { PongEngine } from '../../gameEngines/PongEngine';
+import type { GameState, GameConfig } from '../../gameEngines/PongEngine';
+import { calculateGameConfig } from '../../gameEngines/pongConfig';
 
 export default function PongGame(): JSX.Element {
   const navigate = useNavigate();

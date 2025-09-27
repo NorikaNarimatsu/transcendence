@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface CategoryButton {
     name: string;
     icon?: string;

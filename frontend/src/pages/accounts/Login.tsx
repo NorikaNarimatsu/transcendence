@@ -1,7 +1,7 @@
-import login_image from '../assets/Login.png';
-import ButtonPurple from '../components/ButtonPurple'
-import eye_icon from '../assets/icons/eye.png'
-import arrow_icon from '../assets/icons/arrow.png'
+import login_image from '../../assets/Login.png';
+import ButtonPurple from '../../components/ButtonPurple'
+import eye_icon from '../../assets/icons/eye.png'
+import arrow_icon from '../../assets/icons/arrow.png'
 
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
