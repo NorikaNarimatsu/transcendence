@@ -30,8 +30,18 @@ export interface GameState {
     private gameState: GameState;
     private onStateChange: (state: GameState) => void;
     private animationId: number | null = null;
+
+    private aiDelayCounter = 0;
+    private aiDelayFrames = 8; // AI only reacts every 6 frames
   
-    constructor(config: GameConfig, onStateChange: (state: GameState) => void) {
+
+    private mode: string;
+
+    constructor(config: GameConfig, onStateChange: (state: GameState) => void, mode: string = 'single') {
+      this.config = config;
+      this.onStateChange = onStateChange;
+      this.mode = mode;
+
       this.config = config;
       this.onStateChange = onStateChange;
       
@@ -139,7 +149,8 @@ export interface GameState {
     }
   
     private updatePaddles(): void {
-      // Left paddle movement
+      // Left paddle: always human
+      // Right paddle: AI if single mode, else human
       let leftY = this.paddlePositions.left;
       if (this.keysPressed["w"] || this.keysPressed["W"]) {
         leftY = Math.max(leftY - this.config.paddleSpeed, 0);
@@ -149,13 +160,29 @@ export interface GameState {
       }
       this.paddlePositions.left = leftY;
   
-      // Right paddle movement
       let rightY = this.paddlePositions.right;
-      if (this.keysPressed["ArrowUp"]) {
-        rightY = Math.max(rightY - this.config.paddleSpeed, 0);
-      }
-      if (this.keysPressed["ArrowDown"]) {
-        rightY = Math.min(rightY + this.config.paddleSpeed, this.config.gameHeight - this.config.paddleHeight);
+
+      if (this.mode === 'single') {
+        this.aiDelayCounter++;
+        if (this.aiDelayCounter >= this.aiDelayFrames) {
+          const ballCenter = this.ballPosition.y + this.config.ballSize / 2;
+          const paddleCenter = rightY + this.config.paddleHeight / 2;
+          const tolerance = 8;
+          if (ballCenter < paddleCenter - tolerance) {
+            rightY = Math.max(rightY - this.config.paddleSpeed, 0);
+          } else if (ballCenter > paddleCenter + tolerance) {
+            rightY = Math.min(rightY + this.config.paddleSpeed, this.config.gameHeight - this.config.paddleHeight);
+          }
+          this.aiDelayCounter = 0;
+        }
+      } else {
+        // Human control
+        if (this.keysPressed["ArrowUp"]) {
+          rightY = Math.max(rightY - this.config.paddleSpeed, 0);
+        }
+        if (this.keysPressed["ArrowDown"]) {
+          rightY = Math.min(rightY + this.config.paddleSpeed, this.config.gameHeight - this.config.paddleHeight);
+        }
       }
       this.paddlePositions.right = rightY;
   

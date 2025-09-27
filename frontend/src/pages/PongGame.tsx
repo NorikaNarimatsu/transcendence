@@ -1,14 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { JSX } from 'react';
 import avatar1 from '../assets/avatars/Avatar 1.png';
 import avatar2 from '../assets/avatars/Avatar 2.png';
-import { PongEngine} from '../games/PongEngine';
+import { PongEngine } from '../games/PongEngine';
 import type { GameState, GameConfig } from '../games/PongEngine';
 import { calculateGameConfig } from '../games/pongConfig';
 
 export default function PongGame(): JSX.Element {
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const mode = params.get('mode') || 'single'; // 'single', '2players', 'tournament'
+  const player2 = params.get('player2'); // for 2players mode
+  const players = params.get('players'); // for tournament mode
+
   const [gameConfig, setGameConfig] = useState<GameConfig>(calculateGameConfig());
   const [gameState, setGameState] = useState<GameState>({
     leftPaddleY: (gameConfig.gameHeight - gameConfig.paddleHeight) / 2,
@@ -24,32 +30,31 @@ export default function PongGame(): JSX.Element {
 
   const engineRef = useRef<PongEngine | null>(null);
 
-    // Handle going back to profile
-	const handleBackToProfile = () => {
-		navigate('/playerProfile');
-	  };
+  // Handle going back to profile
+  const handleBackToProfile = () => {
+    navigate('/playerProfile');
+  };
 
-  // Handle window resize
+  // Resize handler
   useEffect(() => {
     const handleResize = () => {
       const newConfig = calculateGameConfig();
       setGameConfig(newConfig);
-    if (engineRef.current) {
+      if (engineRef.current) {
         engineRef.current.stop();
-        engineRef.current = new PongEngine(newConfig, setGameState);
+        engineRef.current = new PongEngine(newConfig, setGameState, mode);
         engineRef.current.start();
       }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [mode]);
 
+  // Game engine and keyboard events
   useEffect(() => {
-    // Initialize game engine
-    engineRef.current = new PongEngine(gameConfig, setGameState);
+    engineRef.current = new PongEngine(gameConfig, setGameState, mode);
 
-    // Set up event listeners
     const handleKeyDown = (e: KeyboardEvent) => {
       engineRef.current?.handleKeyDown(e.key);
     };
@@ -61,7 +66,6 @@ export default function PongGame(): JSX.Element {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // Start game loop
     engineRef.current.start();
 
     return () => {
@@ -69,7 +73,7 @@ export default function PongGame(): JSX.Element {
       window.removeEventListener('keyup', handleKeyUp);
       engineRef.current?.stop();
     };
-  }, [gameConfig]);
+  }, [gameConfig, mode]);
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -78,14 +82,12 @@ export default function PongGame(): JSX.Element {
           <h1 className="player-name">Norika</h1>
           <img src={avatar1} alt="Avatar 1" className="avatar" />
         </div>
-        
         <div className="flex justify-center">
           <p className="player-name">{gameState.leftScore} - {gameState.rightScore}</p>
         </div>
-        
         <div className="flex items-center justify-end gap-2">
           <img src={avatar2} alt="Avatar 2" className="avatar" />
-          <h2 className="player-name">Sara</h2>
+          <h2 className="player-name">{player2 || 'Sara'}</h2>
         </div>
       </header>
 
@@ -136,7 +138,7 @@ export default function PongGame(): JSX.Element {
             }}
           />
 
-		{gameState.gameEnded && (
+          {gameState.gameEnded && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
               <div className="text-center">
                 <p className="text-white text-4xl font-pixelify mb-6">

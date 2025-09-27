@@ -20,7 +20,6 @@ export default function PlayerProfile(): JSX.Element{
     const [password, setPassword] = useState<string>('');
     const [users, setUsers] = useState<User[]>([]);
     const [passwordError, setPasswordError] = useState<string>('');
-    // Add this near your other useState hooks
     const [showTournamentRegistration, setShowTournamentRegistration] = useState(false);
     const [tournamentPlayers, setTournamentPlayers] = useState<number>(3);
     const [tournamentError, setTournamentError] = useState<string>('');
@@ -66,7 +65,7 @@ export default function PlayerProfile(): JSX.Element{
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name: selectedPlayer!.name, password }), // use 'name'
+                body: JSON.stringify({ name: selectedPlayer!.name, password }),
             });
             if (response.ok) {
                 navigate(`./pongGame?mode=2players&player2=${selectedPlayer!.name}`);
