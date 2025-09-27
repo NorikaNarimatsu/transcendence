@@ -18,9 +18,9 @@ export default function PlayerProfile(): JSX.Element{
                 ];
             case 'Friends' :
                 return [
+                    { name: 'See Friends', action: () => console.log('See Friends') }, //Add button for removing friend and notification to make sure you want to remove that friend.
                     { name: 'Add Friend', action: () => console.log('Adding Friend') },
-                    { name: 'Remove Friend', action: () => console.log('Removing Friend') },
-                    { name: 'See Friends', action: () => console.log('See Friends') }
+                    { name: 'Friend Requests', action: () => console.log('Friends Requests')}
                 ];
             case 'Scores' :
                 return [
@@ -53,7 +53,7 @@ export default function PlayerProfile(): JSX.Element{
                         <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
                             <img src={avatar1} alt="Avatar 1" className="avatar m-auto" style={{borderColor: '#7a63fe'}}/>
                             <div className="flex flex-col m-auto">
-                                <div className="font-pixelify text-white text-5xl">Norika</div> {/* TODO: API Call Player Name */}
+                                <div className="font-pixelify text-white text-[40px]">Eduarda</div> {/* TODO: API Call Player Name */}
                                 <div className="font-dotgothic font-bold text-white text-2xl text-border-blue">700 XP</div> {/* TODO: API Call Player XP */}
                             </div>
                         </div>
