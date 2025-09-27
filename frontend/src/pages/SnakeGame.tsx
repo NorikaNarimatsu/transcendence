@@ -5,6 +5,7 @@ import avatar1 from '../assets/avatars/Avatar 1.png'
 import avatar2 from '../assets/avatars/Avatar 2.png' // just necessary in a multiplayer
 
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
 let winner: number;
 const userEmail = "test1@gmail.com"; // Just for test need to be replace with dynamic value from login/session
@@ -24,11 +25,15 @@ function getRandomPosition(): Position {
 }
 
 export default function SnakeGame(): JSX.Element {
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const mode = params.get('mode'); // 'single', 'multi', 'tournament'
+
     const [userName, setUserName] = useState('');
     const [userAvatar, setUserAvatar] = useState('');
     // 1. Game State
     // Multiplayer Addition
-    const [gameMode, setGameMode] = useState<null | 'single' | 'multi'>(null);
+    const [gameMode, setGameMode] = useState<null | 'single' | 'multi' | 'tournament'>(null);
     const [isMultiplayer, setIsMultiplayer] = useState(false);
     const [snake2, setSnake2] = useState<Position[]>([{ x: 5, y: 5 }]);
     const [direction2, setDirection2] = useState<Direction>('LEFT');
@@ -60,6 +65,20 @@ export default function SnakeGame(): JSX.Element {
             setUserAvatar('batata');
         });
     }, []);
+
+    // Set game mode from URL param on mount
+    useEffect(() => {
+        if (mode === 'single') {
+            setGameMode('single');
+            setIsMultiplayer(false);
+        } else if (mode === 'multi' || mode === '2players') {
+            setGameMode('multi');
+            setIsMultiplayer(true);
+        } else if (mode === 'tournament') {
+            setGameMode('tournament');
+            // Tournament logic can go here
+        }
+    }, [mode]);
 
     // 2. Game Loop
     useEffect(() => {
@@ -183,58 +202,6 @@ export default function SnakeGame(): JSX.Element {
     }
 
     // 6. Render
-    if (gameMode === null) {
-        return (
-            <main className="min-h-screen flex flex-col bg-pink-dark">
-                <section className="flex-1 bg-pink-dark-grid bg-pink-dark flex items-center justify-center">
-                    <div
-                        style={{
-                            width: GRID_SIZE_X * CELL_SIZE,
-                            height: GRID_SIZE_Y * CELL_SIZE,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <div className="flex justify-center items-center gap-8">
-                            <ButtonPink
-                                style={{
-                                    minWidth: '180px',
-                                    fontSize: '2rem',
-                                    padding: '0.5rem 1.5rem',
-                                }}
-                                onClick={() => {
-                                    setGameMode('single');
-                                    setIsMultiplayer(false);
-                                }}
-                            >
-                                Single Player
-                            </ButtonPink>
-                            <ButtonPurple
-                                style={{
-                                    minWidth: '180px',
-                                    fontSize: '2rem',
-                                    padding: '0.5rem 1.5rem',
-                                }}
-                                onClick={() => {
-                                    setGameMode('multi');
-                                    setIsMultiplayer(true);
-                                }}
-                            >
-                                Multiplayer
-                            </ButtonPurple>
-                        </div>
-                    </div>
-                </section>
-                <footer className="h-40 bg-blue-deep">
-                    <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl text-center m-[15px]">
-                        Choose Mode
-                    </h1>
-                </footer>
-            </main>
-        );
-    }
-
     return (
         <main className="min-h-screen flex flex-col">
             {/* Top bar */}
@@ -415,6 +382,11 @@ export default function SnakeGame(): JSX.Element {
                                         setSnake([{ x: 10, y: 10 }]);
                                         setFood(getRandomPosition());
                                         setDirection('RIGHT');
+                                        if (isMultiplayer) {
+                                            setSnake2([{ x: 5, y: 5 }]);
+                                            setDirection2('LEFT');
+                                            setScore2(0);
+                                        }
                                     }}
                                 >
                                     Again
