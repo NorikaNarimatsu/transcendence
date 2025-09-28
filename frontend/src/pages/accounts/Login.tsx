@@ -1,7 +1,7 @@
-import login_image from '../assets/Login.png';
-import ButtonPurple from '../components/ButtonPurple'
-import eye_icon from '../assets/icons/eye.png'
-import arrow_icon from '../assets/icons/arrow.png'
+import login_image from '../../assets/Login.png';
+import ButtonPurple from '../../components/ButtonPurple'
+import eye_icon from '../../assets/icons/eye.png'
+import arrow_icon from '../../assets/icons/arrow.png'
 
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -38,7 +38,7 @@ export default function LoginPage(){
     setError('');
 
     try {
-      const response = await fetch('https://localhost:8443/validatePassword', {
+      const response = await fetch('https://localhost:8443/validatePasswordbyEmail', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

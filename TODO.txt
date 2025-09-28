@@ -11,6 +11,7 @@ Database:
 - tables for match (result), friends
 - tables for Login
 - deleting account -> replacing info to anon
+
 Dashboard:
 - start making chart based on match database
 
@@ -22,10 +23,15 @@ VITE:
 
 Frontend:
 - how to make it to https with vite
-- implement pong engine
+
+- implement pong engine  -> Done @Norika
+- implement AI for pong -> partically done but can be improved @Norika
+
 - avator, from fetch request
 - make avator array based on links from github as raw data
 - Logout buttom for game
+- password eye check implementation
+
 
 Login:
 - Signup2 page, if email already exist, error Message

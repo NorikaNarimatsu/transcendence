@@ -1,7 +1,7 @@
-import signup_image from '../assets/SignUp.jpg';
-import ButtonPurple from '../components/ButtonPurple'
-import mail_icon from '../assets/icons/mail.png'
-import arrow_icon from '../assets/icons/arrow.png'
+import signup_image from '../../assets/SignUp.jpg';
+import ButtonPurple from '../../components/ButtonPurple'
+import mail_icon from '../../assets/icons/mail.png'
+import arrow_icon from '../../assets/icons/arrow.png'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 

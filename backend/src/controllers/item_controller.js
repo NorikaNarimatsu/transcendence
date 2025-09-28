@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../server.js';
-import { get } from 'http';
 
 //////// Avatar Array //////
 const avatars = [
@@ -133,7 +132,7 @@ export const validateEmail = async (request, response) => {
   }
 }
 
-export const validatePassword = async (request, response) => {
+export const validatePasswordbyEmail = async (request, response) => {
   const { email, password} = request.body;
   try {
     const user = db.prepare('SELECT * FROM items WHERE email = ?').get(email)
@@ -142,6 +141,21 @@ export const validatePassword = async (request, response) => {
     if (user.password === password)
       return response.code(200).send();
     else if (user.password !== password)
+      return response.code(401).send({message: 'Invalid password'});
+  } catch (error) {
+    return response.code(500).send();
+  }
+}
+
+export const validatePasswordbyName = async (request, response) => {
+  const { name, password } = request.body;
+  try {
+    const user = db.prepare('SELECT * FROM items WHERE name = ?').get(name); // use 'name'
+    if (!user)
+      return response.code(401).send({message: 'User not found'});
+    if (user.password === password)
+      return response.code(200).send();
+    else
       return response.code(401).send({message: 'Invalid password'});
   } catch (error) {
     return response.code(500).send();
@@ -187,6 +201,18 @@ export const getUserByEmail = async (request, reply) => {
   }
 };
 
+export const getAllUsers = async (request, response) => {
+  try {
+    const users = db.prepare('SELECT id, name, avatarUrl FROM items ORDER BY name').all();
+    return response.code(200).send(users);
+  } catch (error) {
+    request.log.error('Failed to get all users:', error);
+    return response.code(500).send({
+      message: 'Internal server error'
+    });
+  }
+};
+
 
 ////////////////////////////// CONTROLLER //////////////////////////////
 
@@ -196,11 +222,13 @@ const itemController = {
     addItem,
     deleteItem,
     updateItem,
-    validateAndAddItem, //new
+    validateAndAddItem,
     validateEmail,
-    validatePassword,
+    validatePasswordbyEmail,
+    validatePasswordbyName,
     addNewUser,
     getUserByEmail,
+    getAllUsers,
 };
 
 export default itemController;
