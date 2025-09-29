@@ -27,7 +27,7 @@ Frontend:
 - implement pong engine  -> Done @Norika
 - implement AI for pong -> partically done but can be improved @Norika
 
-- avator, from fetch request
+- avator, from fetch request -> Done @Eduarda
 - make avator array based on links from github as raw data
 - Logout buttom for game
 - password eye check implementation
@@ -35,6 +35,8 @@ Frontend:
 
 Login:
 - Signup2 page, if email already exist, error Message
+- Profile Logout button
+- Profile Logout logic -> Done @Eduarda 
 
 
 
