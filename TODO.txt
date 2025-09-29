@@ -11,6 +11,7 @@ Database:
 - tables for match (result), friends
 - tables for Login
 - deleting account -> replacing info to anon
+- Users can select a unique display name to participate in tournaments (uniquw)
 
 Dashboard:
 - start making chart based on match database

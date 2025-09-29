@@ -32,7 +32,7 @@ export interface GameState {
     private animationId: number | null = null;
 
     private aiDelayCounter = 0;
-    private aiDelayFrames = 8; // AI only reacts every 6 frames
+    private aiDelayFrames = 5; // AI only reacts every 6 frames
   
 
     private mode: string;
@@ -91,7 +91,7 @@ export interface GameState {
     }
 
     private launchBall(): void {
-      const angle = (Math.random() * Math.PI / 4) - Math.PI / 8;
+      const angle = (Math.random() * Math.PI / 6) - Math.PI / 12;
       const direction = Math.random() < 0.5 ? -1 : 1;
       this.ballVelocity.dx = direction * this.config.ballSpeed * Math.cos(angle);
       this.ballVelocity.dy = this.config.ballSpeed * Math.sin(angle);
@@ -101,18 +101,25 @@ export interface GameState {
     private resetBall(): void {
         const centerX = (this.config.gameWidth / 2 ) - (this.config.ballSize / 2);
         const centerY = (this.config.gameHeight / 2) - ( this.config.ballSize / 2);
-        
+        const centerPaddleY = (this.config.gameHeight - this.config.paddleHeight) / 2;
+
         this.ballPosition.x = centerX;
         this.ballPosition.y = centerY;
         this.ballVelocity.dx = 0;
         this.ballVelocity.dy = 0;
-        
+
+        // Reset paddles to center
+        this.paddlePositions.left = centerPaddleY;
+        this.paddlePositions.right = centerPaddleY;
+
         this.updateState({
           ballX: centerX,
           ballY: centerY,
+          leftPaddleY: centerPaddleY,
+          rightPaddleY: centerPaddleY,
           gameStarted: false
         });
-      }
+    }
     
       private resetGame(): void {
         const centerX = (this.config.gameWidth - this.config.ballSize) / 2;
@@ -163,18 +170,19 @@ export interface GameState {
       let rightY = this.paddlePositions.right;
 
       if (this.mode === 'single') {
-        this.aiDelayCounter++;
-        if (this.aiDelayCounter >= this.aiDelayFrames) {
-          const ballCenter = this.ballPosition.y + this.config.ballSize / 2;
-          const paddleCenter = rightY + this.config.paddleHeight / 2;
-          const tolerance = 8;
-          if (ballCenter < paddleCenter - tolerance) {
-            rightY = Math.max(rightY - this.config.paddleSpeed, 0);
-          } else if (ballCenter > paddleCenter + tolerance) {
-            rightY = Math.min(rightY + this.config.paddleSpeed, this.config.gameHeight - this.config.paddleHeight);
+          this.aiDelayCounter++;
+          if (this.aiDelayCounter >= this.aiDelayFrames) {
+              const ballCenter = this.ballPosition.y + this.config.ballSize / 2;
+              const paddleCenter = rightY + this.config.paddleHeight / 2;
+              const moveFraction = 0.5;
+              let delta = ballCenter - paddleCenter;
+
+              // Limit maximum movement per frame
+              delta = Math.max(-this.config.paddleSpeed, Math.min(this.config.paddleSpeed, delta * moveFraction));
+              rightY = Math.max(0, Math.min(rightY + delta, this.config.gameHeight - this.config.paddleHeight));
+
+              this.aiDelayCounter = 0;
           }
-          this.aiDelayCounter = 0;
-        }
       } else {
         // Human control
         if (this.keysPressed["ArrowUp"]) {
@@ -229,8 +237,18 @@ export interface GameState {
       ) {
         this.ballVelocity.dx = Math.abs(this.ballVelocity.dx);
         nextBallX = this.config.paddleWidth;
+
+        // Add angle based on hit position
+        const paddleCenter = this.paddlePositions.left + this.config.paddleHeight / 2;
+        const hitPos = (nextBallY + this.config.ballSize / 2) - paddleCenter;
+        const maxBounceAngle = Math.PI / 5; // 60 degrees
+        const normalized = hitPos / (this.config.paddleHeight / 2);
+        const bounceAngle = normalized * maxBounceAngle;
+        const speed = Math.sqrt(this.ballVelocity.dx ** 2 + this.ballVelocity.dy ** 2) || this.config.ballSpeed;
+        this.ballVelocity.dx = speed * Math.cos(bounceAngle);
+        this.ballVelocity.dy = speed * Math.sin(bounceAngle);
       }
-  
+
       // Right paddle collision
       if (
         nextBallX + this.config.ballSize >= this.config.gameWidth - this.config.paddleWidth &&
@@ -240,6 +258,16 @@ export interface GameState {
       ) {
         this.ballVelocity.dx = -Math.abs(this.ballVelocity.dx);
         nextBallX = this.config.gameWidth - this.config.paddleWidth - this.config.ballSize;
+
+        // Add angle based on hit position
+        const paddleCenter = this.paddlePositions.right + this.config.paddleHeight / 2;
+        const hitPos = (nextBallY + this.config.ballSize / 2) - paddleCenter;
+        const maxBounceAngle = Math.PI / 3; // 60 degrees
+        const normalized = hitPos / (this.config.paddleHeight / 2);
+        const bounceAngle = normalized * maxBounceAngle;
+        const speed = Math.sqrt(this.ballVelocity.dx ** 2 + this.ballVelocity.dy ** 2) || this.config.ballSpeed;
+        this.ballVelocity.dx = -speed * Math.cos(bounceAngle);
+        this.ballVelocity.dy = speed * Math.sin(bounceAngle);
       }
   
       // Update ball position

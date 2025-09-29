@@ -15,6 +15,7 @@ interface User {
     name: string;
     avatarUrl?: string;
 }
+
 // Not sure why JSC gives warning here
 export default function PlayerProfile(): JSX.Element {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
