@@ -3,9 +3,15 @@ import { db } from '../server.js';
 
 //////// Avatar Array //////
 const avatars = [
-  '/avatars/Avatar 1.png',
-  '/avatars/Avatar 2.png',
-  '/avatars/teste.jpeg'
+  '/avatars/Avatar_1.png',
+  '/avatars/Avatar_2.png',
+  '/avatars/Avatar_3.png',
+  '/avatars/Avatar_4.png',
+  '/avatars/Avatar_5.png',
+  '/avatars/Avatar_6.png',
+  '/avatars/Avatar_7.png',
+  '/avatars/Avatar_8.png',
+  '/avatars/Avatar_9.png'
 ];
 
 ////////////////////////////// GET //////////////////////////////
@@ -201,6 +207,27 @@ export const getUserByEmail = async (request, reply) => {
   }
 };
 
+export const getUserInfoByEmail = async (request, reply) => {
+  const { email } = request.params;
+  try {
+      const user = db.prepare('SELECT name, avatarUrl FROM items WHERE email = ?').get(email);
+      if (user) {
+          return reply.code(200).send({
+              name: user.name,
+              avatar: user.avatarUrl
+          });
+      }
+      return reply.code(404).send({
+          message: 'User not found'
+      });
+  } catch (error) {
+      request.log.error('Failed to get user:', error);
+      return reply.code(500).send({
+          message: 'Internal server error'
+      });
+  }
+};
+
 export const getAllUsers = async (request, response) => {
   try {
     const users = db.prepare('SELECT id, name, avatarUrl FROM items ORDER BY name').all();
@@ -229,6 +256,7 @@ const itemController = {
     addNewUser,
     getUserByEmail,
     getAllUsers,
+    getUserInfoByEmail,
 };
 
 export default itemController;

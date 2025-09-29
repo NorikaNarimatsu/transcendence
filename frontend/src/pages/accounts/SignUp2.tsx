@@ -86,7 +86,7 @@ export default function signupUnkownUser() {
                     className={`w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 ${
                       nameError ? 'border-red-500' : 'border-black'
                     } focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest`}
-                    maxLength={8}
+                    maxLength={7}
                     required
                   />
                   {nameError && (

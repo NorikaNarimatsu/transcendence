@@ -1,14 +1,13 @@
 import type { JSX } from 'react';
 import ButtonPurple from '../../components/ButtonPurple';
 import ButtonPink from '../../components/ButtonDarkPink';
-// import avatar1 from '../assets/avatars/Avatar 2.png'
 import avatar2 from '../../assets/avatars/Avatar 2.png'; // just necessary in a multiplayer
+import { useUser } from '../user/UserContext';
 
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 let winner: number;
-const userEmail = "test1@gmail.com"; // Just for test need to be replace with dynamic value from login/session
 const GRID_SIZE_X = 20; // number of cells horizontally
 const GRID_SIZE_Y = 12; // number of cells vertically
 const CELL_SIZE = 50; // 50x50px
@@ -16,6 +15,7 @@ const SNAKE_VELOCITY = 120; // can be change to modify difficult! - slower = 500
 
 type Position = { x: number; y: number };
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+
 
 function getRandomPosition(): Position {
     return {
@@ -25,22 +25,21 @@ function getRandomPosition(): Position {
 }
 
 export default function SnakeGame(): JSX.Element {
-    const location = useLocation();
-    const params = new URLSearchParams(location.search);
+    const { user } = useUser();
+    const navigate = useNavigate();
+    const params = new URLSearchParams(navigate.search);
     const mode = params.get('mode'); // 'single', 'multi', 'tournament'
 
-    const [userName, setUserName] = useState('');
-    const [userAvatar, setUserAvatar] = useState('');
     // 1. Game State
     // Multiplayer Addition
-    const [gameMode, setGameMode] = useState<null | 'single' | 'multi' | 'tournament'>(null);
+    const [setGameMode] = useState<null | 'single' | 'multi' | 'tournament'>(null);
     const [isMultiplayer, setIsMultiplayer] = useState(false);
-    const [snake2, setSnake2] = useState<Position[]>([{ x: 5, y: 5 }]);
+    const [snake2, setSnake2] = useState<Position[]>([{ x: 10, y: 10 }]);
     const [direction2, setDirection2] = useState<Direction>('LEFT');
     const [score2, setScore2] = useState(0);
 
     // Single Player
-    const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }]);
+    const [snake, setSnake] = useState<Position[]>([{ x: 5, y: 5 }]);
     const [direction, setDirection] = useState<Direction>('RIGHT');
     const [food, setFood] = useState<Position>(getRandomPosition());
     const [score, setScore] = useState(0);
@@ -51,20 +50,11 @@ export default function SnakeGame(): JSX.Element {
     const directionRef = useRef(direction);
     directionRef.current = direction;
 
-    // get user name
     useEffect(() => {
-        fetch(`/api/user/profile?email=${encodeURIComponent(userEmail)}`)
-            .then(res => res.json())
-            .then(data => {
-                setUserName(data.name);
-                setUserAvatar(data.avatarUrl);
-        })
-        .catch(err => {
-            // handle error, fallback to default
-            setUserName('Player');
-            setUserAvatar('batata');
-        });
-    }, []);
+        if (!user) {
+            navigate('/signup');
+        }
+    }, [user, navigate]);
 
     // Set game mode from URL param on mount
     useEffect(() => {
@@ -195,9 +185,9 @@ export default function SnakeGame(): JSX.Element {
         return () => window.removeEventListener('keydown', handleKey);
     }, [direction, direction2, gameOver, waitingToStart]);
 
-    let winnerName = userName;
+    let winnerName = user.name;
     if (isMultiplayer) {
-        if (winner == 1) winnerName = userName;
+        if (winner == 1) winnerName = user.name;
         else if (winner == 2) winnerName = "Guest";
     }
 
@@ -207,8 +197,8 @@ export default function SnakeGame(): JSX.Element {
             {/* Top bar */}
             <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
                 <div className="flex items-center justify-start gap-2">
-                    <h1 className="player-name">{userName}</h1>
-                    <img src={userAvatar} alt="Avatar 1" className="avatar" />
+                    <h1 className="player-name">{user.name}</h1>
+                    <img src={user.avatar} alt="Avatar" className="avatar" />
                 </div>
                 <div className="flex justify-center">
                     <p className="player-name">

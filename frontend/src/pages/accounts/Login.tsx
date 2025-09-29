@@ -4,13 +4,14 @@ import eye_icon from '../../assets/icons/eye.png'
 import arrow_icon from '../../assets/icons/arrow.png'
 
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../user/UserContext'; 
 
 export default function LoginPage(){
-  const location = useLocation();
   const navigate = useNavigate();
+  const { setUser } = useUser();
 
-  const email = location.state?.email || '';
+  const email = navigate.state?.email || '';
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -47,8 +48,21 @@ export default function LoginPage(){
       });
 
       if (response.ok) {
+        const userResponse = await fetch(
+          `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(email)}`
+        );
+
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          // saving in the storebox for future use
+          // console.log("Full API response:", userData);
+          setUser({
+            email: email,
+            name: userData.name,
+            avatar: userData.avatar
+          });
         navigate('/playerProfile');
-      } else {
+      }} else {
         const data = await response.json();
         setError(data.message || 'Invalid password');
       }
@@ -67,7 +81,7 @@ export default function LoginPage(){
 
             <div className="mb-4">
             <h1 className="text-4xl text-blue-deep font-pixelify mb-[2px] text-shadow font-bold">LOG IN</h1>
-                <h2 className="text-xl text-blue-deep font-dotgothic mb-[2px]">Hello {name}!</h2> {/* TODO: Use the user name, API call to the back end? */}
+                <h2 className="text-xl text-blue-deep font-dotgothic mb-[2px]">Hello {name}!</h2>
                 <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">Welcome back :)</h2>
             {/* Password input */}
             <div className="relative mb-4">
