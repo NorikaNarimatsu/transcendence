@@ -1,8 +1,8 @@
 Nickname: 
-- No Space
+- No Space -> Done @Eduarda
 
 Avators;
-- Include all Avatars. (Update PongGame file to not hardcode include avatars but to fetch them from the backend/database).
+- Include all Avatars. (Update PongGame file to not hardcode include avatars but to fetch them from the backend/database). -> Done @Eduarda
 
 Pages:
 - screen with game instructions
@@ -11,6 +11,7 @@ Database:
 - tables for match (result), friends
 - tables for Login
 - deleting account -> replacing info to anon
+- Users can select a unique display name to participate in tournaments (uniquw)
 
 Dashboard:
 - start making chart based on match database
@@ -19,22 +20,24 @@ Security:
 - check for gdbr agreement
 
 VITE:
-- proxy ()
+- proxy () - not used anymore -- Still necessary to check??
 
 Frontend:
-- how to make it to https with vite
+- how to make it to https with vite --- Still necessary??
 
 - implement pong engine  -> Done @Norika
 - implement AI for pong -> partically done but can be improved @Norika
 
-- avator, from fetch request
+- avator, from fetch request -> Done @Eduarda
 - make avator array based on links from github as raw data
 - Logout buttom for game
-- password eye check implementation
+- password eye check implementation -> Done @Eduarda
 
 
 Login:
 - Signup2 page, if email already exist, error Message
+- Profile Logout button -> Done @Eduarda (possible change local)
+- Profile Logout logic -> Done @Eduarda 
 
 
 

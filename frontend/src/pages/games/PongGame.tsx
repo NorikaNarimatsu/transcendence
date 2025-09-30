@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { JSX } from 'react';
-import avatar1 from '../../assets/avatars/Avatar 1.png';
 import avatar2 from '../../assets/avatars/Avatar 2.png';
 import { PongEngine } from '../../gameEngines/PongEngine';
 import type { GameState, GameConfig } from '../../gameEngines/PongEngine';
 import { calculateGameConfig } from '../../gameEngines/pongConfig';
+import { useUser } from '../user/UserContext';
 
 export default function PongGame(): JSX.Element {
-  const navigate = useNavigate();
+  const { user } = useUser();
   const location = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const mode = params.get('mode') || 'single'; // 'single', '2players', 'tournament'
   const player2 = params.get('player2'); // for 2players mode
@@ -79,8 +80,8 @@ export default function PongGame(): JSX.Element {
     <main className="min-h-screen flex flex-col">
       <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
         <div className="flex items-center justify-start gap-2">
-          <h1 className="player-name">Norika</h1>
-          <img src={avatar1} alt="Avatar 1" className="avatar" />
+          <h1 className="player-name">{user.name}</h1>
+          <img src={user.avatar} alt="Avatar" className="avatar" />
         </div>
         <div className="flex justify-center">
           <p className="player-name">{gameState.leftScore} - {gameState.rightScore}</p>

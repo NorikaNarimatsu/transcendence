@@ -28,7 +28,7 @@ export const calculateGameConfig = (): GameConfig => {
     paddleWidth: Math.round(20 * scale),
     paddleHeight: Math.round(120 * scale),
     ballSize: Math.round(30 * scale),
-    paddleSpeed: Math.max(2, Math.round(10 * scale)),
+    paddleSpeed: Math.max(2, Math.round(15 * scale)),
     ballSpeed: Math.max(2, Math.round(10 * scale)),
     winScore: 3
   };

@@ -10,15 +10,16 @@ import { CategoryButtons } from '../components/profileCategoryButtons';
 import { AddFriends } from '../components/profileAddFriends';
 import { PlayerSelection } from '../components/profilePlayerSelection';
 
+import { useUser} from './user/UserContext';
+
 interface User {
     id: number;
     name: string;
     avatarUrl?: string;
 }
-// Not sure why JSC gives warning here
+
 export default function PlayerProfile(): JSX.Element {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
     const [showPlayerSelection, setShowPlayerSelection] = useState(false);
     const [playerSelectionGame, setPlayerSelectionGame] = useState<string | null>(null);
     
@@ -35,10 +36,11 @@ export default function PlayerProfile(): JSX.Element {
     const [tournamentVerifyError, setTournamentVerifyError] = useState('');
     
     const [showAddFriends, setShowAddFriends] = useState(false);
-    
     const [users, setUsers] = useState<User[]>([]);
     const [allUsers, setAllUsers] = useState<User[]>([]);
+
     const navigate = useNavigate();
+    const { user, logout } = useUser();
 
     useEffect(() => {
         fetch('https://localhost:8443/listUsers')
@@ -54,6 +56,17 @@ export default function PlayerProfile(): JSX.Element {
             })
             .catch(err => console.error('Failed to fetch users:', err));
     }, []);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/signup');
+        }
+    }, [user, navigate]);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/signup');
+    };
 
     const handlePlayerSelect = (player: User | null) => {
         setSelectedPlayer(player);
@@ -165,12 +178,23 @@ export default function PlayerProfile(): JSX.Element {
                     { name: 'Delete Account', action: () => console.log('Deleting account') },
                     { name: 'Update data', action: () => console.log('Updating account data') },
                     { name: 'Preference', action: () => console.log('customizing preference') },
-                    { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') }
+                    { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
+                    { name: 'Logout', action: handleLogout }  // provisory location
                 ];
             default:
                 return [];
         }
     };
+
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-pink-grid">
+                <p className="text-blue-deep font-dotgothic text-xl">
+                    Redirecting...
+                </p>
+            </div>
+        );
+    }
 
     return (
         <main className="min-h-screen flex flex-col">
@@ -183,9 +207,9 @@ export default function PlayerProfile(): JSX.Element {
                     <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
                         <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">PLAYER INFO</div>
                         <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
-                            <img src={avatar1} alt="Avatar 1" className="avatar m-auto" style={{borderColor: '#7a63fe'}}/>
+                            <img src={user.avatar} alt="Avatar" className="avatar m-auto" style={{borderColor: '#7a63fe'}}/>
                             <div className="flex flex-col m-auto">
-                                <div className="font-pixelify text-white text-[40px]">Eduarda</div>
+                                <div className="font-pixelify text-white text-[40px]">{user.name}</div>
                                 <div className="font-dotgothic font-bold text-white text-2xl text-border-blue">700 XP</div>
                             </div>
                         </div>

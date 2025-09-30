@@ -10,6 +10,7 @@ import PongGame from './pages/games/PongGame.tsx'
 import SnakeGame from './pages/games/SnakeGame.tsx'
 import PlayerProfile from './pages/PlayerProfile.tsx'
 import TournamentTree from './pages/tournament/tournamentTree.tsx'
+import { UserProvider } from './pages/user/UserContext'
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
@@ -24,7 +25,9 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
   </React.StrictMode>,
 )
 

@@ -90,6 +90,7 @@ export default async function itemRoutes(fastify, options) {
     fastify.post('/validatePasswordbyName', itemController.validatePasswordbyName);
     fastify.post('/addNewUser', itemController.addNewUser);
     fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
+    fastify.get('/getUserInfoByEmail/:email', itemController.getUserInfoByEmail);
     fastify.get('/api/user/profile', userController.getProfile);
     fastify.get('/listUsers', itemController.getAllUsers);
 
