@@ -10,7 +10,7 @@ import { CategoryButtons } from '../components/profileCategoryButtons';
 import { AddFriends } from '../components/profileAddFriends';
 import { PlayerSelection } from '../components/profilePlayerSelection';
 
-import { useUser } from './user/UserContext';
+import { useUser} from './user/UserContext';
 
 interface User {
     id: number;
@@ -178,12 +178,23 @@ export default function PlayerProfile(): JSX.Element {
                     { name: 'Delete Account', action: () => console.log('Deleting account') },
                     { name: 'Update data', action: () => console.log('Updating account data') },
                     { name: 'Preference', action: () => console.log('customizing preference') },
-                    { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') }
+                    { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
+                    { name: 'Logout', action: handleLogout }  // provisory location
                 ];
             default:
                 return [];
         }
     };
+
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-pink-grid">
+                <p className="text-blue-deep font-dotgothic text-xl">
+                    Redirecting...
+                </p>
+            </div>
+        );
+    }
 
     return (
         <main className="min-h-screen flex flex-col">

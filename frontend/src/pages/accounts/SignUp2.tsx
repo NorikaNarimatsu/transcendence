@@ -21,12 +21,14 @@ export default function signupUnkownUser() {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setName(value);
+
+    const validCharacters = /^[a-zA-Z0-9]*$/;
     
     // Real-time validation
-    if (value.length < 2 && value.length > 0) {
-      setNameError('Nickname must be at least 2 characters long'); }
-    else if (value.length > 7) {
-      setNameError('Nickname must be max 7 characters long');
+    if (value.length > 0 && !validCharacters.test(value)) {
+      setNameError('Nickname can only contain letters (a-z, A-Z) and numbers (0-9)'); } 
+    else if (value.length < 2 && value.length > 0) {
+      setNameError('Nickname must be at least 2 characters long');
     } else {
       setNameError('');
     }
