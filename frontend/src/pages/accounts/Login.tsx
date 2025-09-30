@@ -4,17 +4,19 @@ import eye_icon from '../../assets/icons/eye.png'
 import arrow_icon from '../../assets/icons/arrow.png'
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../user/UserContext'; 
 
 export default function LoginPage(){
+  const location = useLocation();
   const navigate = useNavigate();
   const { setUser } = useUser();
 
-  const email = navigate.state?.email || '';
+  const email = location.state?.email || '';
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Fetch username when component mounts
   useEffect(() => {
@@ -33,6 +35,10 @@ export default function LoginPage(){
     };
     fetchUserName();
   }, [email]);
+
+  const togglePasswordVisibility = () => {
+      setShowPassword(!showPassword);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,16 +89,17 @@ export default function LoginPage(){
             <h1 className="text-4xl text-blue-deep font-pixelify mb-[2px] text-shadow font-bold">LOG IN</h1>
                 <h2 className="text-xl text-blue-deep font-dotgothic mb-[2px]">Hello {name}!</h2>
                 <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">Welcome back :)</h2>
-            {/* Password input */}
+            {/* Password input with clickable eye */}
             <div className="relative mb-4">
               <img
                 src={eye_icon}
-                alt="Eye icon"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-[30px] w-auto"
-                />
+                alt= {showPassword ? "Hide password" : "Show password"}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-[30px] w-auto cursor-pointer hover:opacity-75 transition-opacity"
+                onClick={togglePasswordVisibility}
+              />
 
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="************"

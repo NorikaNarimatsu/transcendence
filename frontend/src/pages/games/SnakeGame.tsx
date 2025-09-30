@@ -5,7 +5,7 @@ import avatar2 from '../../assets/avatars/Avatar 2.png'; // just necessary in a 
 import { useUser } from '../user/UserContext';
 
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 let winner: number;
 const GRID_SIZE_X = 20; // number of cells horizontally
@@ -27,7 +27,8 @@ function getRandomPosition(): Position {
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();
     const navigate = useNavigate();
-    const params = new URLSearchParams(navigate.search);
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
     const mode = params.get('mode'); // 'single', 'multi', 'tournament'
 
     // 1. Game State

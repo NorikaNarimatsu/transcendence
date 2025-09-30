@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { JSX } from 'react';
 import avatar2 from '../../assets/avatars/Avatar 2.png';
 import { PongEngine } from '../../gameEngines/PongEngine';
@@ -9,8 +9,9 @@ import { useUser } from '../user/UserContext';
 
 export default function PongGame(): JSX.Element {
   const { user } = useUser();
+  const location = useLocation();
   const navigate = useNavigate();
-  const params = new URLSearchParams(navigate.search);
+  const params = new URLSearchParams(location.search);
   const mode = params.get('mode') || 'single'; // 'single', '2players', 'tournament'
   const player2 = params.get('player2'); // for 2players mode
   const players = params.get('players'); // for tournament mode

@@ -9,7 +9,7 @@ import SignUp2 from './pages/accounts/SignUp2.tsx'
 import PongGame from './pages/games/PongGame.tsx'
 import SnakeGame from './pages/games/SnakeGame.tsx'
 import PlayerProfile from './pages/PlayerProfile.tsx'
-import TournamentTree from './pages/tournament/TournamentTree.tsx'
+import TournamentTree from './pages/tournament/tournamentTree.tsx'
 import { UserProvider } from './pages/user/UserContext'
 
 const router = createBrowserRouter([

@@ -16,6 +16,7 @@ export default function signupUnkownUser() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [nameError, setNameError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -30,6 +31,11 @@ export default function signupUnkownUser() {
       setNameError('');
     }
   };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,22 +115,23 @@ export default function signupUnkownUser() {
                     className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest opacity-70"
                   />
                 </div>
+              <div className="relative mb-4">
+                <img
+                  src={eye_icon}
+                  alt= {showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-[30px] w-auto cursor-pointer hover:opacity-75 transition-opacity"
+                  onClick={togglePasswordVisibility}
+                />
 
-                <div className="relative mb-4">
-                  <img
-                    src={eye_icon}
-                    alt="Eye icon"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-[30px] w-auto"
-                  />
-                  <input 
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)} 
-                    placeholder="************"
-                    className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest"
-                    required
-                  />
-                </div>
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="************"
+                  className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest"
+                  required
+                />
+            </div>
 
                 {error && <p className="text-red-500 mt-2">{error}</p>}
               </div>
