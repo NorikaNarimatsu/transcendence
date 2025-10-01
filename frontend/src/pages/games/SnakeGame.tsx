@@ -199,13 +199,19 @@ export default function SnakeGame(): JSX.Element {
                     {engine.waitingToStart && (
                         <div
                             style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                color: '#fff',
-                                fontSize: '3rem',
-                                zIndex: 10,
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            fontSize: '5rem',
+                            zIndex: 10,
                             }}
                         >
                             Press Space to Start
@@ -216,13 +222,19 @@ export default function SnakeGame(): JSX.Element {
                     {engine.gameOver && (
                         <div
                             style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                color: '#fff',
-                                fontSize: '5rem',
-                                zIndex: 10,
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            fontSize: '5rem',
+                            zIndex: 10,
                             }}
                         >
                             Game Over!
@@ -231,6 +243,9 @@ export default function SnakeGame(): JSX.Element {
                                     Winner: {engine.getWinnerName()}
                                 </div>
                             )}
+                            <div style={{ fontSize: '1rem', marginTop: '2rem' }}>
+                                Press Space to Play Again
+                            </div>
                             <div
                                 style={{
                                     display: 'flex',
@@ -239,9 +254,6 @@ export default function SnakeGame(): JSX.Element {
                                     justifyContent: 'center',
                                 }}
                             >
-                                <ButtonPink onClick={() => engine.startGame()}>
-                                    Again
-                                </ButtonPink>
                                 <ButtonPurple to="/playerProfile">
                                     Return to Profile
                                 </ButtonPurple>

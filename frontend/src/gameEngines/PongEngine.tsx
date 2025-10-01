@@ -36,11 +36,15 @@ export interface GameState {
   
 
     private mode: string;
+    private leftPlayerName: string;
+    private rightPlayerName: string;
 
-    constructor(config: GameConfig, onStateChange: (state: GameState) => void, mode: string = 'single') {
+    constructor(config: GameConfig, onStateChange: (state: GameState) => void, mode: string = 'single', leftPlayerName: string = 'Player 1', rightPlayerName: string = 'AI') {
       this.config = config;
       this.onStateChange = onStateChange;
       this.mode = mode;
+      this.leftPlayerName = leftPlayerName;
+      this.rightPlayerName = rightPlayerName;
 
       this.config = config;
       this.onStateChange = onStateChange;
@@ -143,13 +147,13 @@ export interface GameState {
       if (this.gameState.leftScore >= this.config.winScore) {
         this.updateState({
           gameEnded: true,
-          winner: 'Norika'
+          winner: this.leftPlayerName
         });
         this.resetBall();
       } else if (this.gameState.rightScore >= this.config.winScore) {
         this.updateState({
           gameEnded: true,
-          winner: 'Sara'
+          winner: this.rightPlayerName
         });
         this.resetBall();
       }

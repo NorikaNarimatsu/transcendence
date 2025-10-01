@@ -27,7 +27,7 @@ export function AddFriends({ open, allUsers, onSendRequest, onClose }: AddFriend
                         >
                             {user.avatarUrl && (
                                 <img 
-                                    src={`http://localhost:3000${user.avatarUrl}`} 
+                                    src={user.avatarUrl}
                                     alt={user.name} 
                                     className="w-6 h-6 rounded-full object-cover"
                                 />
