@@ -43,11 +43,14 @@ export default function PlayerProfile(): JSX.Element {
     const { user, logout } = useUser();
 
     useEffect(() => {
-        fetch('https://localhost:8443/listUsers')
+        if (user?.email) {
+        fetch(`https://localhost:8443/users/except/${encodeURIComponent(user.email)}`)
             .then(res => res.ok ? res.text() : Promise.reject(res.status))
             .then(text => {
                 try {
                     const users = JSON.parse(text);
+                    console.log('Fetched users:', users); // Debug: Check the data
+                    console.log('Avatar URLs:', users.map(u => u.avatarUrl)); // Debug: Check avatar URLs
                     setUsers(users);
                     setAllUsers(users);
                 } catch (err) {
@@ -55,7 +58,8 @@ export default function PlayerProfile(): JSX.Element {
                 }
             })
             .catch(err => console.error('Failed to fetch users:', err));
-    }, []);
+        }
+    }, [user?.email]);
 
     useEffect(() => {
         if (!user) {
@@ -157,7 +161,7 @@ export default function PlayerProfile(): JSX.Element {
                     { name: 'Add Friend', action: async () => {
                         setShowAddFriends(true);
                         try {
-                            const response = await fetch('https://localhost:8443/listUsers');
+                            const response = await fetch(`https://localhost:8443/users/except/${encodeURIComponent(user.email)}`);
                             if (response.ok) {
                                 const users = await response.json();
                                 setAllUsers(users);

@@ -240,6 +240,18 @@ export const getAllUsers = async (request, response) => {
   }
 };
 
+export const getAllUsersExceptCurrent = async (request, response) => {
+  const { email } = request.params;
+    try {
+    const users = db.prepare('SELECT id, name, avatarUrl FROM users WHERE email != ? ORDER BY name').all(email);
+    return response.code(200).send(users);
+  } catch (error) {
+    request.log.error('Failed to get all users:', error);
+    return response.code(500).send({
+      message: 'Internal server error'
+    });
+  }
+};
 
 ////////////////////////////// CONTROLLER //////////////////////////////
 
@@ -257,6 +269,7 @@ const itemController = {
     getUserByEmail,
     getAllUsers,
     getUserInfoByEmail,
+    getAllUsersExceptCurrent,
 };
 
 export default itemController;
