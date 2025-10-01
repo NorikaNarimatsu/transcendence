@@ -10,3 +10,4 @@ certs/
 # OS/editor
 *DS_Store
 *.log
+.vscode

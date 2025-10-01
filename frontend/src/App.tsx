@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react'; -> not needed for React version 17+ and we have 19
 import type { JSX } from 'react';
 import { useState } from 'react';
 import ButtonDarkPink from './components/ButtonDarkPink'
