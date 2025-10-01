@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; 
-import avatar1 from '../assets/avatars/Avatar 1.png';
 import bgimage from '../assets/Player_Page.jpg';
 import arrow_icon from '../assets/icons/arrow.png';
 
@@ -15,7 +14,7 @@ import { useUser} from './user/UserContext';
 interface User {
     id: number;
     name: string;
-    avatarUrl?: string;
+    avatarUrl: string;
 }
 
 export default function PlayerProfile(): JSX.Element {
