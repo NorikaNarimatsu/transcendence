@@ -110,6 +110,11 @@ export class SnakeGameEngine {
             return;
         }
 
+        if (this.gameOver && key === 'Space') {
+            this.startGame();
+            return;
+        }
+
         if (this.gameOver || this.waitingToStart) return;
 
         // Player 1 controls (Arrow keys)
