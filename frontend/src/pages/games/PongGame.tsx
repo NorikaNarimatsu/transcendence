@@ -43,18 +43,22 @@ export default function PongGame(): JSX.Element {
       setGameConfig(newConfig);
       if (engineRef.current) {
         engineRef.current.stop();
-        engineRef.current = new PongEngine(newConfig, setGameState, mode);
+        const leftPlayer = user?.name || 'Player 1';
+        const rightPlayer = mode === 'single' ? 'AI' : (player2 || 'Player 2');
+        engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayer, rightPlayer);
         engineRef.current.start();
       }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [mode]);
+  }, [mode, user?.name, player2]);
 
   // Game engine and keyboard events
   useEffect(() => {
-    engineRef.current = new PongEngine(gameConfig, setGameState, mode);
+    const leftPlayer = user?.name || 'Player 1';
+    const rightPlayer = mode === 'single' ? 'AI' : (player2 || 'Player 2');
+    engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayer, rightPlayer);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       engineRef.current?.handleKeyDown(e.key);
@@ -74,7 +78,7 @@ export default function PongGame(): JSX.Element {
       window.removeEventListener('keyup', handleKeyUp);
       engineRef.current?.stop();
     };
-  }, [gameConfig, mode]);
+  }, [gameConfig, mode, user?.name, player2 ]);
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -161,8 +165,8 @@ export default function PongGame(): JSX.Element {
           )}
 
           {!gameState.gameStarted && !gameState.gameEnded && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-white text-2xl font-pixelify opacity-75">
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <p className="text-white text-2xl font-pixelify">
                 Press SPACE to start
               </p>
             </div>

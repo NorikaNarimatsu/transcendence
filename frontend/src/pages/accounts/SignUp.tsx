@@ -2,14 +2,21 @@ import signup_image from '../../assets/SignUp.jpg';
 import ButtonPurple from '../../components/ButtonPurple'
 import mail_icon from '../../assets/icons/mail.png'
 import arrow_icon from '../../assets/icons/arrow.png'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../user/UserContext';
 
 
 export default function SignUp(){
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { logout } = useUser();
+
+  useEffect(() => {
+    logout(); // This will clear user state and localStorage
+  }, [logout]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
