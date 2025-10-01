@@ -17,11 +17,11 @@ export function initializeDatabase() {
     }
 
     const db = new Database(path.join(databaseFolderPath, "transcendence.db"));
-    const tableExists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='items';`).get();
+    const tableExists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).get();
 
     if (!tableExists) {
         db.exec(`
-            CREATE TABLE items (
+            CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 uuid TEXT UNIQUE NOT NULL,
                 name TEXT NOT NULL,
@@ -32,7 +32,7 @@ export function initializeDatabase() {
             );
         `);
         // add table for other parts
-        console.log("Items table created successfully");
+        console.log("Users table created successfully");
         
         // Avatar array for random selection
         const avatars = [
@@ -49,7 +49,7 @@ export function initializeDatabase() {
 
         // Insert 10 test users
         const insertUser = db.prepare(`
-            INSERT INTO items (uuid, name, email, password, avatarUrl)
+            INSERT INTO users (uuid, name, email, password, avatarUrl)
             VALUES (?, ?, ?, ?, ?)
         `);
 
@@ -71,7 +71,7 @@ export function initializeDatabase() {
 
         console.log("All test users created successfully");
     } else {
-        console.log("Items table already exists");
+        console.log("Users table already exists");
     }
     return db;
 }

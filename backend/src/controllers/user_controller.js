@@ -8,7 +8,7 @@ const userController = {
                 reply.status(400).send({ error: 'Email is required' });
                 return;
             }
-            const row = db.prepare('SELECT name, avatarUrl FROM items WHERE email = ?').get(email);
+            const row = db.prepare('SELECT name, avatarUrl FROM users WHERE email = ?').get(email);
             if (!row) {
                 reply.status(404).send({ error: 'User not found' });
             } else {

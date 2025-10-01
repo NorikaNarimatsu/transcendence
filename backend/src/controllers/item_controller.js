@@ -16,13 +16,13 @@ const avatars = [
 
 ////////////////////////////// GET //////////////////////////////
 export function getItems(request, response) {
-  const items = db.prepare('SELECT * FROM items').all();
+  const items = db.prepare('SELECT * FROM users').all();
   response.send(items);
 };
 
 export function getItem(request, response) {
   const { id } = request.params;
-  const item = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
+  const item = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
   if (!item) {
     response.code(404).send({ error: 'Item not found' });
   } else {
@@ -46,7 +46,7 @@ export function addItem(request, response) {
   const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
   const uuid = uuidv4(); // Generate a unique UUID
   const result = db.prepare(
-    'INSERT INTO items (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)'
   ).run(uuid, name, email, password, randomAvatarUrl);
   response.code(201).send({
     id: result.lastInsertRowid,
@@ -66,7 +66,7 @@ export function updateItem(request, response) {
   const { password } = request.body;
   const { avatarUrl } = request.body;
   const responseult = db.prepare(
-    'UPDATE items SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE id = ?'
+    'UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE id = ?'
   ).run(name, avatarUrl, id);
   if (responseult.changes === 0) {
     response.code(404).send({ error: 'Item not found' });
@@ -79,7 +79,7 @@ export function updateItem(request, response) {
 
 export function deleteItem(request, response) {
   const { id } = request.params;
-  const responseult = db.prepare('DELETE FROM items WHERE id = ?').run(id);
+  const responseult = db.prepare('DELETE FROM users WHERE id = ?').run(id);
   if (responseult.changes === 0) {
     response.code(404).send({ error: 'Item not found' });
   } else {
@@ -128,7 +128,7 @@ export const validateAndAddItem = async (request, response) => {
 export const validateEmail = async (request, response) => {
   const { email } = request.body;
   try {
-    const isExistingEmail = db.prepare('SELECT * FROM items WHERE email = ?').get(email);
+    const isExistingEmail = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
     if (isExistingEmail)
       return response.code(200).send();
     else
@@ -141,7 +141,7 @@ export const validateEmail = async (request, response) => {
 export const validatePasswordbyEmail = async (request, response) => {
   const { email, password} = request.body;
   try {
-    const user = db.prepare('SELECT * FROM items WHERE email = ?').get(email)
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email)
     if (!user)
       return response.code(401).send({message: 'User not found'});
     if (user.password === password)
@@ -156,7 +156,7 @@ export const validatePasswordbyEmail = async (request, response) => {
 export const validatePasswordbyName = async (request, response) => {
   const { name, password } = request.body;
   try {
-    const user = db.prepare('SELECT * FROM items WHERE name = ?').get(name); // use 'name'
+    const user = db.prepare('SELECT * FROM users WHERE name = ?').get(name); // use 'name'
     if (!user)
       return response.code(401).send({message: 'User not found'});
     if (user.password === password)
@@ -173,7 +173,7 @@ export function addNewUser(request, response) {
   const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
   try {
     const uuid = uuidv4(); // Generate a unique UUID
-    const result = db.prepare('INSERT INTO items (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, password, randomAvatarUrl);
+    const result = db.prepare('INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, password, randomAvatarUrl);
     response.code(201).send({
       id: result.lastInsertRowid,
       name,
@@ -190,7 +190,7 @@ export function addNewUser(request, response) {
 export const getUserByEmail = async (request, reply) => {
   const { email } = request.params;
   try {
-      const user = db.prepare('SELECT name FROM items WHERE email = ?').get(email);
+      const user = db.prepare('SELECT name FROM users WHERE email = ?').get(email);
       if (user) {
           return reply.code(200).send({
               name: user.name
@@ -210,7 +210,7 @@ export const getUserByEmail = async (request, reply) => {
 export const getUserInfoByEmail = async (request, reply) => {
   const { email } = request.params;
   try {
-      const user = db.prepare('SELECT name, avatarUrl FROM items WHERE email = ?').get(email);
+      const user = db.prepare('SELECT name, avatarUrl FROM users WHERE email = ?').get(email);
       if (user) {
           return reply.code(200).send({
               name: user.name,
@@ -230,7 +230,7 @@ export const getUserInfoByEmail = async (request, reply) => {
 
 export const getAllUsers = async (request, response) => {
   try {
-    const users = db.prepare('SELECT id, name, avatarUrl FROM items ORDER BY name').all();
+    const users = db.prepare('SELECT id, name, avatarUrl FROM users ORDER BY name').all();
     return response.code(200).send(users);
   } catch (error) {
     request.log.error('Failed to get all users:', error);
