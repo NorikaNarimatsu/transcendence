@@ -10,6 +10,7 @@ interface TournamentRegistrationProps {
     open: boolean;
     onClose: () => void;
     allUsers: User[];
+    currentUserName: string; 
     tournamentPlayers: number;
     setTournamentPlayers: (n: number) => void;
     selectedParticipants: User[];
@@ -21,6 +22,7 @@ export function TournamentRegistration({
     open,
     onClose,
     allUsers,
+    currentUserName,
     tournamentPlayers,
     setTournamentPlayers,
     selectedParticipants,
@@ -54,7 +56,9 @@ export function TournamentRegistration({
                 <div className="mb-4 w-full">
                     <span className="font-pixelify text-blue-deep mb-2 block">Select Participants:</span>
                     <div className="flex flex-wrap gap-2 mt-2 overflow-y-auto" style={{ maxHeight: '110px' }}>
-                        {allUsers.map(user => (
+                    {allUsers
+                        .filter(user => user.name !== currentUserName)
+                        .map(user => (
                             <button
                                 key={user.id}
                                 disabled={selectedParticipants.some(p => p.id === user.id) || selectedParticipants.length >= tournamentPlayers - 1}
@@ -74,14 +78,6 @@ export function TournamentRegistration({
                                 {user.name}
                             </button>
                         ))}
-                        <button
-                            disabled={selectedParticipants.some(p => p.name === 'Guest') || selectedParticipants.length >= tournamentPlayers - 1}
-                            onClick={() => setSelectedParticipants([...selectedParticipants, { id: 0, name: 'Guest' }])}
-                            className="px-3 py-2 rounded border bg-pink-medium text-blue-deep hover:bg-pink-dark font-pixelify w-[120px]"
-                            style={{ fontSize: '1.1rem' }}
-                        >
-                            🎮 Guest
-                        </button>
                     </div>
                 </div>
                 <div className="mb-4 w-full">
@@ -109,7 +105,13 @@ export function TournamentRegistration({
                             if (selectedParticipants.length !== tournamentPlayers - 1) {
                                 return;
                             }
-                            navigate(`/tournament?players=${tournamentPlayers}&ids=me,${selectedParticipants.map(u => u.id).join(',')}`);
+                            const currentUser = allUsers.find(u => u.name === currentUserName);
+                            if (!currentUser) return; // Optionally handle error
+                            navigate(
+                                `/tournament?players=${tournamentPlayers}&ids=${[currentUser, ...selectedParticipants]
+                                    .map(u => `${u.id}:${encodeURIComponent(u.name)}:${encodeURIComponent(u.avatarUrl || '')}`)
+                                    .join(',')}`
+                            );
                         }}
                         disabled={selectedParticipants.length !== tournamentPlayers - 1}
                         className="button-pp-blue shadow-no-blur flex-1 flex items-center justify-center font-pixelify"

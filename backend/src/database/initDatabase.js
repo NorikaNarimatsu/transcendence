@@ -44,7 +44,7 @@ export function initializeDatabase() {
             '/avatars/Avatar_6.png',
             '/avatars/Avatar_7.png',
             '/avatars/Avatar_8.png',
-            '/avatars/Avatar_9.png'
+            '/avatars/Avatar_9.png',
         ];
 
         // Insert 10 test users
@@ -68,7 +68,6 @@ export function initializeDatabase() {
                 console.error(`Error creating test user ${name}:`, error);
             }
         }
-
         console.log("All test users created successfully");
     } else {
         console.log("Items table already exists");

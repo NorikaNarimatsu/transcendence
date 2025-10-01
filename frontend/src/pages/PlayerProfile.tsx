@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; 
-import avatar1 from '../assets/avatars/Avatar 1.png';
 import bgimage from '../assets/Player_Page.jpg';
 import arrow_icon from '../assets/icons/arrow.png';
 
@@ -236,6 +235,7 @@ export default function PlayerProfile(): JSX.Element {
                             <PlayerSelection
                                 open={showPlayerSelection}
                                 users={users}
+                                currentUserName={user.name}
                                 onSelect={handlePlayerSelect}
                                 onCancel={() => {
                                     setShowPlayerSelection(false);
@@ -261,6 +261,7 @@ export default function PlayerProfile(): JSX.Element {
                                     open={showTournamentRegistration}
                                     onClose={() => setShowTournamentRegistration(false)}
                                     allUsers={allUsers}
+                                    currentUserName={user.name}
                                     tournamentPlayers={tournamentPlayers}
                                     setTournamentPlayers={setTournamentPlayers}
                                     selectedParticipants={selectedTournamentParticipants}

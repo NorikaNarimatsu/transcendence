@@ -11,6 +11,7 @@ import SnakeGame from './pages/games/SnakeGame.tsx'
 import PlayerProfile from './pages/PlayerProfile.tsx'
 import TournamentTree from './pages/tournament/tournamentTree.tsx'
 import { UserProvider } from './pages/user/UserContext'
+import Bracket from './pages/tournament/Bracket.tsx'
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
@@ -20,7 +21,9 @@ const router = createBrowserRouter([
   { path: '/playerProfile/pongGame', element: <PongGame />},
   { path: '/playerProfile/snakeGame', element: <SnakeGame />},
   { path: '/playerProfile', element: <PlayerProfile />},
-  { path: '/tournament', element: <TournamentTree />}
+  { path: '/tournament', element: <TournamentTree />},
+  { path: '/tournament/bracket', element: <Bracket />}
+
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

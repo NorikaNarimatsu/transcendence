@@ -1,35 +1,36 @@
-interface PasswordVerificationModalProps {
+
+interface DisplayNameVerificationModalProps {
     open: boolean;
     user: { name: string; avatarUrl?: string } | null;
-    password: string;
+    displayName: string;
     error: string;
-    onPasswordChange: (value: string) => void;
+    onDisplayNameChange: (value: string) => void;
     onVerify: () => void;
     onCancel: () => void;
 }
 
-export function PasswordVerification({
+export function DisplayNameVerification({
     open,
     user,
-    password,
+    displayName,
     error,
-    onPasswordChange,
+    onDisplayNameChange,
     onVerify,
     onCancel,
-}: PasswordVerificationModalProps) {
+}: DisplayNameVerificationModalProps) {
     if (!open || !user) return null;
 
     return (
-        <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-30">
+        <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-40">
             <div className="bg-pink-light p-6 rounded-lg w-[300px]">
                 <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">
-                    Verify Password for {user.name}
+                    Enter Display Name for {user.name}
                 </h3>
                 <input
-                    type="password"
-                    value={password}
-                    onChange={e => onPasswordChange(e.target.value)}
-                    placeholder="Enter password"
+                    type="text"
+                    value={displayName}
+                    onChange={e => onDisplayNameChange(e.target.value)}
+                    placeholder="Enter unique display name"
                     className="w-full px-3 py-2 mb-3 border rounded font-pixelify"
                     onKeyDown={e => e.key === 'Enter' && onVerify()}
                 />
@@ -41,10 +42,10 @@ export function PasswordVerification({
                 <div className="flex gap-2">
                     <button
                         onClick={onVerify}
-                        disabled={!password.trim()}
+                        disabled={!displayName.trim()}
                         className="flex-1 px-4 py-2 bg-blue-light text-white font-pixelify rounded hover:bg-blue-medium transition-colors disabled:bg-gray-400"
                     >
-                        Verify
+                        Confirm
                     </button>
                     <button
                         onClick={onCancel}
