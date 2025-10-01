@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 interface User {
     id: number;
     name: string;
-    avatarUrl?: string;
+    avatarUrl: string;
 }
 
 interface TournamentRegistrationProps {
@@ -15,7 +15,9 @@ interface TournamentRegistrationProps {
     selectedParticipants: User[];
     setSelectedParticipants: (users: User[]) => void;
     setVerifyingUser: (user: User | null) => void;
+    user: User;
 }
+
 
 export function TournamentRegistration({
     open,
@@ -26,6 +28,7 @@ export function TournamentRegistration({
     selectedParticipants,
     setSelectedParticipants,
     setVerifyingUser,
+    user,
 }: TournamentRegistrationProps) {
     const navigate = useNavigate();
 
@@ -74,14 +77,6 @@ export function TournamentRegistration({
                                 {user.name}
                             </button>
                         ))}
-                        <button
-                            disabled={selectedParticipants.some(p => p.name === 'Guest') || selectedParticipants.length >= tournamentPlayers - 1}
-                            onClick={() => setSelectedParticipants([...selectedParticipants, { id: 0, name: 'Guest' }])}
-                            className="px-3 py-2 rounded border bg-pink-medium text-blue-deep hover:bg-pink-dark font-pixelify w-[120px]"
-                            style={{ fontSize: '1.1rem' }}
-                        >
-                            🎮 Guest
-                        </button>
                     </div>
                 </div>
                 <div className="mb-4 w-full">
@@ -106,10 +101,22 @@ export function TournamentRegistration({
                 <div className="flex w-full gap-2 mb-2">
                     <button
                         onClick={() => {
-                            if (selectedParticipants.length !== tournamentPlayers - 1) {
-                                return;
-                            }
-                            navigate(`/tournament?players=${tournamentPlayers}&ids=me,${selectedParticipants.map(u => u.id).join(',')}`);
+                            const ids = [
+                                { id: 'me', displayName: user.name, avatarUrl: user.avatarUrl },
+                                ...selectedParticipants.map(u => ({
+                                    id: u.id,
+                                    displayName: u.name,
+                                    avatarUrl: u.avatarUrl || '',
+                                })),
+                            ];
+                            navigate(
+                                `/tournament/tree?players=${tournamentPlayers}&ids=${ids
+                                    .map(
+                                        p =>
+                                            `${p.id}:${encodeURIComponent(p.displayName)}:${encodeURIComponent(p.avatarUrl)}`
+                                    )
+                                    .join(',')}`
+                            );
                         }}
                         disabled={selectedParticipants.length !== tournamentPlayers - 1}
                         className="button-pp-blue shadow-no-blur flex-1 flex items-center justify-center font-pixelify"

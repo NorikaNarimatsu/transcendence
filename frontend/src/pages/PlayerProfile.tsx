@@ -17,6 +17,7 @@ interface User {
     avatarUrl: string;
 }
 
+
 export default function PlayerProfile(): JSX.Element {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [showPlayerSelection, setShowPlayerSelection] = useState(false);
@@ -40,6 +41,13 @@ export default function PlayerProfile(): JSX.Element {
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
+
+    // Is it how it supposed to be used? @Eduarda
+    const currentUser: User = {
+        id: user.id,
+        name: user.name,
+        avatarUrl: user.avatar,
+    };
 
     useEffect(() => {
         if (user?.email) {
@@ -269,6 +277,7 @@ export default function PlayerProfile(): JSX.Element {
                                     selectedParticipants={selectedTournamentParticipants}
                                     setSelectedParticipants={setSelectedTournamentParticipants}
                                     setVerifyingUser={setTournamentVerifyingUser}
+                                    user={currentUser}
                                 />
                                 {tournamentVerifyingUser && (
                                     <PasswordVerification
