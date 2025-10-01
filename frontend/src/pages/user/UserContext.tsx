@@ -16,14 +16,27 @@ const StorageBox = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode}) {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    // user already logged
-    useEffect(() => {
-        const savedUser = localStorage.getItem('currentUser');
-        if (savedUser) {
-            setUser(JSON.parse(savedUser)); // Restore previous user
-        }
+        useEffect(() => {
+        const loadUser = () => {
+            try {
+                const storedUser = localStorage.getItem('currentUser');
+                if (storedUser) {
+                    const userData = JSON.parse(storedUser);
+                    setUser(userData);
+                }
+            } catch (error) {
+                console.error('Error loading user from localStorage:', error);
+                localStorage.removeItem('currentUser'); // Clean up corrupted data
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadUser();
     }, []);
+
 
     const updateUser = (userData: User | null) => {
     setUser(userData);
@@ -38,6 +51,14 @@ export function UserProvider({ children }: { children: ReactNode}) {
         setUser(null);
         localStorage.removeItem('currentUser');
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-pink-grid">
+                <p className="text-blue-deep font-dotgothic text-xl">Loading...</p>
+            </div>
+        );
+    }
 
     return (
         <StorageBox.Provider value={{ user, setUser: updateUser, logout }}>
