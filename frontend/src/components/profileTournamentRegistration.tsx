@@ -1,10 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import { user } from './user/UserContext';
 
-interface User {
-    id: number;
-    name: string;
-    avatarUrl: string;
-}
+//how to use, user.
 
 interface TournamentRegistrationProps {
     open: boolean;

@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface User {
-    email: string;
+    // email: string; // should be replaced with id
+    userID: number;
     name: string;
     avatar: string;
 }

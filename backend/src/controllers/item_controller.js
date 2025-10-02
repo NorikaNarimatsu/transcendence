@@ -171,22 +171,26 @@ export const validatePasswordbyName = async (request, response) => {
 export function addNewUser(request, response) {
   const { name, email, password } = request.body;
   const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
+  const createdAt = new Date().toISOString();
   try {
-    const uuid = uuidv4(); // Generate a unique UUID
-    const result = db.prepare('INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, password, randomAvatarUrl);
+    const result = db.prepare(
+      'INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)'
+    ).run(name, email, password, randomAvatarUrl, createdAt);
     response.code(201).send({
       id: result.lastInsertRowid,
       name,
       email,
       avatarUrl: randomAvatarUrl,
-      created_at: new Date().toISOString()
+      created_at: createdAt
     });
   } catch (error) {
     request.log.error('Failed to add new user:', error);
     return response.code(500).send();
   }
-};
+}
 
+
+//////
 export const getUserByEmail = async (request, reply) => {
   const { email } = request.params;
   try {
@@ -210,9 +214,10 @@ export const getUserByEmail = async (request, reply) => {
 export const getUserInfoByEmail = async (request, reply) => {
   const { email } = request.params;
   try {
-      const user = db.prepare('SELECT name, avatarUrl FROM users WHERE email = ?').get(email);
+      const user = db.prepare('SELECT userID, name, avatarUrl FROM users WHERE email = ?').get(email);
       if (user) {
           return reply.code(200).send({
+              userID: user.userID,
               name: user.name,
               avatar: user.avatarUrl
           });
@@ -227,6 +232,8 @@ export const getUserInfoByEmail = async (request, reply) => {
       });
   }
 };
+
+////////////////////
 
 export const getAllUsers = async (request, response) => {
   try {

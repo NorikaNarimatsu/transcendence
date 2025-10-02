@@ -55,15 +55,15 @@ export default function LoginPage(){
 
       if (response.ok) {
         const userResponse = await fetch(
-          `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(email)}`
+          `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(email)}` // User Interface have to delete emain and add id
         );
 
         if (userResponse.ok) {
           const userData = await userResponse.json();
           // saving in the storebox for future use
-          // console.log("Full API response:", userData);
+          console.log("Full API response:", userData);
           setUser({
-            email: email,
+            userID: userData.userID,
             name: userData.name,
             avatar: userData.avatar
           });

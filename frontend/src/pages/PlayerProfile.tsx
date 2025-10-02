@@ -11,13 +11,6 @@ import { PlayerSelection } from '../components/profilePlayerSelection';
 
 import { useUser} from './user/UserContext';
 
-interface User {
-    id: number;
-    name: string;
-    avatarUrl: string;
-}
-
-
 export default function PlayerProfile(): JSX.Element {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [showPlayerSelection, setShowPlayerSelection] = useState(false);
@@ -44,7 +37,7 @@ export default function PlayerProfile(): JSX.Element {
 
     // Is it how it supposed to be used? @Eduarda
     const currentUser: User = {
-        id: user.id,
+        userID: user.userID,
         name: user.name,
         avatarUrl: user.avatar,
     };

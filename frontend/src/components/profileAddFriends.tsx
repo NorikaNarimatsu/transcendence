@@ -1,8 +1,4 @@
-interface User {
-    id: number;
-    name: string;
-    avatarUrl?: string;
-}
+import { useUser} from './user/UserContext';
 
 interface AddFriendsProps {
     open: boolean;
