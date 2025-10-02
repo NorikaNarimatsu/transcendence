@@ -1,6 +1,5 @@
 import type { JSX } from 'react';
 import ButtonPurple from '../../components/ButtonPurple';
-import ButtonPink from '../../components/ButtonDarkPink';
 import avatar2 from '../../assets/avatars/Avatar 2.png';
 import { useUser } from '../user/UserContext';
 import { SnakeGameEngine, GRID_SIZE_X, GRID_SIZE_Y, CELL_SIZE, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
