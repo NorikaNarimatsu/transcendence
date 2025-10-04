@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../server.js';
+import { hashPassword, comparePassword } from '../utils/passwordUtils.js';
 
 //////// Avatar Array //////
 const avatars = [
@@ -144,9 +145,11 @@ export const validatePasswordbyEmail = async (request, response) => {
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email)
     if (!user)
       return response.code(401).send({message: 'User not found'});
-    if (user.password === password)
+	const isPasswordMatch = await comparePassword(password, user.password);
+
+    if (isPasswordMatch)
       return response.code(200).send();
-    else if (user.password !== password)
+    else
       return response.code(401).send({message: 'Invalid password'});
   } catch (error) {
     return response.code(500).send();
@@ -159,7 +162,10 @@ export const validatePasswordbyName = async (request, response) => {
     const user = db.prepare('SELECT * FROM users WHERE name = ?').get(name); // use 'name'
     if (!user)
       return response.code(401).send({message: 'User not found'});
-    if (user.password === password)
+
+	const isPasswordValid = await comparePassword(password, user.password);
+
+    if (isPasswordValid)
       return response.code(200).send();
     else
       return response.code(401).send({message: 'Invalid password'});
@@ -168,12 +174,14 @@ export const validatePasswordbyName = async (request, response) => {
   }
 }
 
-export function addNewUser(request, response) {
+export async function addNewUser(request, response) {
   const { name, email, password } = request.body;
   const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
   try {
+
+	const hashedPassword = await hashPassword(password);
     const uuid = uuidv4(); // Generate a unique UUID
-    const result = db.prepare('INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, password, randomAvatarUrl);
+    const result = db.prepare('INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, hashedPassword, randomAvatarUrl);
     response.code(201).send({
       id: result.lastInsertRowid,
       name,
