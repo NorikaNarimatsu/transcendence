@@ -6,6 +6,7 @@ import mail_icon from '../../assets/icons/mail.png';
 import person_icon from '../../assets/icons/person.png';
 import eye_icon from '../../assets/icons/eye.png';
 import arrow_icon from '../../assets/icons/arrow.png';
+import { validatePasswordRealTime } from '../../utils/passwordValidation';
 
 export default function signupUnkownUser() {
   const location = useLocation();
@@ -16,6 +17,7 @@ export default function signupUnkownUser() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [nameError, setNameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +36,15 @@ export default function signupUnkownUser() {
     }
   };
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const value = e.target.value;
+	setPassword(value);
+
+	// Real-time validation
+	const errorMessage = validatePasswordRealTime(value);
+	setPasswordError(errorMessage);
+  }
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -42,6 +53,12 @@ export default function signupUnkownUser() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+	if (nameError || passwordError) {
+		setError('Please fix the errors before submitting the form.');
+		return;
+	}
+
     try {
       const response = await fetch('https://localhost:8443/addNewUser', {
         method: 'POST',
@@ -117,7 +134,9 @@ export default function signupUnkownUser() {
                     className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest opacity-70"
                   />
                 </div>
-              <div className="relative mb-4">
+
+
+              <div className="relative mb-6"> {/* Increased margin bottom to accommodate error */}
                 <img
                   src={eye_icon}
                   alt= {showPassword ? "Hide password" : "Show password"}
@@ -128,12 +147,18 @@ export default function signupUnkownUser() {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   placeholder="************"
-                  className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest"
+                  className={`w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 ${passwordError ? 'border-red-500' : 'border-black'} focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest`}
                   required
                 />
-            </div>
+
+                {passwordError && (
+					<p className="absolute left-0 top-full mt-1 text-red-500 text-xs">
+                    {passwordError}
+                  </p>
+                )}
+				</div>
 
                 {error && <p className="text-red-500 mt-2">{error}</p>}
               </div>
