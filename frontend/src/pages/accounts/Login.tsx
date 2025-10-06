@@ -2,6 +2,8 @@ import login_image from '../../assets/Login.png';
 import ButtonPurple from '../../components/ButtonPurple'
 import eye_icon from '../../assets/icons/eye.png'
 import arrow_icon from '../../assets/icons/arrow.png'
+import { sanitizeInput } from '../../utils/sanitizeInput';
+import SafeError from '../../components/SafeError';
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -87,7 +89,7 @@ export default function LoginPage(){
 
             <div className="mb-4">
             <h1 className="text-4xl text-blue-deep font-pixelify mb-[2px] text-shadow font-bold">LOG IN</h1>
-                <h2 className="text-xl text-blue-deep font-dotgothic mb-[2px]">Hello {name}!</h2>
+                <h2 className="text-xl text-blue-deep font-dotgothic mb-[2px]">Hello {sanitizeInput.escapeHtml(name)}!</h2>
                 <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">Welcome back :)</h2>
             {/* Password input with clickable eye */}
             <div className="relative mb-4">
@@ -107,9 +109,7 @@ export default function LoginPage(){
                 required
               />
             </div>
-            {error && ( // Added: error display
-      <p className="text-red-500 mt-2 font-dotgothic">{error}</p>
-    )}
+            <SafeError error={error} className="mt-2 font-dotgothic" />
             </div>
             
             {/* Continue button */} {/*TODO: CHANGE to path, THIS ONE DEPENDS ON THE DATABASE, DOES THE USER EXIST ALREADY OR NOT?*/}

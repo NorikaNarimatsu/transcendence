@@ -1,4 +1,4 @@
-import { z, ZodError } from 'zod';
+import { z, ZodError} from 'zod';
 
 const passwordSchema = z
   .string()
@@ -6,7 +6,10 @@ const passwordSchema = z
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
   .regex(/[0-9]/, "Password must contain at least one digit")
-  .regex(/[@$!%*?&]/,"Password must contain at least one special character @$!%*?&");
+  .regex(/[@$!%*?&]/,"Password must contain at least one special character @$!%*?&")
+  .refine((val) => !/[<>"']/.test(val), "Password cannot contain < > \" or ' characters")
+  .refine((val) => !/on\w+\s*=/i.test(val), "Password cannot contain event handlers like onclick=")
+  .refine((val) => !/javascript:/i.test(val), "Password cannot contain 'javascript:'");
 
   export interface ValidationResult {
 	isValid: boolean;
