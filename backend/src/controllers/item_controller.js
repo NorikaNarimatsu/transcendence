@@ -25,7 +25,7 @@ export function getItems(request, response) {
 			id: item.id,
 			name: sanitizeInput.sanitizeUsername(item.name),
 			email: sanitizeInput.sanitizeEmail(item.email),
-			avatarUrl: sanitizeInput.sanitizeText(item.avatarUrl, 500),
+			avatarUrl: item.avatarUrl,
 			created_at: item.created_at
 		}))
 		response.send(sanitiziedItems);
@@ -52,7 +52,7 @@ export function getItem(request, response) {
 			id: item.id,
 			name: sanitizeInput.sanitizeUsername(item.name),
 			email: sanitizeInput.sanitizeEmail(item.email),
-			avatarUrl: sanitizeInput.sanitizeText(item.avatarUrl, 500),
+			avatarUrl: item.avatarUrl,
 			created_at: item.created_at
 			});
 		}
@@ -108,15 +108,12 @@ export function updateItem(request, response) {
     }
     const sanitiziedName = name ? sanitizeInput.sanitizeUsername(name) : null;
     const sanitiziedEmail = email ? sanitizeInput.sanitizeEmail(email) : null;
-    const sanitiziedAvatarUrl = avatarUrl
-      ? sanitizeInput.sanitizeText(avatarUrl, 500)
-      : null;
 
     const responseult = db
       .prepare(
         "UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE id = ?"
       )
-      .run(sanitiziedName, sanitiziedAvatarUrl, id);
+      .run(sanitiziedName, avatarUrl, id);
     if (responseult.changes === 0) {
       response.code(404).send({ error: "Item not found" });
     } else {
@@ -125,7 +122,7 @@ export function updateItem(request, response) {
         name: sanitiziedName,
         email: sanitiziedEmail,
         password,
-        avatarUrl: sanitiziedAvatarUrl,
+        avatarUrl: avatarUrl,
       });
     }
   } catch (error) {
@@ -371,7 +368,7 @@ export const getUserInfoByEmail = async (request, reply) => {
 		if (user) {
 			return reply.code(200).send({
 			name: sanitizeInput.sanitizeUsername(user.name),
-			avatar: sanitizeInput.sanitizeText(user.avatarUrl, 500),
+			avatar: user.avatarUrl,
 			});
 		}
 		return reply.code(404).send({
@@ -411,7 +408,7 @@ export const getAllUsersExceptCurrent = async (request, response) => {
 			const sanitiziedUsers = users.map(user => ({
 				id: user.id,
 				name: sanitizeInput.sanitizeUsername(user.name),
-				avatarUrl: sanitizeInput.sanitizeText(user.avatarUrl, 500)
+				avatarUrl: user.avatarUrl
 			}))
 		return response.code(200).send(sanitiziedUsers);
 	} catch (error) {
