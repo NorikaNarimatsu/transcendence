@@ -1,8 +1,9 @@
 import type { JSX } from 'react';
 import ButtonPurple from '../../components/ButtonPurple';
-import ButtonPink from '../../components/ButtonDarkPink';
 import avatar2 from '../../assets/avatars/Avatar 2.png';
 import { useUser } from '../user/UserContext';
+import { useSelectedPlayer } from '../user/PlayerContext';
+
 import { SnakeGameEngine, GRID_SIZE_X, GRID_SIZE_Y, CELL_SIZE, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
 
 import { useState, useEffect, useRef } from 'react';
@@ -14,7 +15,7 @@ export default function SnakeGame(): JSX.Element {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const mode = params.get('mode');
-    const player2 = params.get('player2') || 'Guest';
+    const { selectedPlayer } = useSelectedPlayer();
 
     // Game engine reference
     const gameEngineRef = useRef<SnakeGameEngine | null>(null);
@@ -23,8 +24,8 @@ export default function SnakeGame(): JSX.Element {
     // Initialize game engine
     useEffect(() => {
         const isMultiplayer = mode === '2players';
-        gameEngineRef.current = new SnakeGameEngine(isMultiplayer, user?.name || 'Player 1', player2);
-    }, [mode, user?.name, player2]);
+        gameEngineRef.current = new SnakeGameEngine(isMultiplayer, user?.name || 'Player 1');
+    }, [mode, user?.name]);
 
     // Game loop
     useEffect(() => {
@@ -84,8 +85,8 @@ export default function SnakeGame(): JSX.Element {
                 </div>
                 {engine.isMultiplayer && (
                     <div className="flex items-center justify-end gap-2">
-                        <img src={avatar2} alt="Avatar 2" className="avatar" />
-                        <h2 className="player-name">{player2}</h2>
+                        <img src={selectedPlayer?.avatarUrl || avatar2 } alt="Avatar Player 2" className="avatar" />
+                        <h2 className="player-name">{selectedPlayer?.name || 'Guest'}</h2>
                     </div>
                 )}
             </header>

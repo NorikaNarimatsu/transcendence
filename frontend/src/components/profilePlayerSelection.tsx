@@ -1,15 +1,10 @@
 import React from 'react';
-
-interface User {
-    id: number;
-    name: string;
-    avatarUrl?: string;
-}
+import type { SelectedPlayer } from '../pages/user/PlayerContext';
 
 interface PlayerSelectionProps {
     open: boolean;
-    users: User[];
-    onSelect: (user: User | null) => void;
+    users: SelectedPlayer[];
+    onSelect: (user: SelectedPlayer | null) => void;
     onCancel: () => void;
 }
 

@@ -10,13 +10,8 @@ import { AddFriends } from '../components/profileAddFriends';
 import { PlayerSelection } from '../components/profilePlayerSelection';
 
 import { useUser} from './user/UserContext';
-
-interface User {
-    id: number;
-    name: string;
-    avatarUrl: string;
-}
-
+import type { SelectedPlayer } from  './user/PlayerContext';
+import { useSelectedPlayer } from './user/PlayerContext';
 
 export default function PlayerProfile(): JSX.Element {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -26,28 +21,25 @@ export default function PlayerProfile(): JSX.Element {
     const [showPasswordVerification, setShowPasswordVerification] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
-    const [selectedPlayer, setSelectedPlayer] = useState<User | null>(null);
-    
+
     const [showTournamentRegistration, setShowTournamentRegistration] = useState(false);
     const [tournamentPlayers, setTournamentPlayers] = useState(3);
-    const [selectedTournamentParticipants, setSelectedTournamentParticipants] = useState<User[]>([]);
-    const [tournamentVerifyingUser, setTournamentVerifyingUser] = useState<User | null>(null);
+    const [selectedTournamentParticipants, setSelectedTournamentParticipants] = useState<SelectedPlayer[]>([]);
+    const [tournamentVerifyingUser, setTournamentVerifyingUser] = useState<SelectedPlayer | null>(null);
     const [tournamentVerifyPassword, setTournamentVerifyPassword] = useState('');
     const [tournamentVerifyError, setTournamentVerifyError] = useState('');
     
     const [showAddFriends, setShowAddFriends] = useState(false);
-    const [users, setUsers] = useState<User[]>([]);
-    const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<SelectedPlayer[]>([]);
+    const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
+    const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
 
-    // Is it how it supposed to be used? @Eduarda
-    const currentUser: User = {
-        id: user.id,
-        name: user.name,
-        avatarUrl: user.avatar,
-    };
+    useEffect(() => {
+        setSelectedPlayer(null);
+    }, [setSelectedPlayer]);
 
     useEffect(() => {
         if (user?.email) {
@@ -56,8 +48,6 @@ export default function PlayerProfile(): JSX.Element {
             .then(text => {
                 try {
                     const users = JSON.parse(text);
-                    console.log('Fetched users:', users); // Debug: Check the data
-                    console.log('Avatar URLs:', users.map(u => u.avatarUrl)); // Debug: Check avatar URLs
                     setUsers(users);
                     setAllUsers(users);
                 } catch (err) {
@@ -79,13 +69,14 @@ export default function PlayerProfile(): JSX.Element {
         navigate('/signup');
     };
 
-    const handlePlayerSelect = (player: User | null) => {
+    const handlePlayerSelect = (player: SelectedPlayer | null) => {
         setSelectedPlayer(player);
         if (player === null) {
+            setSelectedPlayer('Guest');
             if (playerSelectionGame === 'Snake') {
-                navigate('./snakeGame?mode=2players&player2=guest');
+                navigate('./snakeGame?mode=2players');
             } else {
-                navigate('./pongGame?mode=2players&player2=guest');
+                navigate('./pongGame?mode=2players');
             }
         } else {
             setShowPasswordVerification(true);
@@ -101,10 +92,11 @@ export default function PlayerProfile(): JSX.Element {
                 body: JSON.stringify({ name: selectedPlayer!.name, password }),
             });
             if (response.ok) {
+                setSelectedPlayer(selectedPlayer);
                 if (playerSelectionGame === 'Snake') {
-                    navigate(`./snakeGame?mode=2players&player2=${selectedPlayer!.name}`);
+                    navigate('./snakeGame?mode=2players');
                 } else {
-                    navigate(`./pongGame?mode=2players&player2=${selectedPlayer!.name}`);
+                    navigate('./pongGame?mode=2players');
                 }
             } else {
                 setPasswordError('Incorrect password. Please try again.');
@@ -277,7 +269,7 @@ export default function PlayerProfile(): JSX.Element {
                                     selectedParticipants={selectedTournamentParticipants}
                                     setSelectedParticipants={setSelectedTournamentParticipants}
                                     setVerifyingUser={setTournamentVerifyingUser}
-                                    user={currentUser}
+                                    user={user}
                                 />
                                 {tournamentVerifyingUser && (
                                     <PasswordVerification
