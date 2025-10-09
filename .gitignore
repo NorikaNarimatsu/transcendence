@@ -11,3 +11,4 @@ certs/
 *DS_Store
 *.log
 .vscode
+*.pem

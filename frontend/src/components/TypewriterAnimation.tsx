@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { sanitizeInput } from '../utils/sanitizeInput';
 
 interface TypewriterTextProps {
   text: string;
@@ -30,7 +31,7 @@ export default function TypewriterText({
     const startAnimation = () => {
       let index = 0;
       const timer = setInterval(() => {
-        setDisplayText(text.slice(0, index));
+        setDisplayText(sanitizeInput.escapeHtml(text.slice(0, index)));
         index++;
         if (index > text.length) {
           clearInterval(timer);
