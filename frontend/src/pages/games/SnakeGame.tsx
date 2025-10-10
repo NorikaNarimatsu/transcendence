@@ -24,8 +24,10 @@ export default function SnakeGame(): JSX.Element {
     // Initialize game engine
     useEffect(() => {
         const isMultiplayer = mode === '2players';
-        gameEngineRef.current = new SnakeGameEngine(isMultiplayer, user?.name || 'Player 1');
-    }, [mode, user?.name]);
+        const player1Name = user?.name || 'Player 1';
+        const player2Name = selectedPlayer?.name || 'Guest';
+        gameEngineRef.current = new SnakeGameEngine(isMultiplayer, player1Name, player2Name);
+    }, [mode, user?.name, selectedPlayer?.name]);
 
     // Game loop
     useEffect(() => {

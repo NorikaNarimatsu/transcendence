@@ -46,7 +46,7 @@ export default function PongGame(): JSX.Element {
       if (engineRef.current) {
         engineRef.current.stop();
         const leftPlayer = user?.name || 'Player 1';
-        const rightPlayer = mode === 'single' ? 'AI' : (selectedPlayer || 'Player 2');
+        const rightPlayer = mode === 'single' ? 'AI' : (selectedPlayer?.name || 'Player 2');
         engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayer, rightPlayer);
         engineRef.current.start();
       }
@@ -59,7 +59,7 @@ export default function PongGame(): JSX.Element {
   // Game engine and keyboard events
   useEffect(() => {
     const leftPlayer = user?.name || 'Player 1';
-    const rightPlayer = mode === 'single' ? 'AI' : (selectedPlayer || 'Player 2');
+    const rightPlayer = mode === 'single' ? 'AI' : (selectedPlayer?.name || 'Player 2');
     engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayer, rightPlayer);
 
     const handleKeyDown = (e: KeyboardEvent) => {
