@@ -1,13 +1,14 @@
 import type { JSX } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ButtonPurple from '../../components/ButtonPurple';
 import avatar2 from '../../assets/avatars/Avatar 2.png';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 
-import { SnakeGameEngine, GRID_SIZE_X, GRID_SIZE_Y, CELL_SIZE, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
+import { SnakeGameEngine, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
+import { calculateSnakeGameConfig, type SnakeGameConfig } from '../../gameEngines/SnakeConfig';
 
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();
@@ -18,16 +19,31 @@ export default function SnakeGame(): JSX.Element {
     const { selectedPlayer } = useSelectedPlayer();
 
     // Game engine reference
+    const [gameConfig, setGameConfig] = useState<SnakeGameConfig>(calculateSnakeGameConfig());
     const gameEngineRef = useRef<SnakeGameEngine | null>(null);
     const [, forceUpdate] = useState({});
+
 
     // Initialize game engine
     useEffect(() => {
         const isMultiplayer = mode === '2players';
         const player1Name = user?.name || 'Player 1';
         const player2Name = selectedPlayer?.name || 'Guest';
-        gameEngineRef.current = new SnakeGameEngine(isMultiplayer, player1Name, player2Name);
+        gameEngineRef.current = new SnakeGameEngine(gameConfig, isMultiplayer, player1Name, player2Name);
     }, [mode, user?.name, selectedPlayer?.name]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const newConfig = calculateSnakeGameConfig();
+            setGameConfig(newConfig);
+            if (gameEngineRef.current) {
+                gameEngineRef.current.updateConfig(newConfig);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Game loop
     useEffect(() => {
@@ -77,6 +93,8 @@ export default function SnakeGame(): JSX.Element {
                     <h1 className="player-name">{user.name}</h1>
                     <img src={user.avatar || avatar2} alt="Avatar" className="avatar" />
                 </div>
+
+                {/* Center Score */}
                 <div className="flex justify-center">
                     <p className="player-name">
                         {engine.isMultiplayer 
@@ -85,10 +103,14 @@ export default function SnakeGame(): JSX.Element {
                         }
                     </p>
                 </div>
+
+                {/* Second Player*/}
                 {engine.isMultiplayer && (
                     <div className="flex items-center justify-end gap-2">
                         <img src={selectedPlayer?.avatarUrl || avatar2 } alt="Avatar Player 2" className="avatar" />
-                        <h2 className="player-name">{selectedPlayer?.name || 'Guest'}</h2>
+                        <h2 className="player-name">
+                            {selectedPlayer?.name || 'Guest'}
+                        </h2>
                     </div>
                 )}
             </header>
@@ -98,8 +120,8 @@ export default function SnakeGame(): JSX.Element {
                 <div
                     className="relative bg-pink-light shadow-no-blur-70"
                     style={{
-                        width: GRID_SIZE_X * CELL_SIZE,
-                        height: GRID_SIZE_Y * CELL_SIZE,
+                        width: gameConfig.gameWidth,
+                        height: gameConfig.gameHeight,
                     }}
                 >
                     {/* Snake 1 */}
@@ -110,21 +132,21 @@ export default function SnakeGame(): JSX.Element {
                                 key={idx}
                                 className="snake snake-blue snake-border-pink absolute"
                                 style={{
-                                    left: seg.x * CELL_SIZE,
-                                    top: seg.y * CELL_SIZE,
-                                    width: CELL_SIZE,
-                                    height: CELL_SIZE,
+                                    left: seg.x * gameConfig.cellSize,
+                                    top: seg.y * gameConfig.cellSize,
+                                    width: gameConfig.cellSize,
+                                    height: gameConfig.cellSize,
                                     zIndex: 2,
                                 }}
                             >
                                 <div
                                     className="snake-head snake-head-pink absolute"
                                     style={{
-                                        left: 12,
+                                        left: gameConfig.cellSize * 0.25,
                                         top: '60%',
                                         transform: 'translateY(-70%)',
-                                        width: CELL_SIZE * 0.4,
-                                        height: CELL_SIZE * 0.4,
+                                        width: gameConfig.cellSize * 0.4,
+                                        height: gameConfig.cellSize * 0.4,
                                     }}
                                 />
                             </div>
@@ -134,10 +156,10 @@ export default function SnakeGame(): JSX.Element {
                                 key={idx}
                                 className="snake snake-blue snake-border-pink absolute"
                                 style={{
-                                    left: seg.x * CELL_SIZE,
-                                    top: seg.y * CELL_SIZE,
-                                    width: CELL_SIZE,
-                                    height: CELL_SIZE,
+                                    left: seg.x * gameConfig.cellSize,
+                                    top: seg.y * gameConfig.cellSize,
+                                    width: gameConfig.cellSize,
+                                    height: gameConfig.cellSize,
                                     zIndex: 1,
                                 }}
                             />
@@ -151,21 +173,21 @@ export default function SnakeGame(): JSX.Element {
                                 key={idx}
                                 className="snake snake-pink snake-border-blue absolute"
                                 style={{
-                                    left: seg.x * CELL_SIZE,
-                                    top: seg.y * CELL_SIZE,
-                                    width: CELL_SIZE,
-                                    height: CELL_SIZE,
+                                    left: seg.x * gameConfig.cellSize,
+                                    top: seg.y * gameConfig.cellSize,
+                                    width: gameConfig.cellSize,
+                                    height: gameConfig.cellSize,
                                     zIndex: 2,
                                 }}
                             >
                                 <div
                                     className="snake-head snake-head-blue absolute"
                                     style={{
-                                        left: 12,
+                                        left: gameConfig.cellSize * 0.25,
                                         top: '60%',
                                         transform: 'translateY(-70%)',
-                                        width: CELL_SIZE * 0.4,
-                                        height: CELL_SIZE * 0.4,
+                                        width: gameConfig.cellSize * 0.4,
+                                        height: gameConfig.cellSize * 0.4,
                                     }}
                                 />
                             </div>
@@ -174,10 +196,10 @@ export default function SnakeGame(): JSX.Element {
                                 key={idx}
                                 className="snake snake-pink snake-border-blue absolute"
                                 style={{
-                                    left: seg.x * CELL_SIZE,
-                                    top: seg.y * CELL_SIZE,
-                                    width: CELL_SIZE,
-                                    height: CELL_SIZE,
+                                    left: seg.x * gameConfig.cellSize,
+                                    top: seg.y * gameConfig.cellSize,
+                                    width: gameConfig.cellSize,
+                                    height: gameConfig.cellSize,
                                     zIndex: 1,
                                 }}
                             />
@@ -189,77 +211,50 @@ export default function SnakeGame(): JSX.Element {
                         className="snake-food"
                         style={{
                             position: 'absolute',
-                            left: engine.food.x * CELL_SIZE + 10,
-                            top: engine.food.y * CELL_SIZE + 10,
-                            width: CELL_SIZE * 0.6,
-                            height: CELL_SIZE * 0.6,
+                            left: engine.food.x * gameConfig.cellSize + gameConfig.cellSize * 0.2,
+                            top: engine.food.y * gameConfig.cellSize + gameConfig.cellSize * 0.2,
+                            width: gameConfig.cellSize * 0.6,
+                            height: gameConfig.cellSize * 0.6,
                             background: '#7c3aed',
                             zIndex: 3,
                         }}
                     />
 
-                    {/* Waiting to Start */}
+                   {/* Waiting to Start */}
                     {engine.waitingToStart && (
-                        <div
-                            style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#fff',
-                            fontSize: '5rem',
-                            zIndex: 10,
-                            }}
+                        <div 
+                            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                            style={{ zIndex: 100 }}
                         >
-                            Press Space to Start
+                            <p className="text-white text-2xl font-pixelify">
+                                Press SPACE to start
+                            </p>
                         </div>
                     )}
 
                     {/* Game Over Message */}
                     {engine.gameOver && (
-                        <div
-                            style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#fff',
-                            fontSize: '5rem',
-                            zIndex: 10,
-                            }}
+                        <div 
+                            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                            style={{ zIndex: 100 }}
                         >
-                            Game Over!
-                            {engine.isMultiplayer && (
-                                <div style={{ fontSize: '2rem' }}>
-                                    Winner: {engine.getWinnerName()}
+                            <div className="text-center">
+                                <p className="text-white text-4xl font-pixelify mb-6">
+                                    Game Over!
+                                </p>
+                                {engine.isMultiplayer && (
+                                    <div className="text-white text-2xl font-pixelify mb-4">
+                                        Winner: {engine.getWinnerName()}
+                                    </div>
+                                )}
+                                <div className="flex flex-col gap-4">
+                                    <p className="text-white text-xl font-pixelify opacity-75">
+                                        Press SPACE to play again
+                                    </p>
+                                    <ButtonPurple to="/playerProfile">
+                                        Return to Profile
+                                    </ButtonPurple>
                                 </div>
-                            )}
-                            <div style={{ fontSize: '1rem', marginTop: '2rem' }}>
-                                Press Space to Play Again
-                            </div>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    gap: '2rem',
-                                    marginTop: '2rem',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <ButtonPurple to="/playerProfile">
-                                    Return to Profile
-                                </ButtonPurple>
                             </div>
                         </div>
                     )}

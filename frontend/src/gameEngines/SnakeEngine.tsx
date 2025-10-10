@@ -1,14 +1,11 @@
-import { Snake, Position } from './SnakeConfig';
+import { Snake, type Position, type SnakeGameConfig } from './SnakeConfig';
 
-export const GRID_SIZE_X = 20;
-export const GRID_SIZE_Y = 12;
-export const CELL_SIZE = 50;
 export const SNAKE_VELOCITY = 200;
 
-export function getRandomPosition(): Position {
+export function getRandomPosition(config: SnakeGameConfig): Position {
     return {
-        x: Math.floor(Math.random() * GRID_SIZE_X),
-        y: Math.floor(Math.random() * GRID_SIZE_Y),
+        x: Math.floor(Math.random() * config.gridSizeX),
+        y: Math.floor(Math.random() * config.gridSizeY),
     };
 }
 
@@ -20,22 +17,43 @@ export class SnakeGameEngine {
     public waitingToStart: boolean;
     public winner: number | null;
     public isMultiplayer: boolean;
+    private config: SnakeGameConfig;
 
-    constructor(isMultiplayer: boolean = false, player1Name: string = 'Player 1', player2Name: string = 'Guest') {
-        this.snake1 = new Snake({ x: 10, y: 10 }, 'RIGHT', 'blue', player1Name);
-        this.snake2 = isMultiplayer ? new Snake({ x: 5, y: 5 }, 'LEFT', 'pink', player2Name) : null;
-        this.food = getRandomPosition();
+    constructor(config: SnakeGameConfig, isMultiplayer: boolean = false, player1Name: string = 'Player 1', player2Name: string = 'Guest') {
+        this.config = config;
+
+        // Snake 1 starts on the left side, upper position
+        this.snake1 = new Snake(
+            { x: Math.floor(config.gridSizeX * 0.25), y: Math.floor(config.gridSizeY * 0.3)}, 
+            'RIGHT', 
+            'blue', 
+            player1Name
+        );
+        
+        // Snake 2 starts on the right side, lower position (if multiplayer)
+        this.snake2 = isMultiplayer ? new Snake(
+            { x: Math.floor(config.gridSizeX * 0.75), y: Math.floor(config.gridSizeY * 0.7)}, 
+            'LEFT', 
+            'pink', 
+            player2Name
+        ) : null;
+
+        this.food = getRandomPosition(config);
         this.gameOver = false;
         this.waitingToStart = true;
         this.winner = null;
         this.isMultiplayer = isMultiplayer;
     }
 
+    public updateConfig (newConfig: SnakeGameConfig): void {
+        this.config = newConfig;
+    }
+
     private isValidPosition(position: Position): boolean {
         return position.x >= 0 && 
-               position.x < GRID_SIZE_X && 
+               position.x < this.config.gridSizeX && 
                position.y >= 0 && 
-               position.y < GRID_SIZE_Y;
+               position.y < this.config.gridSizeY;
     }
 
     private checkFoodCollision(position: Position): boolean {
@@ -60,7 +78,7 @@ export class SnakeGameEngine {
         const ateFood = this.checkFoodCollision(nextPosition);
         if (ateFood) {
             snake.incrementScore();
-            this.food = getRandomPosition();
+            this.food = getRandomPosition(this.config);
         }
 
         snake.move(ateFood);
@@ -94,12 +112,14 @@ export class SnakeGameEngine {
         this.waitingToStart = false;
         this.gameOver = false;
         this.winner = null;
-        this.food = getRandomPosition();
+        this.food = getRandomPosition(this.config);
 
-        // Reset snakes
-        this.snake1.reset({ x: 5, y: 5 }, 'RIGHT');
+        // Reset snakes to center positions
+        const centerY = Math.floor(this.config.gridSizeY / 2);
+        
+        this.snake1.reset({ x: Math.floor(this.config.gridSizeX * 0.25), y: centerY }, 'RIGHT');
         if (this.snake2) {
-            this.snake2.reset({ x: 10, y: 10 }, 'LEFT');
+            this.snake2.reset({ x: Math.floor(this.config.gridSizeX * 0.75), y: centerY }, 'LEFT');
         }
     }
 
@@ -144,5 +164,9 @@ export class SnakeGameEngine {
         if (this.winner === 2) return this.snake2?.name || 'Guest';
         
         return '';
+    }
+
+    public getConfig(): SnakeGameConfig {
+        return this.config;
     }
 }

@@ -1,6 +1,52 @@
 export type Position = { x: number; y: number };
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
+export interface SnakeGameConfig {
+    gameWidth: number;
+    gameHeight: number;
+    gridSizeX: number;
+    gridSizeY: number;
+    cellSize: number;
+}
+
+// Function to calculate snake game config based on screen size
+export const calculateSnakeGameConfig = (): SnakeGameConfig => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    // Reserve space for header (160px) and footer (160px)
+    const availableHeight = screenHeight - 320;
+    
+    const maxWidth = Math.min(screenWidth * 0.8, 1200);
+    const maxHeight = Math.min(availableHeight * 0.8, 700);
+    
+    // Keep aspect ratio similar to original (20x12 grid)
+    const aspectRatio = 20 / 12;
+    
+    let gameWidth, gameHeight;
+    if (maxWidth / maxHeight > aspectRatio) {
+        gameHeight = maxHeight;
+        gameWidth = gameHeight * aspectRatio;
+    } else {
+        gameWidth = maxWidth;
+        gameHeight = gameWidth / aspectRatio;
+    }
+    
+    // Calculate grid size to maintain reasonable cell count
+    const gridSizeX = 20; // Keep original grid size
+    const gridSizeY = 12;
+    
+    const cellSize = Math.floor(Math.min(gameWidth / gridSizeX, gameHeight / gridSizeY));
+    
+    return {
+        gameWidth: cellSize * gridSizeX,
+        gameHeight: cellSize * gridSizeY,
+        gridSizeX,
+        gridSizeY,
+        cellSize
+    };
+};
+
 export class Snake {
     public body: Position[];
     public direction: Direction;
