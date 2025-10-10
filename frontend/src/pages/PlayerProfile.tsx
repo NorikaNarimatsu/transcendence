@@ -12,6 +12,8 @@ import { PlayerSelection } from '../components/profilePlayerSelection';
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
 import { useSelectedPlayer } from './user/PlayerContext';
+import { DeleteAccount } from './user/DeleteUser';
+
 
 export default function PlayerProfile(): JSX.Element {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -32,6 +34,8 @@ export default function PlayerProfile(): JSX.Element {
     const [showAddFriends, setShowAddFriends] = useState(false);
     const [users, setUsers] = useState<SelectedPlayer[]>([]);
     const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
+
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
@@ -178,7 +182,7 @@ export default function PlayerProfile(): JSX.Element {
                 ];
             case 'Settings':
                 return [
-                    { name: 'Delete Account', action: () => console.log('Deleting account') },
+                    { name: 'Delete Account', action: () => setShowDeleteConfirmation(true) },
                     { name: 'Update data', action: () => console.log('Updating account data') },
                     { name: 'Preference', action: () => console.log('customizing preference') },
                     { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
@@ -225,6 +229,11 @@ export default function PlayerProfile(): JSX.Element {
                             ]}
                         />
                     </div>
+                    {/* Delete Account Modal */}
+                    <DeleteAccount 
+                        open={showDeleteConfirmation}
+                        onClose={() => setShowDeleteConfirmation(false)}
+                    />
                     {/* RIGHT SIDE: Content Box */}
                     <div
                         className="w-[350px] h-[500px] overflow-hidden bg-cover bg-center relative border-img"

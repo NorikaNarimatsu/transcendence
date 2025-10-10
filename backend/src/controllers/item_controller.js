@@ -402,7 +402,11 @@ export const getAllUsersExceptCurrent = async (request, response) => {
 		const sanitizedEmail = sanitizeInput.sanitizeEmail(email);
 		const users = db
 			.prepare(
-			"SELECT id, name, avatarUrl FROM users WHERE email != ? ORDER BY name"
+			`SELECT id, name, avatarUrl
+				FROM users
+				WHERE email != ?
+				AND name NOT LIKE 'deleted_user_%'
+				ORDER BY name`
 			)
 			.all(sanitizedEmail);
 			const sanitiziedUsers = users.map(user => ({
