@@ -1,6 +1,7 @@
 import { getItem, getItems, addItem, deleteItem, updateItem } from '../controllers/item_controller.js'
 import itemController from '../controllers/item_controller.js'
 import userController from '../controllers/user_controller.js';
+import gameController from '../controllers/game_controller.js';
 
 
 // Item schema
@@ -77,23 +78,32 @@ const updateItemOpts = {
 
 
 export default async function itemRoutes(fastify, options) {
-    fastify.get('/items', itemController.getItems);
-    fastify.get('/items/:id', itemController.getItem);
-    fastify.post('/items', itemController.addItem);
-    fastify.put('/items/:id', itemController.updateItem);
-    fastify.delete('/items/:id', itemController.deleteItem);
+    fastify.get('/items', itemController.getItems); //should be deleted later
+    fastify.get('/items/:id', itemController.getItem); //should be deleted later
+    fastify.post('/items', itemController.addItem); //should be deleted later
+    fastify.put('/items/:id', itemController.updateItem); //should be deleted later
+    fastify.delete('/items/:id', itemController.deleteItem); //should be deleted later
 
     fastify.post('/validateName', itemController.validateName);
     fastify.post('/validateEmail', itemController.validateEmail);
     fastify.post('/validatePasswordbyEmail', itemController.validatePasswordbyEmail);
     fastify.post('/validatePasswordbyName', itemController.validatePasswordbyName);
+
     fastify.post('/addNewUser', itemController.addNewUser);
+
     fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
     fastify.get('/getUserInfoByEmail/:email', itemController.getUserInfoByEmail);
-    fastify.get('/api/user/profile', userController.getProfile);
-    fastify.post('/api/user/anonymize', userController.anonymizeUser);
+    
     fastify.get('/listUsers', itemController.getAllUsers);
     fastify.get('/users/except/:email', itemController.getAllUsersExceptCurrent);
+
     fastify.post('/friends/add', itemController.addFriend);
     fastify.get('/friends/name/:name', itemController.getUserFriends);
+    
+    fastify.get('/api/user/profile', userController.getProfile);
+    fastify.post('/api/user/anonymize', userController.anonymizeUser);
+
+    fastify.post('/matches/add', gameController.addMatch);
+    fastify.get('/matches/user/:name', gameController.getUserMatches);
+    fastify.get('/stats/user/:name', gameController.getUserStats);
 }

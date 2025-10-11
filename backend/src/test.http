@@ -42,7 +42,7 @@ Content-Type: application/json
 # docker exec -it backend /bin/sh
 
 # # Navigate to database directory
-# cd /app/src/database/db
+# cd /app/src/database/
 
 # # Open SQLite shell
 # sqlite3 transcendence.
@@ -54,6 +54,7 @@ Content-Type: application/json
 # /app/src/database/db # sqlite3 transcendence.db
 # SQLite version 3.49.2 2025-05-07 10:39:52
 # Enter ".help" for usage hints.
+# sqlite> .tables
 # sqlite> .mode column
 # sqlite> .headers on
 # sqlite> SELECT * FROM items;

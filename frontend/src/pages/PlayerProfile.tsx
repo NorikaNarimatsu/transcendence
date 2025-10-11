@@ -8,7 +8,6 @@ import AvatarSelection from '../components/AvatarSelection';
 import { TournamentRegistration } from '../components/profileTournamentRegistration';
 import { PasswordVerification } from '../components/profilePasswordVerification';
 import { CategoryButtons } from '../components/profileCategoryButtons';
-import { AddFriends } from '../components/profileAddFriends';
 import { PlayerSelection } from '../components/profilePlayerSelection';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import { FriendsManager } from '../components/FriendsManager';

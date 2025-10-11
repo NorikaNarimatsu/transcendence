@@ -1,15 +1,10 @@
 import { useState, forwardRef, useImperativeHandle } from 'react';
 import { AddFriends } from './profileAddFriends';
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
-
-interface User {
-    name: string;
-    email: string;
-    avatar: string;
-}
+import type { User } from '../pages/user/UserContext'; 
 
 interface FriendsManagerProps {
-    user: User;
+    user: User;  // Now using the official User type
     allUsers: SelectedPlayer[];
     setAllUsers: (users: SelectedPlayer[]) => void;
 }
