@@ -2,7 +2,6 @@ import type { JSX } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ButtonPurple from '../../components/ButtonPurple';
-import ButtonPink from '../../components/ButtonDarkPink';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 
@@ -107,7 +106,7 @@ export default function SnakeGame(): JSX.Element {
                 {/* Second Player*/}
                 {engine.isMultiplayer && (
                     <div className="flex items-center justify-end gap-2">
-                        <img src={selectedPlayer?.avatarUrl} alt="Avatar Player 2" className="avatar" />
+                        <img src={selectedPlayer?.avatarUrl || '/avatars/Avatar_2.png' } alt="Avatar Player 2" className="avatar" />
                         <h2 className="player-name">
                             {selectedPlayer?.name || 'Guest'}
                         </h2>
