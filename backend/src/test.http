@@ -39,22 +39,12 @@ Content-Type: application/json
 
 
 //# Enter the backend container
+
 # docker exec -it backend /bin/sh
-
-# # Navigate to database directory
-# cd /app/src/database/
-
-# # Open SQLite shell
-# sqlite3 transcendence.
-
-# norika_machome@macbookpro transcendence_sep3 % docker exec -it backend /bin/sh
-
-# /app # cd /app/src/database/db
-# /app/src/database/db # 
-# /app/src/database/db # sqlite3 transcendence.db
-# SQLite version 3.49.2 2025-05-07 10:39:52
-# Enter ".help" for usage hints.
-# sqlite> .tables
-# sqlite> .mode column
-# sqlite> .headers on
-# sqlite> SELECT * FROM items;
+# cd src/database/
+# sqlite3 transcendence.db
+# .tables
+# .mode column
+# .headers on
+# SELECT * FROM users;
+# SELECT * FROM friends;
