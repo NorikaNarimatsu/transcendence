@@ -83,8 +83,7 @@ export default async function itemRoutes(fastify, options) {
     fastify.put('/items/:id', itemController.updateItem);
     fastify.delete('/items/:id', itemController.deleteItem);
 
-
-    fastify.post('/validate-name', itemController.validateName);
+    fastify.post('/validateName', itemController.validateName);
     fastify.post('/validateEmail', itemController.validateEmail);
     fastify.post('/validatePasswordbyEmail', itemController.validatePasswordbyEmail);
     fastify.post('/validatePasswordbyName', itemController.validatePasswordbyName);
@@ -95,5 +94,6 @@ export default async function itemRoutes(fastify, options) {
     fastify.post('/api/user/anonymize', userController.anonymizeUser);
     fastify.get('/listUsers', itemController.getAllUsers);
     fastify.get('/users/except/:email', itemController.getAllUsersExceptCurrent);
-
+    fastify.post('/friends/add', itemController.addFriend);
+    fastify.get('/friends/name/:name', itemController.getUserFriends);
 }

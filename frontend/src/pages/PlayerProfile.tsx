@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import bgimage from '../assets/Player_Page.jpg';
 import arrow_icon from '../assets/icons/arrow.png';
@@ -11,12 +11,12 @@ import { CategoryButtons } from '../components/profileCategoryButtons';
 import { AddFriends } from '../components/profileAddFriends';
 import { PlayerSelection } from '../components/profilePlayerSelection';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
+import { FriendsManager } from '../components/FriendsManager';
 
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
 import { useSelectedPlayer } from './user/PlayerContext';
 import { DeleteAccount } from './user/DeleteUser';
-
 
 export default function PlayerProfile(): JSX.Element {
     const [isOpen, setIsOpen] = useState(false);
@@ -36,12 +36,12 @@ export default function PlayerProfile(): JSX.Element {
     const [tournamentVerifyPassword, setTournamentVerifyPassword] = useState('');
     const [tournamentVerifyError, setTournamentVerifyError] = useState('');
     
-    const [showAddFriends, setShowAddFriends] = useState(false);
     const [users, setUsers] = useState<SelectedPlayer[]>([]);
     const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
 
+    const friendsManagerRef = useRef<any>(null);
+
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-	
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     const navigate = useNavigate();
@@ -167,20 +167,8 @@ export default function PlayerProfile(): JSX.Element {
                 ];
             case 'Friends':
                 return [
-                    { name: 'See Friends', action: () => console.log('See Friends') },
-                    { name: 'Add Friend', action: async () => {
-                        setShowAddFriends(true);
-                        try {
-                            const response = await fetch(`https://localhost:8443/users/except/${encodeURIComponent(user.email)}`);
-                            if (response.ok) {
-                                const users = await response.json();
-                                setAllUsers(users);
-                            }
-                        } catch (error) {
-                            console.error('Failed to fetch users:', error);
-                        }
-                    }},
-                    { name: 'Friend Requests', action: () => console.log('Friends Requests')}
+                    { name: 'See Friends', action: () => friendsManagerRef.current?.handleSeeFriends() },
+                    { name: 'Add Friend', action: () => friendsManagerRef.current?.handleAddFriendsClick() }
                 ];
             case 'Scores':
                 return [
@@ -323,15 +311,13 @@ export default function PlayerProfile(): JSX.Element {
                                     ))}
                                 </div>
                             )}
-                            {/* Add Friends Modal */}
-                            {showAddFriends && (
-                                <AddFriends
-                                    open={showAddFriends}
-                                    allUsers={allUsers}
-                                    onSendRequest={user => alert(`Friend request sent to ${user.name}`)}
-                                    onClose={() => setShowAddFriends(false)}
-                                />
-                            )}
+                            {/* Friends Manager Component */}
+                            <FriendsManager 
+                                ref={friendsManagerRef}
+                                user={user}
+                                allUsers={allUsers}
+                                setAllUsers={setAllUsers}
+                            />
                         </div>
                     </div>
                 </div>

@@ -118,7 +118,7 @@
     
 // //     try {
 // //       // fetch() creates HTTPS POST request (Request includes headers and body)
-// //       const response = await fetch('https://localhost:8443/validate-name', {
+// //       const response = await fetch('https://localhost:8443/', {
 // //         method: 'POST',
 // //         headers: {
 // //           'Content-Type': 'application/json',

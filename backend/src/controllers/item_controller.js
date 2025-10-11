@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { db } from "../server.js";
 import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 import { sanitizeInput } from "../utils/sanitizeInput.js";
@@ -22,11 +21,11 @@ export function getItems(request, response) {
 		const items = db.prepare("SELECT * FROM users").all();
 
 		const sanitiziedItems = items.map(item => ({
-			id: item.id,
+			id: item.userID,
 			name: sanitizeInput.sanitizeUsername(item.name),
 			email: sanitizeInput.sanitizeEmail(item.email),
 			avatarUrl: item.avatarUrl,
-			created_at: item.created_at
+			createdAt: item.createdAt
 		}))
 		response.send(sanitiziedItems);
 
@@ -44,16 +43,16 @@ export function getItem(request, response) {
 		return response.code(400).send({ error: "Invalid or missing id" });
 		}
 
-		const item = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+		const item = db.prepare("SELECT * FROM users WHERE userID = ?").get(id);
 		if (!item) {
 		response.code(404).send({ error: "Item not found" });
 		} else {
 		response.send({
-			id: item.id,
+			id: item.userID,
 			name: sanitizeInput.sanitizeUsername(item.name),
 			email: sanitizeInput.sanitizeEmail(item.email),
 			avatarUrl: item.avatarUrl,
-			created_at: item.created_at
+			createdAt: item.createdAt
 			});
 		}
 	} catch (error) {
@@ -63,14 +62,6 @@ export function getItem(request, response) {
 }
 ////////////////////////////// POST //////////////////////////////
 
-// export function addItem(request, response) {
-//   const { name, email, password } = request.body;
-//   const finalAvatarUrl = avatarUrl || avatars[Math.floor(Math.random() * avatars.length)];
-//   const uuid = uuidv4(); // Generate a unique UUID
-//   const responseult = db.prepare('INSERT INTO items (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, password, finalAvatarUrl);
-//   response.code(201).send({ id: responseult.lastInsertRowid, name , email, avatarUrl: finalAvatarUrl, created_at: new Date().toISOString()});
-// };
-
 export function addItem(request, response) {
 	const { name, email, password } = request.body;
 
@@ -78,18 +69,18 @@ export function addItem(request, response) {
 	const sanitiziedEmail = sanitizeInput.sanitizeEmail(email);
 
 	const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
-	const uuid = uuidv4(); // Generate a unique UUID
+	const createdAt = new Date().toISOString();
 	const result = db
 	.prepare(
-		"INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)"
+		"INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)"
 	)
-	.run(uuid, sanitiziedName, sanitiziedEmail, password, randomAvatarUrl);
+	.run(sanitiziedName, sanitiziedEmail, password, randomAvatarUrl, createdAt);
 	response.code(201).send({
 	id: result.lastInsertRowid,
 	name: sanitiziedName,
 	email: sanitiziedEmail,
 	avatarUrl: randomAvatarUrl,
-	created_at: new Date().toISOString(),
+	createdAt: createdAt,
 	});
 }
 
@@ -111,7 +102,7 @@ export function updateItem(request, response) {
 
     const responseult = db
       .prepare(
-        "UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE id = ?"
+        "UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE userID = ?"
       )
       .run(sanitiziedName, avatarUrl, id);
     if (responseult.changes === 0) {
@@ -142,7 +133,7 @@ export function deleteItem(request, response) {
 			return response.code(400).send({ error: "Invalid or missing id" });
 		}
 	
-		const responseult = db.prepare("DELETE FROM users WHERE id = ?").run(parseInt(id));
+		const responseult = db.prepare("DELETE FROM users WHERE userID = ?").run(parseInt(id));
 		if (responseult.changes === 0) {
 		response.code(404).send({ error: "Item not found" });
 		} else {
@@ -214,7 +205,7 @@ export const validateName = async (request, response) => {
 
 // Frontend                        Backend
 //    |                               |
-//    |-- POST /validate-name ------->|
+//    |-- POST /validateName ------->|
 //    |   { "name": "Norika" }        |
 //    |                               |
 //    |                         Validates name
@@ -308,25 +299,25 @@ export async function addNewUser(request, response) {
 	
 	const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
     const hashedPassword = await hashPassword(password);
-    const uuid = uuidv4(); // Generate a unique UUID
+    const createdAt = new Date().toISOString();
 
     const result = db
       .prepare(
-        "INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)"
       )
       .run(
-        uuid,
         sanitizedName,
         sanitizedEmail,
         hashedPassword,
-        randomAvatarUrl
+        randomAvatarUrl,
+        createdAt
       );
     response.code(201).send({
       id: result.lastInsertRowid,
       name: sanitizedName,
       email: sanitizedEmail,
       avatarUrl: randomAvatarUrl,
-      created_at: new Date().toISOString(),
+      created_at: createdAt,
     });
   } catch (error) {
     request.log.error("Failed to add new user:", error);
@@ -385,7 +376,7 @@ export const getUserInfoByEmail = async (request, reply) => {
 export const getAllUsers = async (request, response) => {
 	try {
 		const users = db
-			.prepare("SELECT id, name, avatarUrl FROM users ORDER BY name")
+			.prepare("SELECT userID, name, avatarUrl FROM users ORDER BY name")
 			.all();
 		return response.code(200).send(users);
 	} catch (error) {
@@ -402,7 +393,7 @@ export const getAllUsersExceptCurrent = async (request, response) => {
 		const sanitizedEmail = sanitizeInput.sanitizeEmail(email);
 		const users = db
 			.prepare(
-			`SELECT id, name, avatarUrl
+			`SELECT userID, name, avatarUrl
 				FROM users
 				WHERE email != ?
 				AND name NOT LIKE 'deleted_user_%'
@@ -410,7 +401,7 @@ export const getAllUsersExceptCurrent = async (request, response) => {
 			)
 			.all(sanitizedEmail);
 			const sanitiziedUsers = users.map(user => ({
-				id: user.id,
+				id: user.userID,
 				name: sanitizeInput.sanitizeUsername(user.name),
 				avatarUrl: user.avatarUrl
 			}))
@@ -421,6 +412,93 @@ export const getAllUsersExceptCurrent = async (request, response) => {
 			message: "Internal server error",
 		});
 	}
+};
+
+// Add a friend (one-sided) - using username
+export const addFriend = async (request, response) => {
+    try {
+        const { userName, friendUserID } = request.body;
+
+        if (!userName || !friendUserID) {
+            return response.code(400).send({ message: "User name and friend user ID are required" });
+        }
+        const sanitizedName = sanitizeInput.sanitizeUsername(userName);
+        // Get the user who is adding the friend
+        const user = db.prepare("SELECT userID FROM users WHERE name = ?").get(sanitizedName);
+        if (!user) {
+            return response.code(404).send({ message: "User not found" });
+        }
+        // Check if friend exists
+        const friend = db.prepare("SELECT userID FROM users WHERE userID = ?").get(friendUserID);
+        if (!friend) {
+            return response.code(404).send({ message: "Friend not found" });
+        }
+        // Check if user is trying to add themselves
+        if (user.userID === friendUserID) {
+            return response.code(400).send({ message: "Cannot add yourself as a friend" });
+        }
+        // Check if friendship already exists
+        const existingFriendship = db.prepare(
+            "SELECT * FROM friends WHERE user1ID = ? AND user2ID = ?"
+        ).get(user.userID, friendUserID);
+
+        if (existingFriendship) {
+            return response.code(409).send({ message: "Already friends" });
+        }
+        // Add the friendship
+        const registeredAt = new Date().toISOString();
+        const result = db.prepare(
+            "INSERT INTO friends (user1ID, user2ID, registeredAt) VALUES (?, ?, ?)"
+        ).run(user.userID, friendUserID, registeredAt);
+        return response.code(201).send({ 
+            message: "Friend added successfully",
+            friendshipID: result.lastInsertRowid 
+        });
+    } catch (error) {
+        request.log.error("addFriend error: ", error);
+        return response.code(500).send({ message: "Internal server error" });
+    }
+};
+
+// Get user's friends list - using username
+export const getUserFriends = async (request, response) => {
+    try {
+        const { name } = request.params;
+        
+        if (!name) {
+            return response.code(400).send({ message: "Name parameter is required" });
+        }
+
+        const sanitizedName = sanitizeInput.sanitizeUsername(name);
+
+        // Get user ID
+        const user = db.prepare("SELECT userID FROM users WHERE name = ?").get(sanitizedName);
+        if (!user) {
+            return response.code(404).send({ message: "User not found" });
+        }
+
+        // Get friends with their info
+        const friends = db.prepare(`
+            SELECT u.userID, u.name, u.avatarUrl, f.registeredAt
+            FROM friends f
+            JOIN users u ON f.user2ID = u.userID
+            WHERE f.user1ID = ?
+            ORDER BY u.name
+        `).all(user.userID);
+
+        const sanitizedFriends = friends.map(friend => ({
+            userID: friend.userID,
+            name: sanitizeInput.sanitizeUsername(friend.name),
+            avatarUrl: friend.avatarUrl,
+            registeredAt: friend.registeredAt
+        }));
+
+        return response.code(200).send(sanitizedFriends);
+
+    } catch (error) {
+        request.log.error("getUserFriends error: ", error);
+        return response.code(500).send({ message: "Internal server error" });
+    }
 };
 
 ////////////////////////////// CONTROLLER //////////////////////////////
@@ -441,6 +519,8 @@ const itemController = {
   getAllUsers,
   getUserInfoByEmail,
   getAllUsersExceptCurrent,
+  addFriend,
+  getUserFriends,
 };
 
 export default itemController;

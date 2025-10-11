@@ -1,6 +1,6 @@
 Nickname: 
 - No Space -> Done @Eduarda
-- Check for unique Nickname
+- Check for unique Nickname 
 
 Avators;
 - Include all Avatars. (Update PongGame file to not hardcode include avatars but to fetch them from the backend/database). -> Done @Eduarda

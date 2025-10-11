@@ -30,7 +30,7 @@ Content-Type: application/json
 }
 
 ### ADD WITH VALIDATION ITEM
-POST https://localhost:8443/validate-name
+POST https://localhost:8443/validateName
 Content-Type: application/json
 
 {
