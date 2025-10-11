@@ -8,6 +8,7 @@ import eye_icon from '../../assets/icons/eye.png';
 import arrow_icon from '../../assets/icons/arrow.png';
 import { validatePasswordRealTime } from '../../utils/passwordValidation';
 import SafeError from '../../components/SafeError';
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 
 	export default function signupUnkownUser() {
 	const location = useLocation();
@@ -21,6 +22,8 @@ import SafeError from '../../components/SafeError';
 	const [passwordError, setPasswordError] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [nameAvailable, setNameAvailable] = useState(false);
+	const [privacyAccepted, setPrivacyAccepted] = useState(false);
+	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
 	const handleNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
@@ -94,6 +97,11 @@ import SafeError from '../../components/SafeError';
 	const handleSubmit = async (e: React.FormEvent) => {
 	e.preventDefault();
 	setError('');
+
+	if (!privacyAccepted) {
+		setError('You must accept the Privacy Policy to continue.');
+		return;
+	}
 
 	if (nameError || passwordError) {
 		setError('Please fix the errors before submitting the form.');
@@ -190,7 +198,34 @@ import SafeError from '../../components/SafeError';
 					required
 				/>
 				
-				<SafeError error={passwordError} className="absolute left-0 top-full mt-1 text-xs" />
+				<SafeError 
+					error={passwordError} 
+					className="absolute left-0 top-full mt-1 text-xs"
+					sanitize={false} />
+				</div>
+
+
+				<div className="mb-4">
+					<div className="flex items-start gap-3">
+						<input
+							type="checkbox"
+							id="privacy-checkbox"
+							checked={privacyAccepted}
+							onChange={(e) => setPrivacyAccepted(e.target.checked)}
+							className="mt-1 h-5 w-5 cursor-pointer accent-purple-game border-2 border-black shadow-no-blur-50-reverse-no-active"
+							required
+						/>
+						<label htmlFor="privacy-checkbox" className="text-blue-deep font-dotgothic text-sm leading-tight">
+							I have read and agreed to the{' '}
+							<button
+								type="button"
+								onClick={() => setShowPrivacyModal(true)}
+								className="text-purple-game underline font-bold hover:text-purple-700 transition-colors"
+							>
+								Privacy Policy
+							</button>
+						</label>
+					</div>
 				</div>
 
 				<SafeError error={error} className="mt-2" />
@@ -199,7 +234,7 @@ import SafeError from '../../components/SafeError';
 				{/* <button type="submit" className="w-full"> */}
 				<ButtonPurple 
 				type='submit'
-				disabled={!nameAvailable || !!nameError || !!passwordError}
+				disabled={!nameAvailable || !!nameError || !!passwordError || !privacyAccepted}
 				>
 					<span className="flex items-center justify-end gap-2">
 					Continue
@@ -216,6 +251,12 @@ import SafeError from '../../components/SafeError';
 			</section>
 		</div>
 		</div>
+
+		{/* Privacy Policy Modal */}
+		<PrivacyPolicyModal
+			isOpen={showPrivacyModal}
+			onClose={() => setShowPrivacyModal(false)}
+		/>
 	</main>
 	);
 }

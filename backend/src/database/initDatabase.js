@@ -4,11 +4,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { v4 as uuidv4 } from 'uuid'; //delete later
+import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export function initializeDatabase() {
+export async function initializeDatabase() {
 
     const databaseFolderPath = __dirname;
     if (!fs.existsSync(databaseFolderPath)) {
@@ -59,10 +60,11 @@ export function initializeDatabase() {
             const name = `test${i}`;
             const email = `test${i}@gmail.com`;
             const password = `test${i}`; // Same as username
+            const hashpassword = await hashPassword(password);
             const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
 
             try {
-                insertUser.run(uuid, name, email, password, randomAvatarUrl);
+                insertUser.run(uuid, name, email, hashpassword, randomAvatarUrl);
                 console.log(`Test user ${name} created successfully with avatar: ${randomAvatarUrl}`);
             } catch (error) {
                 console.error(`Error creating test user ${name}:`, error);

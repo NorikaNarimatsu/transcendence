@@ -8,7 +8,7 @@ import { initializeDatabase } from './database/initDatabase.js';
 
 
 const PORT = Number(process.env.PORT || 8443);
-export const db = initializeDatabase();
+export const db = await initializeDatabase();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

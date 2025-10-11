@@ -13,6 +13,7 @@ import TournamentTree from './pages/tournament/tournamentTree.tsx'
 import Bracket from './pages/tournament/tournamentBracket.tsx'
 
 import { UserProvider } from './pages/user/UserContext'
+import { SelectedPlayerProvider } from './pages/user/PlayerContext'
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
@@ -29,7 +30,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <UserProvider>
-      <RouterProvider router={router} />
+        <SelectedPlayerProvider>
+                <RouterProvider router={router} />
+        </SelectedPlayerProvider>
     </UserProvider>
   </React.StrictMode>,
 )

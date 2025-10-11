@@ -1,69 +1,71 @@
-import signup_image from '../../assets/SignUp.jpg';
-import ButtonPurple from '../../components/ButtonPurple'
-import mail_icon from '../../assets/icons/mail.png'
-import arrow_icon from '../../assets/icons/arrow.png'
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '../user/UserContext';
-import { sanitizeEmail, getEmailErrorMessage } from '../../utils/emailValidation';
-import SafeError from '../../components/SafeError';
+import signup_image from "../../assets/SignUp.jpg";
+import ButtonPurple from "../../components/ButtonPurple";
+import mail_icon from "../../assets/icons/mail.png";
+import arrow_icon from "../../assets/icons/arrow.png";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../user/UserContext";
+import {
+  sanitizeEmail,
+  getEmailErrorMessage,
+} from "../../utils/emailValidation";
+import SafeError from "../../components/SafeError";
 
-export default function SignUp(){
-	const [email, setEmail] = useState('');
-	const [error, setError] = useState('');
-	const [emailError, setEmailError] = useState('');
-	const navigate = useNavigate();
-	const { logout } = useUser();
+export default function SignUp() {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const navigate = useNavigate();
+  const { logout } = useUser();
 
-	useEffect(() => {
-		logout(); // This will clear user state and localStorage
-	}, [logout]);
+  useEffect(() => {
+    logout(); // This will clear user state and localStorage
+  }, [logout]);
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
 
-	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const newEmail = e.target.value;
-		setEmail(newEmail);
+    //real-time validation
+    const errorMessage = getEmailErrorMessage(newEmail);
+    setEmailError(errorMessage);
+  };
 
-		//real-time validation
-		const errorMessage = getEmailErrorMessage(newEmail);
-		setEmailError(errorMessage);
-	};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError('');
+    const errorMessage = getEmailErrorMessage(email);
+    if (errorMessage) {
+      setEmailError(errorMessage);
+      return;
+    }
 
-		const errorMessage = getEmailErrorMessage(email);
-		if (errorMessage) {
-			setEmailError(errorMessage);
-			return;
-		}
+    const sanitizedEmail = sanitizeEmail(email);
 
-		const sanitizedEmail = sanitizeEmail(email);
+    try {
+      const response = await fetch("https://localhost:8443/validateEmail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: sanitizedEmail }),
+      });
+      const data = await response.json();
+      if (response.status === 200) {
+        navigate("/signupUnkownUser", { state: { email: sanitizedEmail } });
+      } else if (response.status === 409) {
+        navigate("/login", { state: { email: sanitizedEmail } });
+      } else {
+        setError(data.message || "Validation failed");
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Failed to validate email");
+    }
+  };
 
-		try {
-			const response = await fetch("https://localhost:8443/validateEmail", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ sanitizedEmail }),
-			});
-			const data = await response.json();
-			if (response.status === 200) {
-				navigate('/signupUnkownUser', { state: { email: sanitizedEmail } });
-			} else if (response.status === 409) {
-				navigate('/login', { state: { email: sanitizedEmail } });
-			} else {
-				setError(data.message || "Validation failed");
-			}
-		} catch (err) {
-			console.error('Fetch error:', err);
-			setError('Failed to validate email');
-		}
-	};
-  
-	return (
+  return (
     <main className="min-h-screen flex flex-col">
       <div className="flex-1 bg-pink-grid flex items-center justify-center">
         <div className="bg-pink-dark shadow-no-blur-70 flex m-8 overflow-hidden">

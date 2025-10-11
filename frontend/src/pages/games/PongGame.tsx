@@ -5,28 +5,30 @@ import { PongEngine } from '../../gameEngines/PongEngine';
 import type { GameState, GameConfig } from '../../gameEngines/PongEngine';
 import { calculateGameConfig } from '../../gameEngines/pongConfig';
 import { useUser } from '../user/UserContext';
+import { useSelectedPlayer } from '../user/PlayerContext';
+
 
 export default function PongGame(): JSX.Element {
-  const { user } = useUser();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const params = new URLSearchParams(location.search);
-  const mode = params.get('mode') || 'single'; // 'single', '2players', 'tournament'
-  const player2 = params.get('player2'); // for 2players mode
-  const players = params.get('players'); // for tournament mode
+    const { user } = useUser();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const params = new URLSearchParams(location.search);
+    const mode = params.get('mode') || 'single'; // 'single', '2players', 'tournament'
+    const players = params.get('players'); // for tournament mode
+    const { selectedPlayer } = useSelectedPlayer();
 
-  const [gameConfig, setGameConfig] = useState<GameConfig>(calculateGameConfig());
-  const [gameState, setGameState] = useState<GameState>({
-    leftPaddleY: (gameConfig.gameHeight - gameConfig.paddleHeight) / 2,
-    rightPaddleY: (gameConfig.gameHeight - gameConfig.paddleHeight) / 2,
-    ballX: (gameConfig.gameWidth - gameConfig.ballSize) / 2,
-    ballY: (gameConfig.gameHeight - gameConfig.ballSize) / 2,
-    leftScore: 0,
-    rightScore: 0,
-    gameStarted: false,
-    gameEnded: false,
-    winner: ''
-  });
+    const [gameConfig, setGameConfig] = useState<GameConfig>(calculateGameConfig());
+    const [gameState, setGameState] = useState<GameState>({
+        leftPaddleY: (gameConfig.gameHeight - gameConfig.paddleHeight) / 2,
+        rightPaddleY: (gameConfig.gameHeight - gameConfig.paddleHeight) / 2,
+        ballX: (gameConfig.gameWidth - gameConfig.ballSize) / 2,
+        ballY: (gameConfig.gameHeight - gameConfig.ballSize) / 2,
+        leftScore: 0,
+        rightScore: 0,
+        gameStarted: false,
+        gameEnded: false,
+        winner: ''
+    });
 
   const engineRef = useRef<PongEngine | null>(null);
 
@@ -43,7 +45,7 @@ export default function PongGame(): JSX.Element {
       if (engineRef.current) {
         engineRef.current.stop();
         const leftPlayer = user?.name || 'Player 1';
-        const rightPlayer = mode === 'single' ? 'AI' : (player2 || 'Player 2');
+        const rightPlayer = mode === 'single' ? 'AI' : (selectedPlayer?.name || 'Player 2');
         engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayer, rightPlayer);
         engineRef.current.start();
       }
@@ -51,12 +53,12 @@ export default function PongGame(): JSX.Element {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [mode, user?.name, player2]);
+  }, [mode, user?.name, selectedPlayer]);
 
   // Game engine and keyboard events
   useEffect(() => {
     const leftPlayer = user?.name || 'Player 1';
-    const rightPlayer = mode === 'single' ? 'AI' : (player2 || 'Player 2');
+    const rightPlayer = mode === 'single' ? 'AI' : (selectedPlayer?.name || 'Player 2');
     engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayer, rightPlayer);
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -77,7 +79,7 @@ export default function PongGame(): JSX.Element {
       window.removeEventListener('keyup', handleKeyUp);
       engineRef.current?.stop();
     };
-  }, [gameConfig, mode, user?.name, player2 ]);
+  }, [gameConfig, mode, user?.name, selectedPlayer ]);
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -90,8 +92,9 @@ export default function PongGame(): JSX.Element {
           <p className="player-name">{gameState.leftScore} - {gameState.rightScore}</p>
         </div>
         <div className="flex items-center justify-end gap-2">
-          <img src={avatar2} alt="Avatar 2" className="avatar" />
-          <h2 className="player-name">{player2 || 'AI'}</h2>
+          <img src={selectedPlayer?.avatarUrl || avatar2} alt="Avatar 2" className="avatar" />
+          <h2 className="player-name">
+            {mode === 'single' ? 'AI' : selectedPlayer?.name || 'Guest'}</h2>
         </div>
       </header>
 

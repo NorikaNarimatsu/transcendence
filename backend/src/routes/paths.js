@@ -92,6 +92,7 @@ export default async function itemRoutes(fastify, options) {
     fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
     fastify.get('/getUserInfoByEmail/:email', itemController.getUserInfoByEmail);
     fastify.get('/api/user/profile', userController.getProfile);
+    fastify.post('/api/user/anonymize', userController.anonymizeUser);
     fastify.get('/listUsers', itemController.getAllUsers);
     fastify.get('/users/except/:email', itemController.getAllUsersExceptCurrent);
 
