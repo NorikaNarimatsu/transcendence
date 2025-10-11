@@ -16,6 +16,7 @@ import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
 import { useSelectedPlayer } from './user/PlayerContext';
 import { DeleteAccount } from './user/DeleteUser';
+import Button from '../components/ButtonDarkPink';
 
 
 export default function PlayerProfile(): JSX.Element {
@@ -194,7 +195,6 @@ export default function PlayerProfile(): JSX.Element {
 					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
                     { name: 'Preference', action: () => console.log('customizing preference') },
                     { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
-                    { name: 'Logout', action: handleLogout }  // provisory location
                 ];
             default:
                 return [];
@@ -336,7 +336,11 @@ export default function PlayerProfile(): JSX.Element {
                     </div>
                 </div>
             </section>
-            <footer className="h-40 bg-blue-deep"></footer>
+            <footer className="h-40 bg-blue-deep flex justify-center items-center">
+                <Button onClick={handleLogout} style={{ marginTop: 0 }}>
+                    Log Out
+                </Button>
+            </footer>
         </main>
     );
 }
