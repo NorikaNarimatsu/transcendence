@@ -26,7 +26,7 @@ export default function App(): JSX.Element{
           <p className="text-3xl text-blue-deep font-dotgothic">
             {showSubtitle && (
               <TypewriterText 
-                text="the best pong game you ever saw!" 
+                text="the best pong game you have ever seen!" 
                 speed={80}
                 delay={500}
                 cursorHideDelay={2000}

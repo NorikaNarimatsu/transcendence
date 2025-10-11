@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import bgimage from '../assets/Player_Page.jpg';
 import arrow_icon from '../assets/icons/arrow.png';
 
+import AvatarSelection from '../components/AvatarSelection';
+
 import { TournamentRegistration } from '../components/profileTournamentRegistration';
 import { PasswordVerification } from '../components/profilePasswordVerification';
 import { CategoryButtons } from '../components/profileCategoryButtons';
 import { AddFriends } from '../components/profileAddFriends';
 import { PlayerSelection } from '../components/profilePlayerSelection';
 
-import { useUser} from './user/UserContext';
+import { useUser } from './user/UserContext';
+import Button from '../components/ButtonDarkPink';
 
 interface User {
     id: number;
@@ -19,6 +22,8 @@ interface User {
 
 
 export default function PlayerProfile(): JSX.Element {
+    const [isOpen, setIsOpen] = useState(false);
+
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [showPlayerSelection, setShowPlayerSelection] = useState(false);
     const [playerSelectionGame, setPlayerSelectionGame] = useState<string | null>(null);
@@ -40,13 +45,21 @@ export default function PlayerProfile(): JSX.Element {
     const [allUsers, setAllUsers] = useState<User[]>([]);
 
     const navigate = useNavigate();
-    const { user, logout } = useUser();
+    const { user, setUser, logout } = useUser();
 
     // Is it how it supposed to be used? @Eduarda
     const currentUser: User = {
         id: user.id,
         name: user.name,
         avatarUrl: user.avatar,
+    };
+
+    const handleAvatarSelect = (avatarUrl: string) => {
+       if(user) {
+            const updateUser = { ...user, avatar: avatarUrl };
+            setUser(updateUser);
+       }
+       setIsOpen(false);
     };
 
     useEffect(() => {
@@ -218,7 +231,8 @@ export default function PlayerProfile(): JSX.Element {
                     <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
                         <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">PLAYER INFO</div>
                         <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
-                            <img src={user.avatar} alt="Avatar" className="avatar m-auto" style={{borderColor: '#7a63fe'}}/>
+                                <img onClick={() => setIsOpen(!isOpen)} src={user.avatar} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/>
+                                <AvatarSelection open={isOpen} onClose={() => setIsOpen(false)} onSelect={handleAvatarSelect}/>
                             <div className="flex flex-col m-auto">
                                 <div className="font-pixelify text-white text-[40px]">{user.name}</div>
                                 <div className="font-dotgothic font-bold text-white text-2xl text-border-blue">700 XP</div>

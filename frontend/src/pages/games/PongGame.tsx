@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { JSX } from 'react';
-import avatar2 from '../../assets/avatars/Avatar 2.png';
 import { PongEngine } from '../../gameEngines/PongEngine';
 import type { GameState, GameConfig } from '../../gameEngines/PongEngine';
 import { calculateGameConfig } from '../../gameEngines/pongConfig';
