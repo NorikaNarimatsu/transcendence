@@ -88,16 +88,16 @@ export class sanitizeInput {
 		return sanitized;
 	}
 
-	static sanitizeText(input, maxLength = 500) {
-		if (typeof input !== 'string') {
-			return '';
-		}
-		let sanitized = this.sanitizeHtmlStrict(input);
-		sanitized = this.escapeHtml(sanitized);
+	// static sanitizeText(input, maxLength = 500) {
+	// 	if (typeof input !== 'string') {
+	// 		return '';
+	// 	}
+	// 	let sanitized = this.sanitizeHtmlStrict(input);
+	// 	sanitized = this.escapeHtml(sanitized);
 
-		if (sanitized.length > maxLength) {
-			sanitized = sanitized.substring(0, maxLength);
-		}
-		return sanitized.trim();
-	}
+	// 	if (sanitized.length > maxLength) {
+	// 		sanitized = sanitized.substring(0, maxLength);
+	// 	}
+	// 	return sanitized.trim();
+	// }
 }
