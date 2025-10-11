@@ -53,7 +53,7 @@ import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 
 		if (value.length >= 2 && value.length <= 7 && validCharacters.test(value)) {
 			try {
-				const response = await fetch('https://localhost:8443/validate-name', {
+				const response = await fetch('https://localhost:8443/validateName', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',

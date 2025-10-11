@@ -7,10 +7,9 @@ interface User {
 interface AddFriendsProps {
     open: boolean;
     allUsers: User[];
-    onSendRequest: (user: User) => void;
+    onSendRequest: (user: User) => Promise<void>; // Changed from void to Promise<void>
     onClose: () => void;
 }
-
 export function AddFriends({ open, allUsers, onSendRequest, onClose }: AddFriendsProps) {
     if (!open) return null;
 
