@@ -25,15 +25,6 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
           <p className="text-sm text-gray-300 font-dotgothic mt-1">
             Version 1.0 - Last updated: 11th October 2025
           </p>
-
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl font-bold leading-none transition-colors"
-            aria-label="Close modal"
-          >
-            x
-          </button>
         </div>
 
         {/* SCROLLABLE CONTENT */}
