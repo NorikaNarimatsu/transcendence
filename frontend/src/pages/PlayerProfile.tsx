@@ -8,6 +8,7 @@ import { PasswordVerification } from '../components/profilePasswordVerification'
 import { CategoryButtons } from '../components/profileCategoryButtons';
 import { AddFriends } from '../components/profileAddFriends';
 import { PlayerSelection } from '../components/profilePlayerSelection';
+import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
@@ -36,6 +37,8 @@ export default function PlayerProfile(): JSX.Element {
     const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
 
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+	
+	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
@@ -184,6 +187,7 @@ export default function PlayerProfile(): JSX.Element {
                 return [
                     { name: 'Delete Account', action: () => setShowDeleteConfirmation(true) },
                     { name: 'Update data', action: () => console.log('Updating account data') },
+					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
                     { name: 'Preference', action: () => console.log('customizing preference') },
                     { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
                     { name: 'Logout', action: handleLogout }  // provisory location
@@ -234,6 +238,11 @@ export default function PlayerProfile(): JSX.Element {
                         open={showDeleteConfirmation}
                         onClose={() => setShowDeleteConfirmation(false)}
                     />
+					{/* Privacy Policy Modal */}
+					<PrivacyPolicyModal
+						isOpen={showPrivacyModal}
+						onClose={() => setShowPrivacyModal(false)}
+					/>
                     {/* RIGHT SIDE: Content Box */}
                     <div
                         className="w-[350px] h-[500px] overflow-hidden bg-cover bg-center relative border-img"
