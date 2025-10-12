@@ -418,19 +418,19 @@ export const getUserInfoByEmail = async (request, reply) => {
     }
 };
 
-export const getAllUsers = async (request, response) => {
-	try {
-		const users = db
-			.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID != 1 ORDER BY name")
-			.all();
-		return response.code(200).send(users);
-	} catch (error) {
-		request.log.error("Failed to get all users:", error);
-		return response.code(500).send({
-			message: "Internal server error",
-		});
-	}
-};
+// export const getAllUsers = async (request, response) => {
+// 	try {
+// 		const users = db
+// 			.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID != 1 ORDER BY name")
+// 			.all();
+// 		return response.code(200).send(users);
+// 	} catch (error) {
+// 		request.log.error("Failed to get all users:", error);
+// 		return response.code(500).send({
+// 			message: "Internal server error",
+// 		});
+// 	}
+// };
 
 // Not by EMAIL BUT ID
 export const getUsersExceptUserID = async (request, reply) => {
@@ -445,7 +445,7 @@ export const getUsersExceptUserID = async (request, reply) => {
             .prepare(`
                 SELECT userID, name, avatarUrl 
                 FROM users 
-                WHERE userID != ? AND userID != 1
+                WHERE userID != ? AND userID != 1 AND userID != 2
                 ORDER BY userID
             `)
             .all(sanitizedUserID);
@@ -570,7 +570,7 @@ const itemController = {
     addNewUser,
     getUserByEmail,
     getUserInfoByEmail,
-    getAllUsers,
+    // getAllUsers,
     getUsersExceptUserID,
     
     // Friends management

@@ -78,7 +78,15 @@ export async function initializeDatabase() {
                 '/avatars/AI.jpeg',
                 new Date().toISOString()
             );
-            console.log('AI Player created successfully with userID: 1');
+            const guestPassword = await hashPassword('guest');
+            insertUser.run(
+                'Guest', 
+                'guest@gmail.com', 
+                guestPassword, 
+                '/avatars/Guest.jpeg',
+                new Date().toISOString()
+            );
+            console.log('AI and Guest accounts are created successfully with userID: 1');
         } catch (error) {
             console.error('Error creating AI user:', error);
         }
