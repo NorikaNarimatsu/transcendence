@@ -92,7 +92,7 @@ export default function PongGame(): JSX.Element {
           <p className="player-name">{gameState.leftScore} - {gameState.rightScore}</p>
         </div>
         <div className="flex items-center justify-end gap-2">
-          <img src={selectedPlayer?.avatarUrl} alt="Avatar 2" className="avatar" />
+          <img src={selectedPlayer?.avatarUrl || '/avatars/Avatar_2.png'} alt="Avatar 2" className="avatar" />
           <h2 className="player-name">
             {mode === 'single' ? 'AI' : selectedPlayer?.name || 'Guest'}</h2>
         </div>
