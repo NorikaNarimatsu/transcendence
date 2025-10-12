@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../user/UserContext'; 
 
+
 export default function LoginPage(){
   const location = useLocation();
   const navigate = useNavigate();
@@ -47,37 +48,39 @@ export default function LoginPage(){
     setError('');
 
     try {
-      const response = await fetch('https://localhost:8443/validatePasswordbyEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+        const response = await fetch('https://localhost:8443/validatePasswordbyEmail', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
 
-      if (response.ok) {
-        const userResponse = await fetch(
-          `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(email)}`
-        );
+        if (response.ok) {
+            const userResponse = await fetch(
+                `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(email)}`
+            );
 
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          // saving in the storebox for future use
-          // console.log("Full API response:", userData);
-          setUser({
-            email: email,
-            name: userData.name,
-            avatar: userData.avatar
-          });
-        navigate('/playerProfile');
-      }} else {
-        const data = await response.json();
-        setError(data.message || 'Invalid password');
-      }
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                console.log("Full API response:", userData);
+                setUser({
+                    userID: userData.userID,
+                    email: email,
+                    name: userData.name,
+                    avatar: userData.avatar
+                });
+                console.log("User logged in with userID:", userData.userID);
+                navigate('/playerProfile');
+            }
+        } else {
+            const data = await response.json();
+            setError(data.message || 'Invalid password');
+        }
     } catch (err) {
-      setError('Failed to login');
+        setError('Failed to login');
     }
-  };
+};
 
   return (
     <main className="min-h-screen flex flex-col">

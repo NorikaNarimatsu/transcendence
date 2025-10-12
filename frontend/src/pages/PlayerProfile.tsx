@@ -18,6 +18,10 @@ import { useSelectedPlayer } from './user/PlayerContext';
 import { DeleteAccount } from './user/DeleteUser';
 import Button from '../components/ButtonDarkPink';
 
+// WE CAN USE LIKE THIS AND SEE IT!
+// const { user } = useUser();
+// console.log("Current user:", user);
+
 export default function PlayerProfile(): JSX.Element {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -46,6 +50,7 @@ export default function PlayerProfile(): JSX.Element {
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
+    console.log("Current user:", user);
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
 
     useEffect(() => {
@@ -53,21 +58,21 @@ export default function PlayerProfile(): JSX.Element {
     }, [setSelectedPlayer]);
 
     useEffect(() => {
-        if (user?.email) {
-        fetch(`https://localhost:8443/users/except/${encodeURIComponent(user.email)}`)
-            .then(res => res.ok ? res.text() : Promise.reject(res.status))
-            .then(text => {
-                try {
-                    const users = JSON.parse(text);
-                    setUsers(users);
-                    setAllUsers(users);
-                } catch (err) {
-                    console.error('JSON parse error:', err);
-                }
-            })
-            .catch(err => console.error('Failed to fetch users:', err));
+        if (user?.userID) {  // CHANGED: Check userID instead of email
+            fetch(`https://localhost:8443/users/except/${user.userID}`)
+                .then(res => res.ok ? res.text() : Promise.reject(res.status))
+                .then(text => {
+                    try {
+                        const users = JSON.parse(text);
+                        setUsers(users);
+                        setAllUsers(users);
+                    } catch (err) {
+                        console.error('JSON parse error:', err);
+                    }
+                })
+                .catch(err => console.error('Failed to fetch users:', err));
         }
-    }, [user?.email]);
+    }, [user?.userID]); 
 
     useEffect(() => {
         if (!user) {
@@ -97,10 +102,10 @@ export default function PlayerProfile(): JSX.Element {
 
     const handlePasswordSubmit = async () => {
         try {
-            const response = await fetch('https://localhost:8443/validatePasswordbyName', {
+            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {  // CHANGED: Use userID endpoint
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: selectedPlayer!.name, password }),
+                body: JSON.stringify({ userID: selectedPlayer!.userID, password }),  // CHANGED: Send userID
             });
             if (response.ok) {
                 setSelectedPlayer(selectedPlayer);
@@ -128,10 +133,10 @@ export default function PlayerProfile(): JSX.Element {
     const handleVerifyPassword = async () => {
         if (!tournamentVerifyingUser) return;
         try {
-            const response = await fetch('https://localhost:8443/validatePasswordbyName', {
+            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {  // CHANGED: Use userID endpoint
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: tournamentVerifyingUser.name, password: tournamentVerifyPassword }),
+                body: JSON.stringify({ userID: tournamentVerifyingUser.userID, password: tournamentVerifyPassword }),  // CHANGED: Send userID
             });
             if (response.ok) {
                 setSelectedTournamentParticipants(prev => [...prev, tournamentVerifyingUser]);
@@ -312,11 +317,9 @@ export default function PlayerProfile(): JSX.Element {
                             )}
                             {/* Friends Manager Component */}
                             <FriendsManager 
-                                ref={friendsManagerRef}
-                                user={user}
-                                allUsers={allUsers}
-                                setAllUsers={setAllUsers}
-                            />
+                            ref={friendsManagerRef}
+                            user={user}
+                        />
                         </div>
                     </div>
                 </div>

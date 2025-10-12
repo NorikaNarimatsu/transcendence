@@ -2,21 +2,18 @@ import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
+import { hashPassword, comparePassword } from "../utils/passwordUtils.js"; // where comparePassword is used? Did i mistakenly overwrite? @Gosia
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function initializeDatabase() {
-
     const databaseFolderPath = __dirname;
     if (!fs.existsSync(databaseFolderPath)) {
         fs.mkdirSync(databaseFolderPath, { recursive: true });
         console.log("Database folder created at:", databaseFolderPath);
     }
-
     const db = new Database(path.join(databaseFolderPath, "transcendence.db"));
     const tableExists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).get();
-    
     if (!tableExists) {
         db.exec(`
             -- USERS TABLE
@@ -31,7 +28,6 @@ export async function initializeDatabase() {
                 lang        TEXT NOT NULL DEFAULT 'en',
                 "2FA"       BOOLEAN NOT NULL DEFAULT 0
             );
-
             -- FRIENDS TABLE
             CREATE TABLE IF NOT EXISTS friends (
                 friendID     INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +37,6 @@ export async function initializeDatabase() {
                 FOREIGN KEY (user1ID) REFERENCES users(userID),
                 FOREIGN KEY (user2ID) REFERENCES users(userID)
             );
-
             -- MATCH TABLE
             CREATE TABLE IF NOT EXISTS match (
                 matchID              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,22 +57,17 @@ export async function initializeDatabase() {
         console.log("Users table created successfully");
         
         const avatars = [
-            '/avatars/Avatar_1.png',
-            '/avatars/Avatar_2.png',
-            '/avatars/Avatar_3.png',
-            '/avatars/Avatar_4.png',
-            '/avatars/Avatar_5.png',
-            '/avatars/Avatar_6.png',
-            '/avatars/Avatar_7.png',
-            '/avatars/Avatar_8.png',
+            '/avatars/Avatar_1.png', '/avatars/Avatar_2.png',
+            '/avatars/Avatar_3.png', '/avatars/Avatar_4.png',
+            '/avatars/Avatar_5.png', '/avatars/Avatar_6.png',
+            '/avatars/Avatar_7.png', '/avatars/Avatar_8.png',
             '/avatars/Avatar_9.png'
         ];
-        // Insert 10 test users
+        // Create 10 test users
         const insertUser = db.prepare(`
             INSERT INTO users (name, email, password, avatarUrl, createdAt)
             VALUES (?, ?, ?, ?, ?)
         `);
-        // Create 10 test users with random avatars
         for (let i = 1; i <= 10; i++) {
             const name = `test${i}`;
             const email = `test${i}@gmail.com`;
