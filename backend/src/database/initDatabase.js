@@ -68,6 +68,20 @@ export async function initializeDatabase() {
             INSERT INTO users (name, email, password, avatarUrl, createdAt)
             VALUES (?, ?, ?, ?, ?)
         `);
+
+        try {
+            const aiPassword = await hashPassword('ai');
+            insertUser.run(
+                'AI', 
+                'ai@gmail.com', 
+                aiPassword, 
+                '/avatars/AI.jpeg',
+                new Date().toISOString()
+            );
+            console.log('AI Player created successfully with userID: 1');
+        } catch (error) {
+            console.error('Error creating AI user:', error);
+        }
         for (let i = 1; i <= 10; i++) {
             const name = `test${i}`;
             const email = `test${i}@gmail.com`;

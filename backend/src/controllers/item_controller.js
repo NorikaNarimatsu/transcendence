@@ -404,7 +404,7 @@ export const getUserInfoByEmail = async (request, reply) => {
             return reply.code(200).send({
                 userID: user.userID,  // ADD userID to response
                 name: sanitizeInput.sanitizeUsername(user.name),
-                avatar: user.avatarUrl,
+                avatarUrl: user.avatarUrl,
             });
         }
         return reply.code(404).send({
@@ -421,7 +421,7 @@ export const getUserInfoByEmail = async (request, reply) => {
 export const getAllUsers = async (request, response) => {
 	try {
 		const users = db
-			.prepare("SELECT userID, name, avatarUrl FROM users ORDER BY name")
+			.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID != 1 ORDER BY name")
 			.all();
 		return response.code(200).send(users);
 	} catch (error) {
@@ -445,7 +445,7 @@ export const getUsersExceptUserID = async (request, reply) => {
             .prepare(`
                 SELECT userID, name, avatarUrl 
                 FROM users 
-                WHERE userID != ?
+                WHERE userID != ? AND userID != 1
                 ORDER BY userID
             `)
             .all(sanitizedUserID);

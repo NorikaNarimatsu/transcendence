@@ -1,5 +1,4 @@
 import { useState, forwardRef, useImperativeHandle } from 'react';
-import { AddFriends } from './profileAddFriends';
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
 import type { User } from '../pages/user/UserContext'; 
 
@@ -14,12 +13,16 @@ export interface FriendsManagerHandle {
 
 export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerProps>(
     ({ user }, ref) => {
-        // Just UI state - no data storage
+        // UI state
         const [showFriendsList, setShowFriendsList] = useState(false);
         const [showAddFriends, setShowAddFriends] = useState(false);
         const [friends, setFriends] = useState<SelectedPlayer[]>([]);
         const [availableUsers, setAvailableUsers] = useState<SelectedPlayer[]>([]);
         const [loading, setLoading] = useState(false);
+        
+        // UPDATED: Success popup state - store friend object instead of message
+        const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+        const [addedFriend, setAddedFriend] = useState<SelectedPlayer | null>(null);
 
         const handleSeeFriends = async () => {
             setShowFriendsList(true);
@@ -90,8 +93,11 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                 });
 
                 if (response.ok) {
-                    alert(`${friend.name} added to friends!`);
+                    // UPDATED: Store friend object and remove timeout
+                    setAddedFriend(friend);
+                    setShowSuccessPopup(true);
                     setShowAddFriends(false);
+                    // REMOVED: No more auto-hide timeout
                 } else {
                     const errorData = await response.json();
                     alert(errorData.message || 'Failed to add friend');
@@ -109,17 +115,85 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
 
         return (
             <>
-                {/* Add Friends Modal */}
-                {showAddFriends && (
-                    <AddFriends
-                        open={showAddFriends}
-                        allUsers={availableUsers}
-                        onSendRequest={handleAddFriend}
-                        onClose={() => setShowAddFriends(false)}
-                    />
+                {/* UPDATED: Success Popup Modal with Avatar */}
+                {showSuccessPopup && addedFriend && (
+                    <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-40">
+                        <div className="bg-pink-light p-8 rounded-lg shadow-no-blur-60 border-4 border-blue-deep">
+                            <div className="text-center">
+                                <h3 className="font-pixelify text-blue-deep text-2xl mb-4">Success!</h3>
+                                
+                                {/* NEW: Friend's Avatar and Name */}
+                                <div className="flex items-center justify-center gap-3 mb-6">
+                                    {addedFriend.avatarUrl && (
+                                        <img 
+                                            src={addedFriend.avatarUrl}
+                                            alt={addedFriend.name} 
+                                            className="w-12 h-12 rounded-full object-cover border-2 border-blue-deep"
+                                        />
+                                    )}
+                                    <p className="font-dotgothic text-blue-deep text-lg">
+                                        <span className="font-pixelify">{addedFriend.name}</span> added to friends!
+                                    </p>
+                                </div>
+                                
+                                <button
+                                    onClick={() => {
+                                        setShowSuccessPopup(false);
+                                        setAddedFriend(null);
+                                    }}
+                                    className="px-6 py-3 bg-blue-deep text-white font-pixelify rounded hover:bg-blue-medium transition-colors shadow-no-blur-30"
+                                >
+                                    Awesome!
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
 
-                {/* Friends List Modal */}
+                {/* ADD FRIENDS MODAL */}
+                {showAddFriends && (
+                    <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-30">
+                        <div className="bg-pink-light p-6 rounded-lg max-h-[400px] overflow-y-auto w-[300px]">
+                            <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">Add Friend</h3>
+                            
+                            {loading ? (
+                                <p className="text-blue-deep font-dotgothic text-center">Loading...</p>
+                            ) : (
+                                <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
+                                    {availableUsers.length === 0 ? (
+                                        <p className="text-blue-deep font-dotgothic text-center">No users available to add!</p>
+                                    ) : (
+                                        availableUsers.map((user) => (
+                                            <button
+                                                key={user.userID}
+                                                className="px-4 py-2 bg-blue-light text-blue-deep font-pixelify rounded hover:bg-blue-medium transition-colors flex items-center gap-2"
+                                                onClick={() => handleAddFriend(user)}
+                                            >
+                                                {user.avatarUrl && (
+                                                    <img 
+                                                        src={user.avatarUrl}
+                                                        alt={user.name} 
+                                                        className="w-6 h-6 rounded-full object-cover"
+                                                    />
+                                                )}
+                                                {user.name}
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+                            
+                            <button
+                                onClick={() => setShowAddFriends(false)}
+                                className="w-full px-4 py-2 bg-gray-500 text-white font-pixelify rounded hover:bg-gray-600 transition-colors mt-4"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* FRIENDS LIST MODAL */}
                 {showFriendsList && (
                     <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-30">
                         <div className="bg-pink-light p-6 rounded-lg max-h-[400px] overflow-y-auto w-[300px]">

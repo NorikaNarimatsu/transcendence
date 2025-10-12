@@ -214,7 +214,7 @@ export default function PlayerProfile(): JSX.Element {
                     <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
                         <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">PLAYER INFO</div>
                         <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
-                                <img onClick={() => setIsOpen(!isOpen)} src={user.avatar} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/>
+                                <img onClick={() => setIsOpen(!isOpen)} src={user.avatarUrl} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/>
                                 <AvatarSelection open={isOpen} onClose={() => setIsOpen(false)}/>
                             <div className="flex flex-col m-auto">
                                 <div className="font-pixelify text-white text-[40px]">{user.name}</div>

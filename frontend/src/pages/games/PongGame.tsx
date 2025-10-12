@@ -6,10 +6,13 @@ import type { GameState, GameConfig } from '../../gameEngines/PongEngine';
 import { calculateGameConfig } from '../../gameEngines/pongConfig';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
+import type { SelectedPlayer } from '../user/PlayerContext'; 
 
 
 export default function PongGame(): JSX.Element {
     const { user } = useUser();
+    const [aiPlayer, setAiPlayer] = useState<SelectedPlayer | null>(null);
+
     const location = useLocation();
     const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
@@ -32,10 +35,32 @@ export default function PongGame(): JSX.Element {
 
   const engineRef = useRef<PongEngine | null>(null);
 
-  // Handle going back to profile
+
+
   const handleBackToProfile = () => {
-    navigate('/playerProfile');
+      navigate('/playerProfile');
   };
+
+  useEffect(() => {
+      const fetchAiPlayer = async () => {
+          if (mode === 'single') {
+              try {
+                  const response = await fetch('https://localhost:8443/getUserInfoByEmail/ai@gmail.com');
+                  if (response.ok) {
+                      const aiData = await response.json();
+                      setAiPlayer({
+                          userID: aiData.userID,
+                          name: aiData.name,
+                          avatarUrl: aiData.avatarUrl
+                      });
+                  }
+              } catch (error) {
+                  console.error('Failed to fetch AI player:', error);
+              }
+          }
+      };
+      fetchAiPlayer();
+  }, [mode]);
 
   // Resize handler
   useEffect(() => {
@@ -53,7 +78,7 @@ export default function PongGame(): JSX.Element {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [mode, user?.name, selectedPlayer]);
+  }, [mode, user?.name, selectedPlayer, aiPlayer]); 
 
   // Game engine and keyboard events
   useEffect(() => {
@@ -86,16 +111,28 @@ export default function PongGame(): JSX.Element {
       <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
         <div className="flex items-center justify-start gap-2">
           <h1 className="player-name">{user.name}</h1>
-          <img src={user.avatar} alt="Avatar" className="avatar" />
+          <img src={user.avatarUrl} alt="Avatar" className="avatar" />
         </div>
         <div className="flex justify-center">
           <p className="player-name">{gameState.leftScore} - {gameState.rightScore}</p>
         </div>
-        <div className="flex items-center justify-end gap-2">
-          <img src={selectedPlayer?.avatarUrl || '/avatars/Avatar_2.png'} alt="Avatar 2" className="avatar" />
-          <h2 className="player-name">
-            {mode === 'single' ? 'AI' : selectedPlayer?.name || 'Guest'}</h2>
-        </div>
+          <div className="flex items-center justify-end gap-2">
+              {/* ✅ UPDATED: Show AI player info in single mode */}
+              <img 
+                  src={mode === 'single' 
+                      ? (aiPlayer?.avatarUrl || '/avatars/Avatar_AI.png')
+                      : (selectedPlayer?.avatarUrl || '/avatars/Avatar_2.png')
+                  } 
+                  alt="Avatar 2" 
+                  className="avatar" 
+              />
+              <h2 className="player-name">
+                  {mode === 'single' 
+                      ? (aiPlayer?.name || 'AI Player')
+                      : (selectedPlayer?.name || 'Guest')
+                  }
+              </h2>
+          </div>
       </header>
 
       <section className="flex-1 bg-pink-grid flex items-center justify-center">
