@@ -49,8 +49,6 @@ export default function LoginPage(){
     e.preventDefault();
     setError('');
 
-    console.log("🔍 Login: Starting login process for email:", email);
-
     try {
       // Step 1: Validate password
       const response = await fetch('https://localhost:8443/validatePasswordbyEmail', {
@@ -60,21 +58,15 @@ export default function LoginPage(){
         },
         body: JSON.stringify({ email, password }),
       });
-
-      console.log("🔍 Login: Password validation response status:", response.status);
-
       if (response.ok) {
         // Step 2: Get user info
         const userResponse = await fetch(
           `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(email)}`
         );
 
-        console.log("🔍 Login: User info response status:", userResponse.status);
-
         if (userResponse.ok) {
           const userData = await userResponse.json();
-          console.log("🔍 Login: Full API response:", userData);
-          
+
           // Step 3: Prepare user data
           const userToStore = {
             userID: userData.userID,
@@ -83,43 +75,33 @@ export default function LoginPage(){
             avatarUrl: userData.avatarUrl
           };
           
-          console.log("🔍 Login: About to store user:", userToStore);
-          
           // Step 4: Set user (this should trigger localStorage save)
           setUser(userToStore);
-          
-          console.log("🔍 Login: setUser called, userID:", userData.userID);
           
           // Step 5: Debug localStorage after a delay
           setTimeout(() => {
             const stored = localStorage.getItem('currentUser');
-            console.log("🔍 Login: What's in localStorage after setUser:", stored);
             if (stored) {
               try {
                 const parsed = JSON.parse(stored);
-                console.log("🔍 Login: Parsed stored user:", parsed);
               } catch (e) {
-                console.error("🔍 Login: Error parsing stored user:", e);
+                console.error("Login: Error parsing stored user:", e);
               }
             } else {
-              console.error("🔍 Login: NO DATA in localStorage!");
+              console.error("Login: NO DATA in localStorage!");
             }
           }, 1000);
           
           // Step 6: Navigate
-          console.log("🔍 Login: Navigating to playerProfile");
           navigate('/playerProfile');
         } else {
-          console.error("🔍 Login: Failed to get user info, status:", userResponse.status);
           setError('Failed to get user information');
         }
       } else {
         const data = await response.json();
-        console.error("🔍 Login: Password validation failed:", data);
         setError(data.message || 'Invalid password');
       }
     } catch (err) {
-      console.error("🔍 Login: Error during login:", err);
       setError('Failed to login');
     }
   };
