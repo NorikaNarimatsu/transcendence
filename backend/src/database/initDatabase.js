@@ -47,7 +47,7 @@ export async function initializeDatabase() {
                 user1ID              INTEGER NOT NULL,
                 user2ID              INTEGER,
                 user1Score           INTEGER NOT NULL,
-                user2Score           INTEGER NOT NULL,
+                user2Score           INTEGER DEFAULT 0,
                 winnerID             INTEGER NOT NULL,
                 FOREIGN KEY (user1ID) REFERENCES users(userID),
                 FOREIGN KEY (user2ID) REFERENCES users(userID),

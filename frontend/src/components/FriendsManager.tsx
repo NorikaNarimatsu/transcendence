@@ -128,7 +128,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                                         <img 
                                             src={addedFriend.avatarUrl}
                                             alt={addedFriend.name} 
-                                            className="w-12 h-12 rounded-full object-cover border-2 border-blue-deep"
+                                            className="w-8 h-8 rounded-full object-cover border-2 border-blue-deep"
                                         />
                                     )}
                                     <p className="font-dotgothic text-blue-deep text-lg">
@@ -200,11 +200,11 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                             <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">My Friends</h3>
                             
                             {loading ? (
-                                <p className="text-blue-deep font-dotgothic text-center">Loading...</p>
+                                <p className="text-blue-deep font-pixelify text-center">Loading...</p>
                             ) : (
                                 <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
                                     {friends.length === 0 ? (
-                                        <p className="text-blue-deep font-dotgothic text-center">No friends yet!</p>
+                                        <p className="text-blue-deep font-pixelify text-center">No friends yet ...</p>
                                     ) : (
                                         friends.map((friend) => (
                                             <div

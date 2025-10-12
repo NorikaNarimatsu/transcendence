@@ -31,7 +31,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         const initializeSpecialPlayers = async () => {
             try {
                 // Fetch AI Player (userID = 1)
-                const aiResponse = await fetch('https://localhost:8443/getUserInfoByEmail/ai@gmail.com');
+                const aiResponse = await fetch('https://localhost:8443/getUserInfoByEmail/ai@gmail.com'); // we can hard code the contents as well hahaha without fetching
                 if (aiResponse.ok) {
                     const aiData = await aiResponse.json();
                     setAiPlayer({
@@ -43,7 +43,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                 }
 
                 // Fetch Guest Player (userID = 2)
-                const guestResponse = await fetch('https://localhost:8443/getUserInfoByEmail/guest@gmail.com');
+                const guestResponse = await fetch('https://localhost:8443/getUserInfoByEmail/guest@gmail.com'); // we can hard code the contents as well hahaha without fetching
                 if (guestResponse.ok) {
                     const guestData = await guestResponse.json();
                     setGuestPlayer({

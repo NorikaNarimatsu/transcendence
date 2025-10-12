@@ -48,3 +48,4 @@ Content-Type: application/json
 # .headers on
 # SELECT * FROM users;
 # SELECT * FROM friends;
+# SELECT * FROM match;
