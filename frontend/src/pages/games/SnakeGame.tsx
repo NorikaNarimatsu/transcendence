@@ -85,6 +85,41 @@ export default function SnakeGame(): JSX.Element {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const sendMatchResult = async (engine: SnakeGameEngine) => {
+        try {
+            const matchData = {
+                matchType: 'snake',
+                matchMode: mode,
+                user1ID: user?.userID, // Current user
+                user2ID: mode === '2players' ? (opponent?.userID || 2) : null, // Opponent or Guest (userID=2) or null for single
+                user1Score: engine.snake1.score,
+                user2Score: engine.isMultiplayer ? (engine.snake2?.score || 0) : 0
+            };
+
+            console.log('=== SENDING SNAKE MATCH RESULT ===');
+            console.log('Match Data:', matchData);
+
+            const response = await fetch('https://localhost:8443/match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(matchData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Match saved successfully:', result);
+                console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
+            } else {
+                const error = await response.json();
+                console.error('Failed to save match:', error);
+            }
+        } catch (error) {
+            console.error('Error sending match result:', error);
+        }
+    };
+    
     // Game loop
     useEffect(() => {
         if (!gameEngineRef.current) return;
@@ -107,6 +142,14 @@ export default function SnakeGame(): JSX.Element {
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
     }, []);
+
+    useEffect(() => {
+        if (gameEngineRef.current?.gameOver) {
+            console.log('Snake game ended, sending match result...');
+            sendMatchResult(gameEngineRef.current);
+        }
+    }, [gameEngineRef.current?.gameOver]); // This might need adjustment based on how SnakeEngine notifies game over
+
 
     // User authentication check
     useEffect(() => {

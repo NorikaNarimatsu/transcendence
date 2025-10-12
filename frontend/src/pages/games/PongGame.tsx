@@ -50,6 +50,8 @@ export default function PongGame(): JSX.Element {
   
   const opponent = getOpponent();
 
+  
+
     // Resize handler
     useEffect(() => {
         const handleResize = () => {
@@ -67,6 +69,41 @@ export default function PongGame(): JSX.Element {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, [mode, user?.name, opponent]);
+
+    const sendMatchResult = async (finalGameState: GameState) => {
+      try {
+          const matchData = {
+              matchType: 'pong',
+              matchMode: mode,
+              user1ID: user?.userID, // Current user
+              user2ID: opponent?.userID || 2, // Opponent or Guest (userID=2)
+              user1Score: finalGameState.leftScore,
+              user2Score: finalGameState.rightScore
+          };
+
+          console.log('=== SENDING MATCH RESULT ===');
+          console.log('Match Data:', matchData);
+
+          const response = await fetch('https://localhost:8443/match', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(matchData)
+          });
+
+          if (response.ok) {
+              const result = await response.json();
+              console.log('Match saved successfully:', result);
+              console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
+          } else {
+              const error = await response.json();
+              console.error('Failed to save match:', error);
+          }
+      } catch (error) {
+          console.error('Error sending match result:', error);
+      }
+  };
 
     // Game engine and keyboard events
     useEffect(() => {
@@ -120,6 +157,13 @@ export default function PongGame(): JSX.Element {
             engineRef.current?.stop();
         };
     }, [gameConfig, mode, user?.name, opponent]);
+
+    useEffect(() => {
+      if (gameState.gameEnded && gameState.winner) {
+          console.log('Game ended, sending match result...');
+          sendMatchResult(gameState);
+      }
+  }, [gameState.gameEnded, gameState.winner]); // Send result when game ends
 
     return (
       <main className="min-h-screen flex flex-col">

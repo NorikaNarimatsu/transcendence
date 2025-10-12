@@ -45,7 +45,7 @@ export async function initializeDatabase() {
                 tournamentBracketID  INTEGER,
                 tournamentMatchID    INTEGER,
                 user1ID              INTEGER NOT NULL,
-                user2ID              INTEGER NOT NULL,
+                user2ID              INTEGER,
                 user1Score           INTEGER NOT NULL,
                 user2Score           INTEGER NOT NULL,
                 winnerID             INTEGER NOT NULL,
@@ -105,9 +105,78 @@ export async function initializeDatabase() {
             }
         }
         console.log("All test users created successfully");
+
+        const insertMatch = db.prepare(`
+            INSERT INTO match (matchType, matchMode, user1ID, user2ID, user1Score, user2Score, winnerID)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        const pongMatches = [
+            // Single player matches (vs AI - userID 1)
+            { matchType: 'pong', matchMode: 'single', user1ID: 3, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 3 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 3, user2ID: 1, user1Score: 2, user2Score: 3, winnerID: 1 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 4, user2ID: 1, user1Score: 3, user2Score: 0, winnerID: 4 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 4, user2ID: 1, user1Score: 1, user2Score: 3, winnerID: 1 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 5, user2ID: 1, user1Score: 3, user2Score: 2, winnerID: 5 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 6, user2ID: 1, user1Score: 0, user2Score: 3, winnerID: 1 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 7, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 7 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 8, user2ID: 1, user1Score: 2, user2Score: 3, winnerID: 1 },
+
+            // 2-player matches (vs Guest - userID 2)
+            { matchType: 'pong', matchMode: '2players', user1ID: 3, user2ID: 2, user1Score: 3, user2Score: 1, winnerID: 3 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 4, user2ID: 2, user1Score: 1, user2Score: 3, winnerID: 2 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 5, user2ID: 2, user1Score: 3, user2Score: 2, winnerID: 5 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 6, user2ID: 2, user1Score: 0, user2Score: 3, winnerID: 2 },
+
+            // 2-player matches (user vs user)
+            { matchType: 'pong', matchMode: '2players', user1ID: 3, user2ID: 4, user1Score: 3, user2Score: 2, winnerID: 3 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 5, user2ID: 6, user1Score: 2, user2Score: 3, winnerID: 6 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 7, user2ID: 8, user1Score: 3, user2Score: 0, winnerID: 7 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 9, user2ID: 10, user1Score: 1, user2Score: 3, winnerID: 10 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 11, user2ID: 12, user1Score: 3, user2Score: 1, winnerID: 11 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 3, user2ID: 5, user1Score: 3, user2Score: 2, winnerID: 3 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 4, user2ID: 7, user1Score: 1, user2Score: 3, winnerID: 7 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 6, user2ID: 8, user1Score: 3, user2Score: 1, winnerID: 6 },
+
+            // More single player matches
+            { matchType: 'pong', matchMode: 'single', user1ID: 9, user2ID: 1, user1Score: 3, user2Score: 2, winnerID: 9 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 10, user2ID: 1, user1Score: 0, user2Score: 3, winnerID: 1 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 11, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 11 },
+            { matchType: 'pong', matchMode: 'single', user1ID: 12, user2ID: 1, user1Score: 2, user2Score: 3, winnerID: 1 },
+
+            // More 2-player matches
+            { matchType: 'pong', matchMode: '2players', user1ID: 7, user2ID: 2, user1Score: 3, user2Score: 0, winnerID: 7 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 8, user2ID: 2, user1Score: 2, user2Score: 3, winnerID: 2 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 9, user2ID: 2, user1Score: 3, user2Score: 1, winnerID: 9 },
+            { matchType: 'pong', matchMode: '2players', user1ID: 10, user2ID: 2, user1Score: 1, user2Score: 3, winnerID: 2 }
+        ];
+
+        console.log("Adding fake Pong match data...");
+        for (const match of pongMatches) {
+            try {
+                insertMatch.run(
+                    match.matchType,
+                    match.matchMode,
+                    match.user1ID,
+                    match.user2ID,
+                    match.user1Score,
+                    match.user2Score,
+                    match.winnerID
+                );
+            } catch (error) {
+                console.error(`Error inserting match:`, error);
+            }
+        }
+        console.log(`${pongMatches.length} fake Pong matches added successfully`);
+
     } else {
         console.log("Users table already exists");
     }
+
+
+
+
+
     return db;
 }
 
