@@ -58,7 +58,6 @@ export default function PlayerProfile(): JSX.Element {
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
-    console.log("Current user:", user);
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
 
     useEffect(() => {
