@@ -86,7 +86,9 @@ export default function PongGame(): JSX.Element {
               user1ID: user?.userID, // Current user
               user2ID: opponent?.userID || 2, // Opponent or Guest (userID=2)
               user1Score: finalGameState.leftScore,
-              user2Score: finalGameState.rightScore
+              user2Score: finalGameState.rightScore,
+              startedAt: finalGameState.startedAt,
+              endedAt: finalGameState.endedAt
           };
 
           console.log('=== SENDING MATCH RESULT ===');
@@ -104,6 +106,9 @@ export default function PongGame(): JSX.Element {
               const result = await response.json();
               console.log('Match saved successfully:', result);
               console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
+              if (result.duration) {
+                  console.log('Match Duration:', result.duration, 'seconds');
+              }
           } else {
               const error = await response.json();
               console.error('Failed to save match:', error);

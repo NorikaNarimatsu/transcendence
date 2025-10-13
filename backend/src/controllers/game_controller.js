@@ -16,11 +16,13 @@ export const addMatch = async (request, response) => {
             user2ID,        // Player 2 ID (number - 1=AI, 2=Guest, 3+=users)
             user1Score,     // Player 1 final score
             user2Score,     // Player 2 final score
+            startedAt,      // Match start timestamp
+            endedAt,        // Match end timestamp
             tournamentBracketID = null,
             tournamentMatchID = null
         } = request.body;
 
-        console.log("Extracted values:", { matchType, matchMode, user1ID, user2ID, user1Score, user2Score });
+        console.log("Extracted values:", { matchType, matchMode, user1ID, user2ID, user1Score, user2Score, startedAt, endedAt });
 
         // FIXED: Validate required fields
         if (!matchType || !matchMode || !user1ID || user2ID === undefined || user1Score === undefined || user2Score === undefined) {
@@ -86,13 +88,13 @@ export const addMatch = async (request, response) => {
 
         console.log("Winner determined:", { winnerID, user1Score, user2Score });
 
-        // FIXED: Insert match into database
+        // FIXED: Insert match into database with timestamps
         console.log("Preparing to insert match...");
         const insertMatch = db.prepare(`
             INSERT INTO match (
                 matchType, matchMode, tournamentBracketID, tournamentMatchID,
-                user1ID, user2ID, user1Score, user2Score, winnerID
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                user1ID, user2ID, user1Score, user2Score, winnerID, startedAt, endedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
         const result = insertMatch.run(
@@ -104,7 +106,9 @@ export const addMatch = async (request, response) => {
             user2ID,
             parseInt(user1Score),
             parseInt(user2Score),
-            winnerID
+            winnerID,
+            startedAt || new Date().toISOString(), // Default to now if not provided
+            endedAt || new Date().toISOString()     // Default to now if not provided
         );
 
         console.log("Insert successful:", result);
@@ -115,7 +119,10 @@ export const addMatch = async (request, response) => {
             message: "Match saved successfully",
             matchID: result.lastInsertRowid,
             winner: winnerName,
-            winnerID: winnerID
+            winnerID: winnerID,
+            duration: startedAt && endedAt ? 
+                Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 1000) : 
+                null
         });
 
     } catch (error) {

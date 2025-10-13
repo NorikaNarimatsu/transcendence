@@ -2,9 +2,12 @@ import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { hashPassword, comparePassword } from "../utils/passwordUtils.js"; // where comparePassword is used? Did i mistakenly overwrite? @Gosia
+import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
+import { prefillDatabase } from "./prefillDatabase.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const PREFILL_DATABASE = true; // Change to false for production
 
 export async function initializeDatabase() {
     const databaseFolderPath = __dirname;
@@ -14,6 +17,7 @@ export async function initializeDatabase() {
     }
     const db = new Database(path.join(databaseFolderPath, "transcendence.db"));
     const tableExists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).get();
+    
     if (!tableExists) {
         db.exec(`
             -- USERS TABLE
@@ -49,21 +53,16 @@ export async function initializeDatabase() {
                 user1Score           INTEGER NOT NULL,
                 user2Score           INTEGER DEFAULT 0,
                 winnerID             INTEGER NOT NULL,
+                startedAt            DATETIME NOT NULL DEFAULT (datetime('now')),
+                endedAt              DATETIME,
                 FOREIGN KEY (user1ID) REFERENCES users(userID),
                 FOREIGN KEY (user2ID) REFERENCES users(userID),
                 FOREIGN KEY (winnerID) REFERENCES users(userID)
             );
         `);
-        console.log("Users table created successfully");
+        console.log("Database schema created successfully");
         
-        const avatars = [
-            '/avatars/Avatar_1.png', '/avatars/Avatar_2.png',
-            '/avatars/Avatar_3.png', '/avatars/Avatar_4.png',
-            '/avatars/Avatar_5.png', '/avatars/Avatar_6.png',
-            '/avatars/Avatar_7.png', '/avatars/Avatar_8.png',
-            '/avatars/Avatar_9.png'
-        ];
-        // Create 10 test users
+        console.log("Creating essential AI and Guest accounts...");
         const insertUser = db.prepare(`
             INSERT INTO users (name, email, password, avatarUrl, createdAt)
             VALUES (?, ?, ?, ?, ?)
@@ -78,6 +77,7 @@ export async function initializeDatabase() {
                 '/avatars/AI.jpeg',
                 new Date().toISOString()
             );
+
             const guestPassword = await hashPassword('guest');
             insertUser.run(
                 'Guest', 
@@ -86,91 +86,32 @@ export async function initializeDatabase() {
                 '/avatars/Guest.jpeg',
                 new Date().toISOString()
             );
-            console.log('AI and Guest accounts are created successfully with userID: 1');
+            console.log('AI and Guest accounts created successfully');
         } catch (error) {
-            console.error('Error creating AI user:', error);
+            console.error('Error creating AI/Guest users:', error);
         }
-        for (let i = 1; i <= 10; i++) {
-            const name = `test${i}`;
-            const email = `test${i}@gmail.com`;
-            const password = `test${i}`; // Same as username
-            const hashpassword = await hashPassword(password);
-            const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
-            const createdAt = new Date().toISOString();
-            try {
-                insertUser.run(name, email, hashpassword, randomAvatarUrl, createdAt);
-                console.log(`Test user ${name} created successfully with avatar: ${randomAvatarUrl}`);
-            } catch (error) {
-                console.error(`Error creating test user ${name}:`, error);
-            }
+        
+        // Conditionally prefill with test data
+        if (PREFILL_DATABASE) {
+            console.log("PREFILL_DATABASE = true, adding test data...");
+            await prefillDatabase(db);
+        } else {
+            console.log("PREFILL_DATABASE = false, skipping test data");
+            console.log("Set PREFILL_DATABASE = true in initDatabase.js to add test data");
         }
-        console.log("All test users created successfully");
-
-        const insertMatch = db.prepare(`
-            INSERT INTO match (matchType, matchMode, user1ID, user2ID, user1Score, user2Score, winnerID)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `);
-
-        const pongMatches = [
-            // Single player matches (vs AI - userID 1)
-            { matchType: 'pong', matchMode: 'single', user1ID: 3, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 3 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 3, user2ID: 1, user1Score: 2, user2Score: 3, winnerID: 1 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 4, user2ID: 1, user1Score: 3, user2Score: 0, winnerID: 4 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 4, user2ID: 1, user1Score: 1, user2Score: 3, winnerID: 1 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 5, user2ID: 1, user1Score: 3, user2Score: 2, winnerID: 5 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 6, user2ID: 1, user1Score: 0, user2Score: 3, winnerID: 1 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 7, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 7 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 8, user2ID: 1, user1Score: 2, user2Score: 3, winnerID: 1 },
-
-            // 2-player matches (vs Guest - userID 2)
-            { matchType: 'pong', matchMode: '2players', user1ID: 3, user2ID: 2, user1Score: 3, user2Score: 1, winnerID: 3 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 4, user2ID: 2, user1Score: 1, user2Score: 3, winnerID: 2 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 5, user2ID: 2, user1Score: 3, user2Score: 2, winnerID: 5 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 6, user2ID: 2, user1Score: 0, user2Score: 3, winnerID: 2 },
-
-            // 2-player matches (user vs user)
-            { matchType: 'pong', matchMode: '2players', user1ID: 3, user2ID: 4, user1Score: 3, user2Score: 2, winnerID: 3 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 5, user2ID: 6, user1Score: 2, user2Score: 3, winnerID: 6 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 7, user2ID: 8, user1Score: 3, user2Score: 0, winnerID: 7 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 9, user2ID: 10, user1Score: 1, user2Score: 3, winnerID: 10 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 11, user2ID: 12, user1Score: 3, user2Score: 1, winnerID: 11 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 3, user2ID: 5, user1Score: 3, user2Score: 2, winnerID: 3 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 4, user2ID: 7, user1Score: 1, user2Score: 3, winnerID: 7 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 6, user2ID: 8, user1Score: 3, user2Score: 1, winnerID: 6 },
-
-            // More single player matches
-            { matchType: 'pong', matchMode: 'single', user1ID: 9, user2ID: 1, user1Score: 3, user2Score: 2, winnerID: 9 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 10, user2ID: 1, user1Score: 0, user2Score: 3, winnerID: 1 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 11, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 11 },
-            { matchType: 'pong', matchMode: 'single', user1ID: 12, user2ID: 1, user1Score: 2, user2Score: 3, winnerID: 1 },
-
-            // More 2-player matches
-            { matchType: 'pong', matchMode: '2players', user1ID: 7, user2ID: 2, user1Score: 3, user2Score: 0, winnerID: 7 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 8, user2ID: 2, user1Score: 2, user2Score: 3, winnerID: 2 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 9, user2ID: 2, user1Score: 3, user2Score: 1, winnerID: 9 },
-            { matchType: 'pong', matchMode: '2players', user1ID: 10, user2ID: 2, user1Score: 1, user2Score: 3, winnerID: 2 }
-        ];
-
-        console.log("Adding fake Pong match data...");
-        for (const match of pongMatches) {
-            try {
-                insertMatch.run(
-                    match.matchType,
-                    match.matchMode,
-                    match.user1ID,
-                    match.user2ID,
-                    match.user1Score,
-                    match.user2Score,
-                    match.winnerID
-                );
-            } catch (error) {
-                console.error(`Error inserting match:`, error);
-            }
-        }
-        console.log(`${pongMatches.length} fake Pong matches added successfully`);
-
     } else {
-        console.log("Users table already exists");
+        console.log("Database tables already exist");
+        
+        // Check if we should add test data to existing database
+        if (PREFILL_DATABASE) {
+            const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get().count;
+            if (userCount <= 2) { // Only AI and Guest exist
+                console.log("Adding test data to existing database...");
+                await prefillDatabase(db);
+            } else {
+                console.log(`Database already has ${userCount} users, skipping prefill`);
+            }
+        }
     }
     return db;
 }

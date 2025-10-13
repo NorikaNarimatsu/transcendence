@@ -105,7 +105,9 @@ export default function SnakeGame(): JSX.Element {
                 user1ID: user?.userID, // Current user
                 user2ID: mode === '2players' ? (opponent?.userID || 2) : null, // Opponent or Guest (userID=2) or null for single
                 user1Score: engine.snake1.score,
-                user2Score: engine.isMultiplayer ? (engine.snake2?.score || 0) : 0
+                user2Score: engine.isMultiplayer ? (engine.snake2?.score || 0) : 0,
+                startedAt: engine.startedAt,
+                endedAt: engine.endedAt
             };
 
             console.log('=== SENDING SNAKE MATCH RESULT ===');
@@ -123,6 +125,9 @@ export default function SnakeGame(): JSX.Element {
                 const result = await response.json();
                 console.log('Match saved successfully:', result);
                 console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
+                if (result.duration) {
+                    console.log('Match Duration:', result.duration, 'seconds');
+                }
             } else {
                 const error = await response.json();
                 console.error('Failed to save match:', error);

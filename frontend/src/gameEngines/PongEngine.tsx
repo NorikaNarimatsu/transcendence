@@ -8,6 +8,8 @@ export interface GameState {
     gameStarted: boolean;
     gameEnded: boolean;
     winner: string;
+    startedAt?: string;
+    endedAt?: string;
   }
   
   export interface GameConfig {
@@ -99,7 +101,12 @@ export interface GameState {
       const direction = Math.random() < 0.5 ? -1 : 1;
       this.ballVelocity.dx = direction * this.config.ballSpeed * Math.cos(angle);
       this.ballVelocity.dy = this.config.ballSpeed * Math.sin(angle);
-      this.updateState({ gameStarted: true });
+      
+      const startTime = new Date().toISOString();
+      this.updateState({ 
+        gameStarted: true,
+        startedAt: startTime
+      });
     }
   
     private resetBall(): void {
@@ -145,15 +152,19 @@ export interface GameState {
   
     private checkGameEnd(): void {
       if (this.gameState.leftScore >= this.config.winScore) {
+        const endTime = new Date().toISOString();
         this.updateState({
           gameEnded: true,
-          winner: this.leftPlayerName
+          winner: this.leftPlayerName,
+          endedAt: endTime
         });
         this.resetBall();
       } else if (this.gameState.rightScore >= this.config.winScore) {
+        const endTime = new Date().toISOString();
         this.updateState({
           gameEnded: true,
-          winner: this.rightPlayerName
+          winner: this.rightPlayerName,
+          endedAt: endTime
         });
         this.resetBall();
       }

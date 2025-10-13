@@ -11,6 +11,7 @@ import SnakeGame from './pages/games/SnakeGame.tsx'
 import PlayerProfile from './pages/PlayerProfile.tsx'
 import TournamentTree from './pages/tournament/tournamentTree.tsx'
 import Bracket from './pages/tournament/tournamentBracket.tsx'
+import Dashboard from './pages/games/Dashboard.tsx'
 
 import { UserProvider } from './pages/user/UserContext'
 import { SelectedPlayerProvider } from './pages/user/PlayerContext'
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
   { path: '/', element: <App /> },
   { path: '/login', element: <Login /> },
   { path: '/signup', element: <SignUp /> },
+  { path: '/dashboard', element: <Dashboard /> },
   { path: '/signupUnkownUser', element: <SignUp2 />},
   { path: '/playerProfile/pongGame', element: <PongGame />},
   { path: '/playerProfile/snakeGame', element: <SnakeGame />},

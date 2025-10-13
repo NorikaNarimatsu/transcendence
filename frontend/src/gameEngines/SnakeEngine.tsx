@@ -17,6 +17,8 @@ export class SnakeGameEngine {
     public waitingToStart: boolean;
     public winner: number | null;
     public isMultiplayer: boolean;
+    public startedAt: string | null;
+    public endedAt: string | null;
     private config: SnakeGameConfig;
 
     constructor(config: SnakeGameConfig, isMultiplayer: boolean = false, player1Name: string = 'Player 1', player2Name: string = 'Guest') {
@@ -43,6 +45,8 @@ export class SnakeGameEngine {
         this.waitingToStart = true;
         this.winner = null;
         this.isMultiplayer = isMultiplayer;
+        this.startedAt = null;
+        this.endedAt = null;
     }
 
     public updateConfig (newConfig: SnakeGameConfig): void {
@@ -93,6 +97,7 @@ export class SnakeGameEngine {
         if (!snake1Alive) {
             this.winner = 2;
             this.gameOver = true;
+            this.endedAt = new Date().toISOString();
             return;
         }
 
@@ -102,6 +107,7 @@ export class SnakeGameEngine {
             if (!snake2Alive) {
                 this.winner = 1;
                 this.gameOver = true;
+                this.endedAt = new Date().toISOString();
                 return;
             }
         }
@@ -112,6 +118,8 @@ export class SnakeGameEngine {
         this.waitingToStart = false;
         this.gameOver = false;
         this.winner = null;
+        this.startedAt = new Date().toISOString();
+        this.endedAt = null;
         this.food = getRandomPosition(this.config);
 
         // Reset snakes to center positions
