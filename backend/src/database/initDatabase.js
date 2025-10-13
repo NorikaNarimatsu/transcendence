@@ -172,11 +172,6 @@ export async function initializeDatabase() {
     } else {
         console.log("Users table already exists");
     }
-
-
-
-
-
     return db;
 }
 

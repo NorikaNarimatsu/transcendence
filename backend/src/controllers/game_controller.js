@@ -126,7 +126,6 @@ export const addMatch = async (request, response) => {
     }
 };
 
-// Rest of the functions stay the same...
 export const getUserMatches = async (request, response) => {
     try {
         const { userID } = request.params;

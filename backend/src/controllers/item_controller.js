@@ -299,7 +299,7 @@ export const validatePasswordByUserID = async (request, reply) => {
             return reply.code(404).send({ message: "User not found" });
         }
         
-        // ✅ FIXED: Use comparePassword instead of bcrypt.compare (to match your existing pattern)
+        // FIXED: Use comparePassword instead of bcrypt.compare (to match your existing pattern)
         const isValidPassword = await comparePassword(password, user.password);
         
         if (isValidPassword) {
