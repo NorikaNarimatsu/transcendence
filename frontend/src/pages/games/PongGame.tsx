@@ -14,16 +14,18 @@ import gear_icon from '../../assets/icons/Settings.png';
 import star_icon from '../../assets/icons/Star.png';
 
 //Game instructions component
-import GameInstructions from '../../components/GameInstructionsPongGame';
+import GameInstructions from '../../components/GameInstructionsPongGame';import type { SelectedPlayer } from '../user/PlayerContext';
 
 export default function PongGame(): JSX.Element {
     const { user } = useUser();
     const location = useLocation();
     const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
-    const mode = params.get('mode') || 'single'; // 'single', '2players', 'tournament'
-    const players = params.get('players'); // for tournament mode
-    const { selectedPlayer } = useSelectedPlayer();
+    const mode = params.get('mode') || 'single';
+    const players = params.get('players');
+    
+    // ADD: Get all players from global context
+    const { selectedPlayer, aiPlayer, guestPlayer } = useSelectedPlayer();
 
     const [gameConfig, setGameConfig] = useState<GameConfig>(calculateGameConfig());
     const [gameState, setGameState] = useState<GameState>({
@@ -38,74 +40,160 @@ export default function PongGame(): JSX.Element {
         winner: ''
     });
 
-  const engineRef = useRef<PongEngine | null>(null);
+    const engineRef = useRef<PongEngine | null>(null);
 
-  // Handle going back to profile
-  const handleBackToProfile = () => {
-    navigate('/playerProfile');
+    const handleBackToProfile = () => {
+        navigate('/playerProfile');
+    };
+
+    const getOpponent = (): SelectedPlayer | null => {
+      if (mode === 'single') {
+          return aiPlayer;
+      } else if (mode === '2players') {
+          // If a player is selected, use them; otherwise use Guest
+          return selectedPlayer || guestPlayer;
+      }
+      return null;
+  };
+  
+  const opponent = getOpponent();
+
+  
+
+    // Resize handler
+    useEffect(() => {
+        const handleResize = () => {
+            const newConfig = calculateGameConfig();
+            setGameConfig(newConfig);
+            if (engineRef.current) {
+                engineRef.current.stop();
+                const leftPlayer = user?.name || 'Player 1';
+                const rightPlayer = opponent?.name || 'Player 2';
+                engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayer, rightPlayer);
+                engineRef.current.start();
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [mode, user?.name, opponent]);
+
+    const sendMatchResult = async (finalGameState: GameState) => {
+      try {
+          const matchData = {
+              matchType: 'pong',
+              matchMode: mode,
+              user1ID: user?.userID, // Current user
+              user2ID: opponent?.userID || 2, // Opponent or Guest (userID=2)
+              user1Score: finalGameState.leftScore,
+              user2Score: finalGameState.rightScore
+          };
+
+          console.log('=== SENDING MATCH RESULT ===');
+          console.log('Match Data:', matchData);
+
+          const response = await fetch('https://localhost:8443/match', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(matchData)
+          });
+
+          if (response.ok) {
+              const result = await response.json();
+              console.log('Match saved successfully:', result);
+              console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
+          } else {
+              const error = await response.json();
+              console.error('Failed to save match:', error);
+          }
+      } catch (error) {
+          console.error('Error sending match result:', error);
+      }
   };
 
-  // Resize handler
-  useEffect(() => {
-    const handleResize = () => {
-      const newConfig = calculateGameConfig();
-      setGameConfig(newConfig);
-      if (engineRef.current) {
-        engineRef.current.stop();
+    // Game engine and keyboard events
+    useEffect(() => {
         const leftPlayer = user?.name || 'Player 1';
-        const rightPlayer = mode === 'single' ? 'AI' : (selectedPlayer?.name || 'Player 2');
-        engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayer, rightPlayer);
+        const rightPlayer = opponent?.name || 'Player 2';
+
+         // SHOULD BE DELETED THESE COMENTS LATER // THIS IS FOR DEGUB
+        console.log('=== PONG GAME STARTED ===');
+        console.log('Game Mode:', mode);
+        console.log('Left Player (User):', {
+            name: user?.name,
+            userID: user?.userID,
+            avatarUrl: user?.avatarUrl
+        });
+        console.log('Right Player (Opponent):', {
+            name: opponent?.name,
+            userID: opponent?.userID,
+            avatarUrl: opponent?.avatarUrl,
+            type: mode === 'single' ? 'AI' : (selectedPlayer ? 'Selected Player' : 'Guest')
+        });
+        console.log('Global Context Players:', {
+            selectedPlayer: selectedPlayer,
+            aiPlayer: aiPlayer,
+            guestPlayer: guestPlayer
+        });
+        console.log('Final Player Names:', {
+            leftPlayerName: leftPlayer,
+            rightPlayerName: rightPlayer
+        });
+        console.log('========================');
+        // SHOULD BE DELETED THESE COMENTS LATER
+
+        engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayer, rightPlayer);
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            engineRef.current?.handleKeyDown(e.key);
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            engineRef.current?.handleKeyUp(e.key);
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
         engineRef.current.start();
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+            engineRef.current?.stop();
+        };
+    }, [gameConfig, mode, user?.name, opponent]);
+
+    useEffect(() => {
+      if (gameState.gameEnded && gameState.winner) {
+          console.log('Game ended, sending match result...');
+          sendMatchResult(gameState);
       }
-    };
+  }, [gameState.gameEnded, gameState.winner]); // Send result when game ends
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [mode, user?.name, selectedPlayer]);
-
-  // Game engine and keyboard events
-  useEffect(() => {
-    const leftPlayer = user?.name || 'Player 1';
-    const rightPlayer = mode === 'single' ? 'AI' : (selectedPlayer?.name || 'Player 2');
-    engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayer, rightPlayer);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      engineRef.current?.handleKeyDown(e.key);
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      engineRef.current?.handleKeyUp(e.key);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    engineRef.current.start();
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      engineRef.current?.stop();
-    };
-  }, [gameConfig, mode, user?.name, selectedPlayer ]);
-
-  return (
-    <main className="min-h-screen flex flex-col">
-      <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
-        <div className="flex items-center justify-start gap-2">
-          <h1 className="player-name">{user.name}</h1>
-          <img src={user.avatar} alt="Avatar" className="avatar" />
-        </div>
-        <div className="flex justify-center">
-          <p className="player-name">{gameState.leftScore} - {gameState.rightScore}</p>
-        </div>
-        <div className="flex items-center justify-end gap-2">
-          <img src={selectedPlayer?.avatarUrl || '/avatars/Avatar_2.png'} alt="Avatar 2" className="avatar" />
-          <h2 className="player-name">
-            {mode === 'single' ? 'AI' : selectedPlayer?.name || 'Guest'}</h2>
-        </div>
-      </header>
-
+    return (
+      <main className="min-h-screen flex flex-col">
+          <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
+              <div className="flex items-center justify-start gap-2">
+                  <h1 className="player-name">{user?.name}</h1>
+                  <img src={user?.avatarUrl} alt="Avatar" className="avatar" />
+              </div>
+              <div className="flex justify-center">
+                  <p className="player-name">{gameState.leftScore} - {gameState.rightScore}</p>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                  <img 
+                      src={opponent?.avatarUrl || '/avatars/Avatar_2.png'} 
+                      alt="Opponent Avatar" 
+                      className="avatar" 
+                  />
+                  <h2 className="player-name">
+                      {opponent?.name || 'Guest'}
+                  </h2>
+              </div>
+          </header>
       <section className="flex-1 bg-pink-grid flex items-center justify-center">
         <div 
           className="relative bg-pink-dark shadow-no-blur-70"

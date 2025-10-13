@@ -5,10 +5,7 @@ import arrow_icon from "../../assets/icons/arrow.png";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../user/UserContext";
-import {
-  sanitizeEmail,
-  getEmailErrorMessage,
-} from "../../utils/emailValidation";
+import { sanitizeEmail, getEmailErrorMessage } from "../../utils/emailValidation";
 import SafeError from "../../components/SafeError";
 
 export default function SignUp() {

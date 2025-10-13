@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { db } from "../server.js";
 import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 import { sanitizeInput } from "../utils/sanitizeInput.js";
@@ -22,11 +21,11 @@ export function getItems(request, response) {
 		const items = db.prepare("SELECT * FROM users").all();
 
 		const sanitiziedItems = items.map(item => ({
-			id: item.id,
+			id: item.userID,
 			name: sanitizeInput.sanitizeUsername(item.name),
 			email: sanitizeInput.sanitizeEmail(item.email),
 			avatarUrl: item.avatarUrl,
-			created_at: item.created_at
+			createdAt: item.createdAt
 		}))
 		response.send(sanitiziedItems);
 
@@ -44,16 +43,16 @@ export function getItem(request, response) {
 		return response.code(400).send({ error: "Invalid or missing id" });
 		}
 
-		const item = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+		const item = db.prepare("SELECT * FROM users WHERE userID = ?").get(id);
 		if (!item) {
 		response.code(404).send({ error: "Item not found" });
 		} else {
 		response.send({
-			id: item.id,
+			id: item.userID,
 			name: sanitizeInput.sanitizeUsername(item.name),
 			email: sanitizeInput.sanitizeEmail(item.email),
 			avatarUrl: item.avatarUrl,
-			created_at: item.created_at
+			createdAt: item.createdAt
 			});
 		}
 	} catch (error) {
@@ -63,14 +62,6 @@ export function getItem(request, response) {
 }
 ////////////////////////////// POST //////////////////////////////
 
-// export function addItem(request, response) {
-//   const { name, email, password } = request.body;
-//   const finalAvatarUrl = avatarUrl || avatars[Math.floor(Math.random() * avatars.length)];
-//   const uuid = uuidv4(); // Generate a unique UUID
-//   const responseult = db.prepare('INSERT INTO items (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)').run(uuid, name, email, password, finalAvatarUrl);
-//   response.code(201).send({ id: responseult.lastInsertRowid, name , email, avatarUrl: finalAvatarUrl, created_at: new Date().toISOString()});
-// };
-
 export function addItem(request, response) {
 	const { name, email, password } = request.body;
 
@@ -78,18 +69,18 @@ export function addItem(request, response) {
 	const sanitiziedEmail = sanitizeInput.sanitizeEmail(email);
 
 	const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
-	const uuid = uuidv4(); // Generate a unique UUID
+	const createdAt = new Date().toISOString();
 	const result = db
 	.prepare(
-		"INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)"
+		"INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)"
 	)
-	.run(uuid, sanitiziedName, sanitiziedEmail, password, randomAvatarUrl);
+	.run(sanitiziedName, sanitiziedEmail, password, randomAvatarUrl, createdAt);
 	response.code(201).send({
 	id: result.lastInsertRowid,
 	name: sanitiziedName,
 	email: sanitiziedEmail,
 	avatarUrl: randomAvatarUrl,
-	created_at: new Date().toISOString(),
+	createdAt: createdAt,
 	});
 }
 
@@ -111,7 +102,7 @@ export function updateItem(request, response) {
 
     const responseult = db
       .prepare(
-        "UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE id = ?"
+        "UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE userID = ?"
       )
       .run(sanitiziedName, avatarUrl, id);
     if (responseult.changes === 0) {
@@ -142,7 +133,7 @@ export function deleteItem(request, response) {
 			return response.code(400).send({ error: "Invalid or missing id" });
 		}
 	
-		const responseult = db.prepare("DELETE FROM users WHERE id = ?").run(parseInt(id));
+		const responseult = db.prepare("DELETE FROM users WHERE userID = ?").run(parseInt(id));
 		if (responseult.changes === 0) {
 		response.code(404).send({ error: "Item not found" });
 		} else {
@@ -214,7 +205,7 @@ export const validateName = async (request, response) => {
 
 // Frontend                        Backend
 //    |                               |
-//    |-- POST /validate-name ------->|
+//    |-- POST /validateName ------->|
 //    |   { "name": "Norika" }        |
 //    |                               |
 //    |                         Validates name
@@ -266,22 +257,66 @@ export const validatePasswordbyEmail = async (request, response) => {
 	}
 };
 
-export const validatePasswordbyName = async (request, response) => {
-	try {
-		const { name, password } = request.body;
+// export const validatePasswordbyName = async (request, response) => {
+// 	try {
+// 		const { name, password } = request.body;
 
-		const sanitiziedName = sanitizeInput.sanitizeUsername(name);
-		const user = db.prepare("SELECT * FROM users WHERE name = ?").get(sanitiziedName); // use 'name'
-		if (!user) return response.code(401).send({ message: "User not found" });
+// 		const sanitiziedName = sanitizeInput.sanitizeUsername(name);
+// 		const user = db.prepare("SELECT * FROM users WHERE name = ?").get(sanitiziedName); // use 'name'
+// 		if (!user) return response.code(401).send({ message: "User not found" });
 
-		//TODO for Gosia - should I also validate here password? in case of frontend bypass
-		const isPasswordValid = await comparePassword(password, user.password);
+// 		//TODO for Gosia - should I also validate here password? in case of frontend bypass
+// 		const isPasswordValid = await comparePassword(password, user.password);
 
-		if (isPasswordValid) return response.code(200).send();
-		else return response.code(401).send({ message: "Invalid password" });
-	} catch (error) {
-		return response.code(500).send();
-	}
+// 		if (isPasswordValid) return response.code(200).send();
+// 		else return response.code(401).send({ message: "Invalid password" });
+// 	} catch (error) {
+// 		return response.code(500).send();
+// 	}
+// };
+
+export const validatePasswordByUserID = async (request, reply) => {
+    try {
+        const { userID, password } = request.body;
+        
+        if (!userID || !password) {
+            return reply.code(400).send({ 
+                message: "userID and password are required" 
+            });
+        }
+        
+        const sanitizedUserID = parseInt(userID);
+        if (isNaN(sanitizedUserID)) {
+            return reply.code(400).send({ message: "Invalid userID" });
+        }
+        
+        // Get user by userID
+        const user = db
+            .prepare("SELECT userID, password FROM users WHERE userID = ?")
+            .get(sanitizedUserID);
+        
+        if (!user) {
+            return reply.code(404).send({ message: "User not found" });
+        }
+        
+        // FIXED: Use comparePassword instead of bcrypt.compare (to match your existing pattern)
+        const isValidPassword = await comparePassword(password, user.password);
+        
+        if (isValidPassword) {
+            return reply.code(200).send({ 
+                message: "Password is valid",
+                userID: user.userID 
+            });
+        } else {
+            return reply.code(401).send({ message: "Invalid password" });
+        }
+        
+    } catch (error) {
+        request.log.error("Password validation error:", error);
+        return reply.code(500).send({
+            message: "Internal server error",
+        });
+    }
 };
 
 export async function addNewUser(request, response) {
@@ -308,25 +343,25 @@ export async function addNewUser(request, response) {
 	
 	const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
     const hashedPassword = await hashPassword(password);
-    const uuid = uuidv4(); // Generate a unique UUID
+    const createdAt = new Date().toISOString();
 
     const result = db
       .prepare(
-        "INSERT INTO users (uuid, name, email, password, avatarUrl) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)"
       )
       .run(
-        uuid,
         sanitizedName,
         sanitizedEmail,
         hashedPassword,
-        randomAvatarUrl
+        randomAvatarUrl,
+        createdAt
       );
     response.code(201).send({
       id: result.lastInsertRowid,
       name: sanitizedName,
       email: sanitizedEmail,
       avatarUrl: randomAvatarUrl,
-      created_at: new Date().toISOString(),
+      created_at: createdAt,
     });
   } catch (error) {
     request.log.error("Failed to add new user:", error);
@@ -358,89 +393,189 @@ export const getUserByEmail = async (request, reply) => {
 };
 
 export const getUserInfoByEmail = async (request, reply) => {
-	try {
-		const { email } = request.params;
-		const sanitiziedEmail = sanitizeInput.sanitizeEmail(email);
-		
-		const user = db
-			.prepare("SELECT name, avatarUrl FROM users WHERE email = ?")
-			.get(sanitiziedEmail);
-		if (user) {
-			return reply.code(200).send({
-			name: sanitizeInput.sanitizeUsername(user.name),
-			avatar: user.avatarUrl,
-			});
-		}
-		return reply.code(404).send({
-			message: "User not found",
-		});
-	} catch (error) {
-		request.log.error("Failed to get user:", error);
-		return reply.code(500).send({
-			message: "Internal server error",
-		});
-	}
+    try {
+        const { email } = request.params;
+        const sanitiziedEmail = sanitizeInput.sanitizeEmail(email);
+        
+        const user = db
+            .prepare("SELECT userID, name, avatarUrl FROM users WHERE email = ?") // ADD userID
+            .get(sanitiziedEmail);
+        if (user) {
+            return reply.code(200).send({
+                userID: user.userID,  // ADD userID to response
+                name: sanitizeInput.sanitizeUsername(user.name),
+                avatarUrl: user.avatarUrl,
+            });
+        }
+        return reply.code(404).send({
+            message: "User not found",
+        });
+    } catch (error) {
+        request.log.error("Failed to get user:", error);
+        return reply.code(500).send({
+            message: "Internal server error",
+        });
+    }
 };
 
-export const getAllUsers = async (request, response) => {
-	try {
-		const users = db
-			.prepare("SELECT id, name, avatarUrl FROM users ORDER BY name")
-			.all();
-		return response.code(200).send(users);
-	} catch (error) {
-		request.log.error("Failed to get all users:", error);
-		return response.code(500).send({
-			message: "Internal server error",
-		});
-	}
+// export const getAllUsers = async (request, response) => {
+// 	try {
+// 		const users = db
+// 			.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID != 1 ORDER BY name")
+// 			.all();
+// 		return response.code(200).send(users);
+// 	} catch (error) {
+// 		request.log.error("Failed to get all users:", error);
+// 		return response.code(500).send({
+// 			message: "Internal server error",
+// 		});
+// 	}
+// };
+
+// Not by EMAIL BUT ID
+export const getUsersExceptUserID = async (request, reply) => {
+    try {
+        const { userID } = request.params;
+        const sanitizedUserID = parseInt(userID);
+        
+        if (isNaN(sanitizedUserID)) {
+            return reply.code(400).send({ message: "Invalid userID" });
+        }
+        const users = db
+            .prepare(`
+                SELECT userID, name, avatarUrl 
+                FROM users 
+                WHERE userID != ? AND userID != 1 AND userID != 2
+                ORDER BY userID
+            `)
+            .all(sanitizedUserID);
+        const formattedUsers = users.map(user => ({
+            userID: user.userID,
+            name: sanitizeInput.sanitizeUsername(user.name),
+            avatarUrl: user.avatarUrl
+        }));
+        return reply.code(200).send(formattedUsers);
+    } catch (error) {
+        request.log.error("Failed to get users except userID:", error);
+        return reply.code(500).send({
+            message: "Internal server error",
+        });
+    }
 };
 
-export const getAllUsersExceptCurrent = async (request, response) => {
-	try {
-		const { email } = request.params;
-		const sanitizedEmail = sanitizeInput.sanitizeEmail(email);
-		const users = db
-			.prepare(
-			`SELECT id, name, avatarUrl
-				FROM users
-				WHERE email != ?
-				AND name NOT LIKE 'deleted_user_%'
-				ORDER BY name`
-			)
-			.all(sanitizedEmail);
-			const sanitiziedUsers = users.map(user => ({
-				id: user.id,
-				name: sanitizeInput.sanitizeUsername(user.name),
-				avatarUrl: user.avatarUrl
-			}))
-		return response.code(200).send(sanitiziedUsers);
-	} catch (error) {
-		request.log.error("Failed to get all users:", error);
-		return response.code(500).send({
-			message: "Internal server error",
-		});
-	}
+// Simplified version for one-sided friendship
+export const getUserFriendsByUserID = async (request, reply) => {
+    try {
+        const { userID } = request.params;
+        const sanitizedUserID = parseInt(userID);
+        
+        if (isNaN(sanitizedUserID)) {
+            return reply.code(400).send({ message: "Invalid userID" });
+        }
+        
+        // Get friends where this user is user1ID (one-sided friendship)
+        const friends = db.prepare(`
+            SELECT u.userID, u.name, u.avatarUrl
+            FROM friends f
+            JOIN users u ON f.user2ID = u.userID
+            WHERE f.user1ID = ?
+            ORDER BY u.name
+        `).all(sanitizedUserID);
+        
+        // Format response to match SelectedPlayer interface
+        const formattedFriends = friends.map(friend => ({
+            userID: friend.userID,
+            name: sanitizeInput.sanitizeUsername(friend.name),
+            avatarUrl: friend.avatarUrl
+        }));
+        
+        return reply.code(200).send(formattedFriends);
+        
+    } catch (error) {
+        request.log.error("Failed to get friends by userID:", error);
+        return reply.code(500).send({
+            message: "Internal server error",
+        });
+    }
+};
+
+export const addFriendByUserID = async (request, response) => {
+    try {
+        const { user1ID, user2ID } = request.body;
+
+        if (!user1ID || !user2ID) {
+            return response.code(400).send({ message: "user1ID and user2ID are required" });
+        }
+
+        const sanitizedUser1ID = parseInt(user1ID);
+        const sanitizedUser2ID = parseInt(user2ID);
+
+        if (isNaN(sanitizedUser1ID) || isNaN(sanitizedUser2ID)) {
+            return response.code(400).send({ message: "Invalid userID format" });
+        }
+
+        // Check if user1 exists
+        const user1 = db.prepare("SELECT userID FROM users WHERE userID = ?").get(sanitizedUser1ID);
+        if (!user1) {
+            return response.code(404).send({ message: "User not found" });
+        }
+
+        // Check if user2 (friend) exists
+        const user2 = db.prepare("SELECT userID FROM users WHERE userID = ?").get(sanitizedUser2ID);
+        if (!user2) {
+            return response.code(404).send({ message: "Friend not found" });
+        }
+
+        // Check if user is trying to add themselves
+        if (sanitizedUser1ID === sanitizedUser2ID) {
+            return response.code(400).send({ message: "Cannot add yourself as a friend" });
+        }
+
+        // Check if friendship already exists (one-sided only)
+        const existingFriendship = db.prepare(
+            "SELECT * FROM friends WHERE user1ID = ? AND user2ID = ?"
+        ).get(sanitizedUser1ID, sanitizedUser2ID);
+
+        if (existingFriendship) {
+            return response.code(409).send({ message: "Already friends" });
+        }
+
+        // Add the friendship (one-sided)
+        const registeredAt = new Date().toISOString();
+        const result = db.prepare(
+            "INSERT INTO friends (user1ID, user2ID, registeredAt) VALUES (?, ?, ?)"
+        ).run(sanitizedUser1ID, sanitizedUser2ID, registeredAt);
+
+        return response.code(201).send({ 
+            message: "Friend added successfully",
+            friendshipID: result.lastInsertRowid 
+        });
+
+    } catch (error) {
+        request.log.error("addFriendByUserID error: ", error);
+        return response.code(500).send({ message: "Internal server error" });
+    }
 };
 
 ////////////////////////////// CONTROLLER //////////////////////////////
 
 const itemController = {
-  getItems,
-  getItem,
-  addItem,
-  deleteItem,
-  updateItem,
-//   validateAndAddItem,
-  validateName,
-  validateEmail,
-  validatePasswordbyEmail,
-  validatePasswordbyName,
-  addNewUser,
-  getUserByEmail,
-  getAllUsers,
-  getUserInfoByEmail,
-  getAllUsersExceptCurrent,
-};
+    // Core validation
+    validateName,
+    validateEmail,
+    validatePasswordbyEmail,
+    validatePasswordByUserID,
+    
+    // User management
+    addNewUser,
+    getUserByEmail,
+    getUserInfoByEmail,
+    // getAllUsers,
+    getUsersExceptUserID,
+    
+    // Friends management
+    addFriendByUserID,
+    getUserFriendsByUserID
+  };
 
 export default itemController;

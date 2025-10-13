@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface User {
-    email: string;
+export interface User {
+    userID: number;
+    email: string;     // i want to delete later, what do you think, @Eduarda?
     name: string;
-    avatar: string;
+    avatarUrl: string; //changed because it was a bit confusing without url
 }
 
 interface UserContextType {
@@ -24,7 +25,11 @@ export function UserProvider({ children }: { children: ReactNode}) {
                 const storedUser = localStorage.getItem('currentUser');
                 if (storedUser) {
                     const userData = JSON.parse(storedUser);
-                    setUser(userData);
+                    if (userData && userData.userID && userData.email && userData.name && userData.avatarUrl) {
+                        setUser(userData);
+                    } else {
+                        localStorage.removeItem('currentUser');
+                    }
                 }
             } catch (error) {
                 console.error('Error loading user from localStorage:', error);
@@ -41,7 +46,10 @@ export function UserProvider({ children }: { children: ReactNode}) {
     const updateUser = (userData: User | null) => {
     setUser(userData);
     if (userData) {
-        localStorage.setItem('currentUser', JSON.stringify(userData));
+        if (userData.userID && userData.email && userData.name && userData.avatarUrl)
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+        else
+            console.warn('Invalid user data provided to setUser:', userData);
     } else { // i dont know if this is right TODO: check later
         localStorage.removeItem('currentUser');
     }

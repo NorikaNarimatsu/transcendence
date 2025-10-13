@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import bgimage from '../assets/Player_Page.jpg';
 import arrow_icon from '../assets/icons/arrow.png';
@@ -9,9 +9,9 @@ import AvatarSelection from '../components/AvatarSelection';
 import { TournamentRegistration } from '../components/profileTournamentRegistration';
 import { PasswordVerification } from '../components/profilePasswordVerification';
 import { CategoryButtons } from '../components/profileCategoryButtons';
-import { AddFriends } from '../components/profileAddFriends';
 import { PlayerSelection } from '../components/profilePlayerSelection';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
+import { FriendsManager } from '../components/FriendsManager';
 
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
@@ -19,6 +19,9 @@ import { useSelectedPlayer } from './user/PlayerContext';
 import { DeleteAccount } from './user/DeleteUser';
 import Button from '../components/ButtonDarkPink';
 
+// WE CAN USE LIKE THIS AND SEE IT!
+// const { user } = useUser();
+// console.log("Current user:", user);
 
 export default function PlayerProfile(): JSX.Element {
     const [isOpen, setIsOpen] = useState(false);
@@ -38,13 +41,21 @@ export default function PlayerProfile(): JSX.Element {
     const [tournamentVerifyPassword, setTournamentVerifyPassword] = useState('');
     const [tournamentVerifyError, setTournamentVerifyError] = useState('');
     
-    const [showAddFriends, setShowAddFriends] = useState(false);
     const [users, setUsers] = useState<SelectedPlayer[]>([]);
     const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
 
+    const friendsManagerRef = useRef<any>(null);
+
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-	
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+
+    const [basicStats, setBasicStats] = useState<{
+        wins: number;
+        losses: number;
+        totalMatches: number;
+    } | null>(null);
+    const [showBasicStats, setShowBasicStats] = useState(false);
+
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
@@ -55,21 +66,21 @@ export default function PlayerProfile(): JSX.Element {
     }, [setSelectedPlayer]);
 
     useEffect(() => {
-        if (user?.email) {
-        fetch(`https://localhost:8443/users/except/${encodeURIComponent(user.email)}`)
-            .then(res => res.ok ? res.text() : Promise.reject(res.status))
-            .then(text => {
-                try {
-                    const users = JSON.parse(text);
-                    setUsers(users);
-                    setAllUsers(users);
-                } catch (err) {
-                    console.error('JSON parse error:', err);
-                }
-            })
-            .catch(err => console.error('Failed to fetch users:', err));
+        if (user?.userID) {  // CHANGED: Check userID instead of email
+            fetch(`https://localhost:8443/users/except/${user.userID}`)
+                .then(res => res.ok ? res.text() : Promise.reject(res.status))
+                .then(text => {
+                    try {
+                        const users = JSON.parse(text);
+                        setUsers(users);
+                        setAllUsers(users);
+                    } catch (err) {
+                        console.error('JSON parse error:', err);
+                    }
+                })
+                .catch(err => console.error('Failed to fetch users:', err));
         }
-    }, [user?.email]);
+    }, [user?.userID]); 
 
     useEffect(() => {
         if (!user) {
@@ -99,10 +110,10 @@ export default function PlayerProfile(): JSX.Element {
 
     const handlePasswordSubmit = async () => {
         try {
-            const response = await fetch('https://localhost:8443/validatePasswordbyName', {
+            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {  // CHANGED: Use userID endpoint
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: selectedPlayer!.name, password }),
+                body: JSON.stringify({ userID: selectedPlayer!.userID, password }),  // CHANGED: Send userID
             });
             if (response.ok) {
                 setSelectedPlayer(selectedPlayer);
@@ -130,10 +141,10 @@ export default function PlayerProfile(): JSX.Element {
     const handleVerifyPassword = async () => {
         if (!tournamentVerifyingUser) return;
         try {
-            const response = await fetch('https://localhost:8443/validatePasswordbyName', {
+            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {  // CHANGED: Use userID endpoint
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: tournamentVerifyingUser.name, password: tournamentVerifyPassword }),
+                body: JSON.stringify({ userID: tournamentVerifyingUser.userID, password: tournamentVerifyPassword }),  // CHANGED: Send userID
             });
             if (response.ok) {
                 setSelectedTournamentParticipants(prev => [...prev, tournamentVerifyingUser]);
@@ -145,6 +156,23 @@ export default function PlayerProfile(): JSX.Element {
             }
         } catch {
             setTournamentVerifyError('Error verifying password. Please try again.');
+        }
+    };
+
+    const fetchBasicStats = async () => {
+        if (!user?.userID) return;
+        
+        try {
+            const response = await fetch(`https://localhost:8443/user/${user.userID}/stats`);
+            if (response.ok) {
+                const data = await response.json();
+                setBasicStats(data.overall);
+                setShowBasicStats(true);
+            } else {
+                console.error('Failed to fetch stats');
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
         }
     };
 
@@ -169,25 +197,13 @@ export default function PlayerProfile(): JSX.Element {
                 ];
             case 'Friends':
                 return [
-                    { name: 'See Friends', action: () => console.log('See Friends') },
-                    { name: 'Add Friend', action: async () => {
-                        setShowAddFriends(true);
-                        try {
-                            const response = await fetch(`https://localhost:8443/users/except/${encodeURIComponent(user.email)}`);
-                            if (response.ok) {
-                                const users = await response.json();
-                                setAllUsers(users);
-                            }
-                        } catch (error) {
-                            console.error('Failed to fetch users:', error);
-                        }
-                    }},
-                    { name: 'Friend Requests', action: () => console.log('Friends Requests')}
+                    { name: 'See Friends', action: () => friendsManagerRef.current?.handleSeeFriends() },
+                    { name: 'Add Friend', action: () => friendsManagerRef.current?.handleAddFriendsClick() }
                 ];
-            case 'Scores':
+            case 'Dashboard':
                 return [
-                    { name: 'See Scores', action: () => console.log('Seeing Scores') },
-                    { name: 'Reset all Scores', action: () => console.log('Reseting all scores') }
+                    { name: 'Go to Dashboard', action: () => navigate('/dashboard') }, // Navigate to new page
+                    { name: 'Basic Stats', action: () => fetchBasicStats() } // Fetch and show stats
                 ];
             case 'Settings':
                 return [
@@ -223,7 +239,7 @@ export default function PlayerProfile(): JSX.Element {
                     <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
                         <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">PLAYER INFO</div>
                         <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
-                                <img onClick={() => setIsOpen(!isOpen)} src={user.avatar} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/>
+                                <img onClick={() => setIsOpen(!isOpen)} src={user.avatarUrl} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/>
                                 <AvatarSelection open={isOpen} onClose={() => setIsOpen(false)}/>
                             <div className="flex flex-col m-auto justify-evenly">
                                 <div className="font-pixelify text-white text-[40px]">{user.name}</div>
@@ -235,7 +251,7 @@ export default function PlayerProfile(): JSX.Element {
                             buttons={[
                                 { name: 'Games', icon: arrow_icon, onClick: () => setSelectedCategory('Games') },
                                 { name: 'Friends', icon: arrow_icon, onClick: () => setSelectedCategory('Friends') },
-                                { name: 'Scores', icon: arrow_icon, onClick: () => setSelectedCategory('Scores') },
+                                { name: 'Dashboard', icon: arrow_icon, onClick: () => setSelectedCategory('Dashboard') },
                                 { name: 'Settings', icon: arrow_icon, className: "button-pp-blue-settings shadow-no-blur flex items-center justify-between", onClick: () => setSelectedCategory('Settings') }
                             ]}
                         />
@@ -313,6 +329,47 @@ export default function PlayerProfile(): JSX.Element {
                                 )}
                             </div>
                         )}
+
+                            {showBasicStats && basicStats && (
+                                <div className="absolute inset-0 flex items-center justify-center z-30 bg-black bg-opacity-50">
+                                    <div className="bg-pink-dark border-4 border-purple-light rounded-lg p-6 shadow-no-blur-60 max-w-sm mx-4">
+                                        <div className="font-pixelify text-white text-3xl text-center mb-6">BASIC STATS</div>
+                                        <div className="space-y-4">
+                                            <div className="text-center">
+                                                <div className="font-dotgothic text-green-400 text-4xl font-bold">
+                                                    {basicStats.wins}
+                                                </div>
+                                                <div className="font-dotgothic text-white text-xl">
+                                                    Wins
+                                                </div>
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="font-dotgothic text-red-400 text-4xl font-bold">
+                                                    {basicStats.losses}
+                                                </div>
+                                                <div className="font-dotgothic text-white text-xl">
+                                                    Losses
+                                                </div>
+                                            </div>
+                                            <div className="text-center border-t border-purple-light pt-4">
+                                                <div className="font-dotgothic text-blue-400 text-2xl font-bold">
+                                                    {basicStats.totalMatches}
+                                                </div>
+                                                <div className="font-dotgothic text-white text-lg">
+                                                    Total Matches
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowBasicStats(false)}
+                                            className="button-pp-purple shadow-no-blur-60 w-full mt-6"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Category Content */}
                             {selectedCategory && !showPlayerSelection && !showPasswordVerification && (
                                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4">
@@ -325,15 +382,11 @@ export default function PlayerProfile(): JSX.Element {
                                     ))}
                                 </div>
                             )}
-                            {/* Add Friends Modal */}
-                            {showAddFriends && (
-                                <AddFriends
-                                    open={showAddFriends}
-                                    allUsers={allUsers}
-                                    onSendRequest={user => alert(`Friend request sent to ${user.name}`)}
-                                    onClose={() => setShowAddFriends(false)}
-                                />
-                            )}
+                            {/* Friends Manager Component */}
+                            <FriendsManager 
+                            ref={friendsManagerRef}
+                            user={user}
+                        />
                         </div>
                     </div>
                 </div>

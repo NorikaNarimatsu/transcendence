@@ -5,6 +5,7 @@ import ButtonPurple from '../../components/ButtonPurple';
 import ButtonPink from '../../components/ButtonDarkPink';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
+import type { SelectedPlayer } from '../user/PlayerContext';
 
 import { SnakeGameEngine, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
 import { calculateSnakeGameConfig, type SnakeGameConfig } from '../../gameEngines/SnakeConfig';
@@ -21,8 +22,9 @@ export default function SnakeGame(): JSX.Element {
     const navigate = useNavigate();
     const location = useLocation();
     const params = new URLSearchParams(location.search);
-    const mode = params.get('mode');
-    const { selectedPlayer } = useSelectedPlayer();
+    const mode = params.get('mode') || 'single';
+    
+    const { selectedPlayer, guestPlayer } = useSelectedPlayer();
 
     // Game engine reference
     const [gameConfig, setGameConfig] = useState<SnakeGameConfig>(calculateSnakeGameConfig());
@@ -33,14 +35,54 @@ export default function SnakeGame(): JSX.Element {
     const handleBackToProfile = () => {
         navigate('/playerProfile');
     };
+    const getOpponent = (): SelectedPlayer | null => {
+        if (mode === 'single') {
+            return null; // No opponent in single mode
+        } else if (mode === '2players') {
+            // If a player is selected, use them; otherwise use Guest
+            return selectedPlayer || guestPlayer;
+        }
+        return null;
+    };
+    
+    const opponent = getOpponent();
 
-    // Initialize game engine
     useEffect(() => {
         const isMultiplayer = mode === '2players';
         const player1Name = user?.name || 'Player 1';
-        const player2Name = selectedPlayer?.name || 'Guest';
+        const player2Name = opponent?.name || 'Guest';
+
+        console.log('=== SNAKE GAME STARTED ===');
+        console.log('Game Mode:', mode);
+        console.log('Player 1 (User):', {
+            name: user?.name,
+            userID: user?.userID,
+            avatarUrl: user?.avatarUrl
+        });
+        
+        if (mode === '2players') {
+            console.log('Player 2 (Opponent):', {
+                name: opponent?.name,
+                userID: opponent?.userID,
+                avatarUrl: opponent?.avatarUrl,
+                type: selectedPlayer ? 'Selected Player' : 'Guest'
+            });
+            console.log('Global Context Players:', {
+                selectedPlayer: selectedPlayer,
+                guestPlayer: guestPlayer
+            });
+        } else {
+            console.log('Single player mode - no opponent');
+        }
+        
+        console.log('Final Player Names:', {
+            player1Name: player1Name,
+            player2Name: player2Name || 'None (Single Mode)'
+        });
+        console.log('========================');
+
         gameEngineRef.current = new SnakeGameEngine(gameConfig, isMultiplayer, player1Name, player2Name);
-    }, [mode, user?.name, selectedPlayer?.name]);
+    }, [mode, user?.name, opponent, gameConfig]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -55,6 +97,41 @@ export default function SnakeGame(): JSX.Element {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const sendMatchResult = async (engine: SnakeGameEngine) => {
+        try {
+            const matchData = {
+                matchType: 'snake',
+                matchMode: mode,
+                user1ID: user?.userID, // Current user
+                user2ID: mode === '2players' ? (opponent?.userID || 2) : null, // Opponent or Guest (userID=2) or null for single
+                user1Score: engine.snake1.score,
+                user2Score: engine.isMultiplayer ? (engine.snake2?.score || 0) : 0
+            };
+
+            console.log('=== SENDING SNAKE MATCH RESULT ===');
+            console.log('Match Data:', matchData);
+
+            const response = await fetch('https://localhost:8443/match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(matchData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Match saved successfully:', result);
+                console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
+            } else {
+                const error = await response.json();
+                console.error('Failed to save match:', error);
+            }
+        } catch (error) {
+            console.error('Error sending match result:', error);
+        }
+    };
+    
     // Game loop
     useEffect(() => {
         if (!gameEngineRef.current) return;
@@ -77,6 +154,14 @@ export default function SnakeGame(): JSX.Element {
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
     }, []);
+
+    useEffect(() => {
+        if (gameEngineRef.current?.gameOver) {
+            console.log('Snake game ended, sending match result...');
+            sendMatchResult(gameEngineRef.current);
+        }
+    }, [gameEngineRef.current?.gameOver]); // This might need adjustment based on how SnakeEngine notifies game over
+
 
     // User authentication check
     useEffect(() => {
@@ -101,7 +186,7 @@ export default function SnakeGame(): JSX.Element {
             <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
                 <div className="flex items-center justify-start gap-2">
                     <h1 className="player-name">{user.name}</h1>
-                    <img src={user.avatar} alt="Avatar" className="avatar" />
+                    <img src={user.avatarUrl} alt="Avatar" className="avatar" />
                 </div>
 
                 {/* Center Score */}
@@ -109,17 +194,20 @@ export default function SnakeGame(): JSX.Element {
                     <p className="player-name">
                         {engine.isMultiplayer 
                             ? `${engine.snake1.score} - ${engine.snake2?.score || 0}` 
-                            : engine.snake1.score
+                            : `Score: ${engine.snake1.score}`
                         }
                     </p>
                 </div>
 
-                {/* Second Player*/}
                 {engine.isMultiplayer && (
                     <div className="flex items-center justify-end gap-2">
-                        <img src={selectedPlayer?.avatarUrl || '/avatars/Avatar_2.png' } alt="Avatar Player 2" className="avatar" />
+                        <img 
+                            src={opponent?.avatarUrl || '/avatars/Avatar_2.png'} 
+                            alt="Opponent Avatar" 
+                            className="avatar" 
+                        />
                         <h2 className="player-name">
-                            {selectedPlayer?.name || 'Guest'}
+                            {opponent?.name || 'Guest'}
                         </h2>
                     </div>
                 )}
@@ -235,7 +323,6 @@ export default function SnakeGame(): JSX.Element {
                         <GameInstructions></GameInstructions>
                     )}
 
-                    {/* Game Over Message */}
                     {engine.gameOver && (
                         <div 
                             className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50"
@@ -243,11 +330,15 @@ export default function SnakeGame(): JSX.Element {
                         >
                             <div className="text-center">
                                 <p className="text-white text-4xl font-pixelify mb-6">
-                                    Game Over!
+                                    {engine.isMultiplayer ? 'Game Over!' : 'Game Over!'}
                                 </p>
-                                {engine.isMultiplayer && (
+                                {engine.isMultiplayer ? (
                                     <div className="text-white text-2xl font-pixelify mb-4">
                                         Winner: {engine.getWinnerName()}
+                                    </div>
+                                ) : (
+                                    <div className="text-white text-2xl font-pixelify mb-4">
+                                        Final Score: {engine.snake1.score}
                                     </div>
                                 )}
                                 <div className="flex flex-col gap-4">

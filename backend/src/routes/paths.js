@@ -1,99 +1,31 @@
-import { getItem, getItems, addItem, deleteItem, updateItem } from '../controllers/item_controller.js'
 import itemController from '../controllers/item_controller.js'
 import userController from '../controllers/user_controller.js';
-
-
-// Item schema
-const Item = {
-    type: 'object',
-    properties: {
-        id: {type: 'string'},
-        name: {type: 'string'}
-    }
-}
-
-// Options for get all items
-const getItemsOpts = {
-    schema: {
-        response: {
-            200: {
-                type: 'array',
-                items: Item,
-            },
-        },
-    },
-    handler: getItems,
-}
-
-// Options for get single items
-const getItemOpts = {
-    schema: {
-        response: {
-            200: Item,
-        },
-    },
-    handler: getItem,
-}
-
-const postItemOpts = {
-    schema: {
-        body: {
-            type: 'object',
-            required: ['name'],
-            properties: {
-                name: { type: 'string' },
-            }
-        },
-        response: {
-            201: Item,
-        },
-    },
-    handler: addItem,
-}
-
-
-const deleteItemOpts = {
-    schema: {
-        response: {
-            200: {
-                type: 'object',
-                properties: {
-                    message: {type: 'string'},
-                }
-            },
-        },
-    },
-    handler: deleteItem,
-}
-
-const updateItemOpts = {
-    schema: {
-        response: {
-            200: Item,
-        },
-    },
-    handler: updateItem,
-}
-
+import gameController from '../controllers/game_controller.js';
 
 export default async function itemRoutes(fastify, options) {
-    fastify.get('/items', itemController.getItems);
-    fastify.get('/items/:id', itemController.getItem);
-    fastify.post('/items', itemController.addItem);
-    fastify.put('/items/:id', itemController.updateItem);
-    fastify.delete('/items/:id', itemController.deleteItem);
-
-
-    fastify.post('/validate-name', itemController.validateName);
+    // User validation
+    fastify.post('/validateName', itemController.validateName);
     fastify.post('/validateEmail', itemController.validateEmail);
     fastify.post('/validatePasswordbyEmail', itemController.validatePasswordbyEmail);
-    fastify.post('/validatePasswordbyName', itemController.validatePasswordbyName);
+    fastify.post('/validatePasswordbyUserID', itemController.validatePasswordByUserID);
+
+    // User management
     fastify.post('/addNewUser', itemController.addNewUser);
     fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
     fastify.get('/getUserInfoByEmail/:email', itemController.getUserInfoByEmail);
+    // fastify.get('/listUsers', itemController.getAllUsers);
+    fastify.get('/users/except/:userID', itemController.getUsersExceptUserID);
+
+    // Friends management (using userID)
+    fastify.post('/friends/add', itemController.addFriendByUserID);
+    fastify.get('/friends/userID/:userID', itemController.getUserFriendsByUserID);
+    
+    // User profile
     fastify.get('/api/user/profile', userController.getProfile);
     fastify.post('/api/user/anonymize', userController.anonymizeUser);
-    fastify.get('/listUsers', itemController.getAllUsers);
-    fastify.get('/users/except/:email', itemController.getAllUsersExceptCurrent);
 
+    // Game management
+    fastify.get('/user/:userID/matches', gameController.getUserMatches);      
+    fastify.get('/user/:userID/stats', gameController.getUserStats);          
+    fastify.post('/match', gameController.addMatch);                          
 }
