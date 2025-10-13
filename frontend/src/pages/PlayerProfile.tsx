@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import bgimage from '../assets/Player_Page.jpg';
 import arrow_icon from '../assets/icons/arrow.png';
+import log_out_icon from '../assets/icons/Log_out.png';
 
 import AvatarSelection from '../components/AvatarSelection';
 
@@ -224,9 +225,10 @@ export default function PlayerProfile(): JSX.Element {
                         <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
                                 <img onClick={() => setIsOpen(!isOpen)} src={user.avatar} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/>
                                 <AvatarSelection open={isOpen} onClose={() => setIsOpen(false)}/>
-                            <div className="flex flex-col m-auto">
+                            <div className="flex flex-col m-auto justify-evenly">
                                 <div className="font-pixelify text-white text-[40px]">{user.name}</div>
-                                <div className="font-dotgothic font-bold text-white text-2xl text-border-blue">700 XP</div>
+                                <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">Wins: {user.wins}</div> {/* TODO: API CALL USER.WINS */}
+                                <div className="font-dotgothic font-bold text-white text-base text-border-blue">Losses: {user.losses}</div> {/* TODO: API CALL USER.LOSSES */}
                             </div>
                         </div>
                         <CategoryButtons
@@ -338,7 +340,7 @@ export default function PlayerProfile(): JSX.Element {
             </section>
             <footer className="h-40 bg-blue-deep flex justify-center items-center">
                 <Button onClick={handleLogout} style={{ marginTop: 0 }}>
-                    Log Out
+                    <img src={log_out_icon} alt="Log out button" className="h-8 w-auto"/>
                 </Button>
             </footer>
         </main>

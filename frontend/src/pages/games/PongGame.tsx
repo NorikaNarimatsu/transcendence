@@ -6,7 +6,15 @@ import type { GameState, GameConfig } from '../../gameEngines/PongEngine';
 import { calculateGameConfig } from '../../gameEngines/pongConfig';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
+import ButtonPink from '../../components/ButtonDarkPink';
 
+//Icons import
+import home_icon from '../../assets/icons/Home.png';
+import gear_icon from '../../assets/icons/Settings.png';
+import star_icon from '../../assets/icons/Star.png';
+
+//Game instructions component
+import GameInstructions from '../../components/GameInstructionsPongGame';
 
 export default function PongGame(): JSX.Element {
     const { user } = useUser();
@@ -155,29 +163,32 @@ export default function PongGame(): JSX.Element {
                   <p className="text-white text-xl font-pixelify opacity-75">
                     Press SPACE to play again
                   </p>
-                  <button
-                    onClick={handleBackToProfile}
-                    className="px-6 py-3 bg-pink-light text-blue-deep font-pixelify text-lg rounded-lg hover:bg-pink-medium transition-colors duration-200 mx-auto"
-                  >
-                    Back to Profile
-                  </button>
                 </div>
               </div>
             </div>
           )}
 
           {!gameState.gameStarted && !gameState.gameEnded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <p className="text-white text-2xl font-pixelify">
-                Press SPACE to start
-              </p>
-            </div>
+            <GameInstructions></GameInstructions>
           )}
         </div>
       </section>
 
-      <footer className="h-40 bg-blue-deep">
-        <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl text-center m-[15px]">PONG GAME</h1>
+      <footer className="h-40 bg-blue-deep grid place-items-center">
+          <div className="col-start-1 row-start-1">
+              <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl animate-marquee">PONG GAME</h1>
+          </div>
+          <div className="col-start-1 row-start-1 z-10 flex gap-4">
+              <ButtonPink onClick={handleBackToProfile} className="mt-0">
+                  <img src={home_icon} alt="Home" className="h-8 w-auto"/>
+              </ButtonPink>
+              <ButtonPink onClick={handleBackToProfile} className="mt-0" >
+                  <img src={gear_icon} alt="Game Settings" className="h-8 w-auto"/>
+              </ButtonPink>
+              <ButtonPink onClick={handleBackToProfile} className="mt-0">
+                  <img src={star_icon} alt="Game Stats" className="h-8 w-auto"/>
+              </ButtonPink>
+          </div>
       </footer>
     </main>
   );

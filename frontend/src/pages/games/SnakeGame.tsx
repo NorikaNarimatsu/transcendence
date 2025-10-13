@@ -2,12 +2,19 @@ import type { JSX } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ButtonPurple from '../../components/ButtonPurple';
+import ButtonPink from '../../components/ButtonDarkPink';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 
 import { SnakeGameEngine, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
 import { calculateSnakeGameConfig, type SnakeGameConfig } from '../../gameEngines/SnakeConfig';
 
+//Icons import
+import home_icon from '../../assets/icons/Home.png'
+import gear_icon from '../../assets/icons/Settings.png'
+import star_icon from '../../assets/icons/Star.png'
+
+import GameInstructions from '../../components/GameInstructionsSnakeGame';
 
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();
@@ -22,6 +29,10 @@ export default function SnakeGame(): JSX.Element {
     const gameEngineRef = useRef<SnakeGameEngine | null>(null);
     const [, forceUpdate] = useState({});
 
+     // Handle going back to profile
+    const handleBackToProfile = () => {
+        navigate('/playerProfile');
+    };
 
     // Initialize game engine
     useEffect(() => {
@@ -221,14 +232,7 @@ export default function SnakeGame(): JSX.Element {
 
                    {/* Waiting to Start */}
                     {engine.waitingToStart && (
-                        <div 
-                            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50"
-                            style={{ zIndex: 100 }}
-                        >
-                            <p className="text-white text-2xl font-pixelify">
-                                Press SPACE to start
-                            </p>
-                        </div>
+                        <GameInstructions></GameInstructions>
                     )}
 
                     {/* Game Over Message */}
@@ -250,9 +254,6 @@ export default function SnakeGame(): JSX.Element {
                                     <p className="text-white text-xl font-pixelify opacity-75">
                                         Press SPACE to play again
                                     </p>
-                                    <ButtonPurple to="/playerProfile">
-                                        Return to Profile
-                                    </ButtonPurple>
                                 </div>
                             </div>
                         </div>
@@ -261,10 +262,21 @@ export default function SnakeGame(): JSX.Element {
             </section>
 
             {/* Bottom bar */}
-            <footer className="h-40 bg-blue-deep">
-                <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl text-center m-[15px]">
-                    SNAKE GAME
-                </h1>
+            <footer className="h-40 bg-blue-deep grid place-items-center">
+                <div className="col-start-1 row-start-1">
+                    <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl animate-marquee">SNAKE GAME</h1>
+                </div>
+                <div className="col-start-1 row-start-1 z-10 flex gap-4">
+                    <ButtonPink onClick={handleBackToProfile} style={{ marginTop: 0}}>
+                        <img src={home_icon} alt="Home" className="h-8 w-auto"/>
+                    </ButtonPink>
+                    <ButtonPink onClick={handleBackToProfile} style={{ marginTop: 0}}>
+                        <img src={gear_icon} alt="Game Settings" className="h-8 w-auto"/>
+                    </ButtonPink>
+                    <ButtonPink onClick={handleBackToProfile} style={{ marginTop: 0}}>
+                        <img src={star_icon} alt="Game Stats" className="h-8 w-auto"/>
+                    </ButtonPink>
+                </div>
             </footer>
         </main>
     );

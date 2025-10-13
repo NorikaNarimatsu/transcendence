@@ -22,6 +22,20 @@ export default {
 		fontFamily: {
 			pixelify: ['"Pixelify Sans"', 'sans-serif'],
 			dotgothic: ['"DotGothic16"', 'sans-serif'],
+		},
+		animation: {
+			'marquee': 'marquee 15s linear infinite',
+			'marquee-reverse': 'marquee-reverse 15s linear infinite',
+		},
+		keyframes: {
+			marquee: {
+          '0%': { transform: 'translateX(200%)' },
+          '100%': { transform: 'translateX(-200%)' },
+        },
+        'marquee-reverse': {
+          '0%': { transform: 'translateX(-200%)' },
+          '100%': { transform: 'translateX(200%)' },
+        }
 		}
 	},
   },

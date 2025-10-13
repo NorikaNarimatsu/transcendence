@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     children: React.ReactNode;
     to?: string;
+    className?: string
 }
 
-export default function Button({ children, to, onClick, type= "button", ...props}: ButtonProps){
+export default function Button({ children, to, className, onClick, type= "button", ...props}: ButtonProps){
     const navigate = useNavigate();
 
     function handleClick(event: React.MouseEvent<HTMLButtonElement>){
