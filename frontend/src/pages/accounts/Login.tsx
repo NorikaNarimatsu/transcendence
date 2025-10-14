@@ -70,7 +70,6 @@ export default function LoginPage(){
           // Step 3: Prepare user data
           const userToStore = {
             userID: userData.userID,
-            email: email,
             name: userData.name,
             avatarUrl: userData.avatarUrl
           };
@@ -78,19 +77,20 @@ export default function LoginPage(){
           // Step 4: Set user (this should trigger localStorage save)
           setUser(userToStore);
           
-          // Step 5: Debug localStorage after a delay
-          setTimeout(() => {
-            const stored = localStorage.getItem('currentUser');
-            if (stored) {
-              try {
-                const parsed = JSON.parse(stored);
-              } catch (e) {
-                console.error("Login: Error parsing stored user:", e);
-              }
-            } else {
-              console.error("Login: NO DATA in localStorage!");
-            }
-          }, 1000);
+          // TODO: check it > I think this is not being use
+          // // Step 5: Debug localStorage after a delay
+          // setTimeout(() => {
+          //   const stored = localStorage.getItem('currentUser');
+          //   if (stored) {
+          //     try {
+          //       const parsed = JSON.parse(stored);
+          //     } catch (e) {
+          //       console.error("Login: Error parsing stored user:", e);
+          //     }
+          //   } else {
+          //     console.error("Login: NO DATA in localStorage!");
+          //   }
+          // }, 1000);
           
           // Step 6: Navigate
           navigate('/playerProfile');
