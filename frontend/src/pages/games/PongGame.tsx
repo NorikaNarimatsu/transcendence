@@ -80,6 +80,14 @@ export default function PongGame(): JSX.Element {
 
     const sendMatchResult = async (finalGameState: GameState) => {
       try {
+          let winnerID: number;
+          if (finalGameState.leftScore > finalGameState.rightScore) {
+              winnerID = user?.userID || 0;
+          } else if (finalGameState.rightScore > finalGameState.leftScore) {
+              winnerID = opponent?.userID || 2;
+          } else {
+              winnerID = user?.userID || 0; // Default to user1 for ties
+          }
           const matchData = {
               matchType: 'pong',
               matchMode: mode,
@@ -87,6 +95,7 @@ export default function PongGame(): JSX.Element {
               user2ID: opponent?.userID || 2, // Opponent or Guest (userID=2)
               user1Score: finalGameState.leftScore,
               user2Score: finalGameState.rightScore,
+              winnerID: winnerID,
               startedAt: finalGameState.startedAt,
               endedAt: finalGameState.endedAt
           };

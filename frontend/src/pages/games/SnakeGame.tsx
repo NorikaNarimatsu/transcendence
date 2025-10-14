@@ -82,7 +82,7 @@ export default function SnakeGame(): JSX.Element {
         console.log('========================');
 
         gameEngineRef.current = new SnakeGameEngine(gameConfig, isMultiplayer, player1Name, player2Name);
-    }, [mode, user?.name, opponent, gameConfig]);
+    }, [mode, user?.name, opponent]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -99,6 +99,17 @@ export default function SnakeGame(): JSX.Element {
 
     const sendMatchResult = async (engine: SnakeGameEngine) => {
         try {
+            let winnerID: number;
+
+                const winner = engine.getWinner();
+                if (winner === 'player1') {
+                    winnerID = user?.userID;
+                } else if (winner === 'player2') {
+                    winnerID = opponent?.userID || 2;
+                }
+                else
+                    winnerID = 0;
+
             const matchData = {
                 matchType: 'snake',
                 matchMode: mode,
@@ -106,6 +117,7 @@ export default function SnakeGame(): JSX.Element {
                 user2ID: mode === '2players' ? (opponent?.userID || 2) : null, // Opponent or Guest (userID=2) or null for single
                 user1Score: engine.snake1.score,
                 user2Score: engine.isMultiplayer ? (engine.snake2?.score || 0) : 0,
+                winnerID: winnerID,
                 startedAt: engine.startedAt,
                 endedAt: engine.endedAt
             };
@@ -165,7 +177,7 @@ export default function SnakeGame(): JSX.Element {
             console.log('Snake game ended, sending match result...');
             sendMatchResult(gameEngineRef.current);
         }
-    }, [gameEngineRef.current?.gameOver]); // This might need adjustment based on how SnakeEngine notifies game over
+    }, [gameEngineRef.current?.gameOver]);
 
 
     // User authentication check
@@ -335,17 +347,26 @@ export default function SnakeGame(): JSX.Element {
                         >
                             <div className="text-center">
                                 <p className="text-white text-4xl font-pixelify mb-6">
-                                    {engine.isMultiplayer ? 'Game Over!' : 'Game Over!'}
+                                    Game Over!
                                 </p>
                                 {engine.isMultiplayer ? (
                                     <div className="text-white text-2xl font-pixelify mb-4">
-                                        Winner: {engine.getWinnerName()}
+                                    <div>Winner: {engine.getWinnerName()}</div>
+                                    <div className="text-lg mt-3">
+                                        <p>{engine.snake1.name}: {engine.snake1.score}/10 foods</p>
+                                        {engine.snake2 && (
+                                            <p>{engine.snake2.name}: {engine.snake2.score}/10 foods</p>
+                                        )}
                                     </div>
-                                ) : (
-                                    <div className="text-white text-2xl font-pixelify mb-4">
-                                        Final Score: {engine.snake1.score}
-                                    </div>
-                                )}
+                                </div>
+                            ) : (
+                                <div className="text-white text-2xl font-pixelify mb-4">
+                                    <div>Final Score: {engine.snake1.score}/10 foods</div>
+                                    {engine.snake1.score >= 10 && (
+                                        <div className="text-lg text-green-400 mt-2">🎉 Goal Achieved!</div>
+                                    )}
+                                </div>
+                            )}
                                 <div className="flex flex-col gap-4">
                                     <p className="text-white text-xl font-pixelify opacity-75">
                                         Press SPACE to play again

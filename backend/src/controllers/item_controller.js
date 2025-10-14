@@ -15,135 +15,6 @@ const avatars = [
   "/avatars/Avatar_9.png",
 ];
 
-////////////////////////////// GET //////////////////////////////
-export function getItems(request, response) {
-	try {
-		const items = db.prepare("SELECT * FROM users").all();
-
-		const sanitiziedItems = items.map(item => ({
-			id: item.userID,
-			name: sanitizeInput.sanitizeUsername(item.name),
-			email: sanitizeInput.sanitizeEmail(item.email),
-			avatarUrl: item.avatarUrl,
-			createdAt: item.createdAt
-		}))
-		response.send(sanitiziedItems);
-
-	} catch (error) {
-		request.log.error("getItems error: ", error);
-		return response.code(500).send({ error: "Internal server error" });
-	}
-}
-
-export function getItem(request, response) {
-	try {
-		const { id } = request.params;
-
-		if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
-		return response.code(400).send({ error: "Invalid or missing id" });
-		}
-
-		const item = db.prepare("SELECT * FROM users WHERE userID = ?").get(id);
-		if (!item) {
-		response.code(404).send({ error: "Item not found" });
-		} else {
-		response.send({
-			id: item.userID,
-			name: sanitizeInput.sanitizeUsername(item.name),
-			email: sanitizeInput.sanitizeEmail(item.email),
-			avatarUrl: item.avatarUrl,
-			createdAt: item.createdAt
-			});
-		}
-	} catch (error) {
-		request.log.error("getItem error: ", error);
-		return response.code(500).send({ error: "Internal server error" });
-	}
-}
-////////////////////////////// POST //////////////////////////////
-
-export function addItem(request, response) {
-	const { name, email, password } = request.body;
-
-	const sanitiziedName = sanitizeInput.sanitizeUsername(name);
-	const sanitiziedEmail = sanitizeInput.sanitizeEmail(email);
-
-	const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
-	const createdAt = new Date().toISOString();
-	const result = db
-	.prepare(
-		"INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)"
-	)
-	.run(sanitiziedName, sanitiziedEmail, password, randomAvatarUrl, createdAt);
-	response.code(201).send({
-	id: result.lastInsertRowid,
-	name: sanitiziedName,
-	email: sanitiziedEmail,
-	avatarUrl: randomAvatarUrl,
-	createdAt: createdAt,
-	});
-}
-
-////////////////////////////// PUT //////////////////////////////
-
-export function updateItem(request, response) {
-	try {
-    const { id } = request.params;
-    const { name } = request.body;
-    const { email } = request.body;
-    const { password } = request.body;
-    const { avatarUrl } = request.body;
-    // TODO for Gosia -> is this really needed here?
-    if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
-      return response.code(400).send({ error: "Invalid or missing id" });
-    }
-    const sanitiziedName = name ? sanitizeInput.sanitizeUsername(name) : null;
-    const sanitiziedEmail = email ? sanitizeInput.sanitizeEmail(email) : null;
-
-    const responseult = db
-      .prepare(
-        "UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE userID = ?"
-      )
-      .run(sanitiziedName, avatarUrl, id);
-    if (responseult.changes === 0) {
-      response.code(404).send({ error: "Item not found" });
-    } else {
-      response.send({
-        id,
-        name: sanitiziedName,
-        email: sanitiziedEmail,
-        password,
-        avatarUrl: avatarUrl,
-      });
-    }
-  } catch (error) {
-		request.log.error("update error: ", error);
-		return response.code(400).send({ 
-			error: error.message || "Invalid input data" });
-	}
-}
-
-////////////////////////////// DELETE //////////////////////////////
-
-export function deleteItem(request, response) {
-	try {
-		const { id } = request.params;
-		// TODO for Gosia -> is this really needed here?
-		if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
-			return response.code(400).send({ error: "Invalid or missing id" });
-		}
-	
-		const responseult = db.prepare("DELETE FROM users WHERE userID = ?").run(parseInt(id));
-		if (responseult.changes === 0) {
-		response.code(404).send({ error: "Item not found" });
-		} else {
-		response.code(204).send({ message: `Item has been removed` });
-		}
-	} catch (error) {
-		request.log.error("deleteItem error: ", error);
-		return response.code(500).send({ error: "Internal server error" });
-	}
-}
 
 export const validateName = async (request, response) => {
 	try {
@@ -171,51 +42,6 @@ export const validateName = async (request, response) => {
 		return response.code(500).send({ message: "Internal server error" });
 	}
 };
-
-
-
-
-////////////////////////////// NEW VALIDATION //////////////////////////////
-
-
-//TODO for Gosia - should this also be sanitizied, or can sanitizeName be used in the next function instead
-// export const validateItem = (name) => {
-// 	if (typeof name !== "string") throw new Error("Invalid name");
-// 	const sanitiziedName = sanitizeInput.sanitizeUsername(name);
-// 	if (!sanitiziedName.match(/^[A-Za-z0-9]+$/))
-// 		throw new Error("Name must contain only letters and numbers");
-// 	if (sanitiziedName.length < 2 || sanitiziedName.length > 7)
-// 		throw new Error("Name must be between 2 and 7 characters");
-// 	return true;
-// };
-
-// // Combined function using existing addItem
-// export const validateAndAddItem = async (request, response) => {
-// 	try {
-// 		const { name } = request.body; // request.body now contains: { name: "whatever user typed" }
-// 		validateItem(name);
-// 		return addItem(request, response);
-// 	} catch (error) {
-// 		request.log.error(error);
-// 		return response.code(400).send({
-// 			message: error.message || "Validation failed",
-// 		});
-// 	}
-// };
-
-// Frontend                        Backend
-//    |                               |
-//    |-- POST /validateName ------->|
-//    |   { "name": "Norika" }        |
-//    |                               |
-//    |                         Validates name
-//    |                         Storesponse in DB
-//    |                               |
-//    |<- responseponse 200 ---------------|
-//    |   { "message": "success" }    |
-
-////////////////////////////// NEW VALIDATION //////////////////////////////
-
 
 export const validateEmail = async (request, response) => {
 	try {
@@ -418,19 +244,6 @@ export const getUserInfoByEmail = async (request, reply) => {
     }
 };
 
-// export const getAllUsers = async (request, response) => {
-// 	try {
-// 		const users = db
-// 			.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID != 1 ORDER BY name")
-// 			.all();
-// 		return response.code(200).send(users);
-// 	} catch (error) {
-// 		request.log.error("Failed to get all users:", error);
-// 		return response.code(500).send({
-// 			message: "Internal server error",
-// 		});
-// 	}
-// };
 
 // Not by EMAIL BUT ID
 export const getUsersExceptUserID = async (request, reply) => {
@@ -445,7 +258,7 @@ export const getUsersExceptUserID = async (request, reply) => {
             .prepare(`
                 SELECT userID, name, avatarUrl 
                 FROM users 
-                WHERE userID != ? AND userID != 1 AND userID != 2
+                WHERE userID != ? AND userID != 1 AND userID != 2 AND userID != 0
                 ORDER BY userID
             `)
             .all(sanitizedUserID);
@@ -579,3 +392,131 @@ const itemController = {
   };
 
 export default itemController;
+
+
+
+
+
+
+
+// ////////////////////////////// POST //////////////////////////////
+
+// export function addItem(request, response) {
+// 	const { name, email, password } = request.body;
+
+// 	const sanitiziedName = sanitizeInput.sanitizeUsername(name);
+// 	const sanitiziedEmail = sanitizeInput.sanitizeEmail(email);
+
+// 	const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
+// 	const createdAt = new Date().toISOString();
+// 	const result = db
+// 	.prepare(
+// 		"INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)"
+// 	)
+// 	.run(sanitiziedName, sanitiziedEmail, password, randomAvatarUrl, createdAt);
+// 	response.code(201).send({
+// 	id: result.lastInsertRowid,
+// 	name: sanitiziedName,
+// 	email: sanitiziedEmail,
+// 	avatarUrl: randomAvatarUrl,
+// 	createdAt: createdAt,
+// 	});
+// }
+
+// ////////////////////////////// PUT //////////////////////////////
+
+// export function updateItem(request, response) {
+// 	try {
+//     const { id } = request.params;
+//     const { name } = request.body;
+//     const { email } = request.body;
+//     const { password } = request.body;
+//     const { avatarUrl } = request.body;
+//     // TODO for Gosia -> is this really needed here?
+//     if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
+//       return response.code(400).send({ error: "Invalid or missing id" });
+//     }
+//     const sanitiziedName = name ? sanitizeInput.sanitizeUsername(name) : null;
+//     const sanitiziedEmail = email ? sanitizeInput.sanitizeEmail(email) : null;
+
+//     const responseult = db
+//       .prepare(
+//         "UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE userID = ?"
+//       )
+//       .run(sanitiziedName, avatarUrl, id);
+//     if (responseult.changes === 0) {
+//       response.code(404).send({ error: "Item not found" });
+//     } else {
+//       response.send({
+//         id,
+//         name: sanitiziedName,
+//         email: sanitiziedEmail,
+//         password,
+//         avatarUrl: avatarUrl,
+//       });
+//     }
+//   } catch (error) {
+// 		request.log.error("update error: ", error);
+// 		return response.code(400).send({ 
+// 			error: error.message || "Invalid input data" });
+// 	}
+// }
+
+// ////////////////////////////// DELETE //////////////////////////////
+
+// export function deleteItem(request, response) {
+// 	try {
+// 		const { id } = request.params;
+// 		// TODO for Gosia -> is this really needed here?
+// 		if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
+// 			return response.code(400).send({ error: "Invalid or missing id" });
+// 		}
+	
+// 		const responseult = db.prepare("DELETE FROM users WHERE userID = ?").run(parseInt(id));
+// 		if (responseult.changes === 0) {
+// 		response.code(404).send({ error: "Item not found" });
+// 		} else {
+// 		response.code(204).send({ message: `Item has been removed` });
+// 		}
+// 	} catch (error) {
+// 		request.log.error("deleteItem error: ", error);
+// 		return response.code(500).send({ error: "Internal server error" });
+// 	}
+// }
+
+
+//TODO for Gosia - should this also be sanitizied, or can sanitizeName be used in the next function instead
+// export const validateItem = (name) => {
+// 	if (typeof name !== "string") throw new Error("Invalid name");
+// 	const sanitiziedName = sanitizeInput.sanitizeUsername(name);
+// 	if (!sanitiziedName.match(/^[A-Za-z0-9]+$/))
+// 		throw new Error("Name must contain only letters and numbers");
+// 	if (sanitiziedName.length < 2 || sanitiziedName.length > 7)
+// 		throw new Error("Name must be between 2 and 7 characters");
+// 	return true;
+// };
+
+// // Combined function using existing addItem
+// export const validateAndAddItem = async (request, response) => {
+// 	try {
+// 		const { name } = request.body; // request.body now contains: { name: "whatever user typed" }
+// 		validateItem(name);
+// 		return addItem(request, response);
+// 	} catch (error) {
+// 		request.log.error(error);
+// 		return response.code(400).send({
+// 			message: error.message || "Validation failed",
+// 		});
+// 	}
+// };
+
+// Frontend                        Backend
+//    |                               |
+//    |-- POST /validateName ------->|
+//    |   { "name": "Norika" }        |
+//    |                               |
+//    |                         Validates name
+//    |                         Storesponse in DB
+//    |                               |
+//    |<- responseponse 200 ---------------|
+//    |   { "message": "success" }    |

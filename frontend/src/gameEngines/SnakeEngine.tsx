@@ -1,6 +1,7 @@
 import { Snake, type Position, type SnakeGameConfig } from './SnakeConfig';
 
 export const SNAKE_VELOCITY = 200;
+export const WINNING_SCORE = 10; // First to eat 10 times WIN
 
 export function getRandomPosition(config: SnakeGameConfig): Position {
     return {
@@ -83,6 +84,18 @@ export class SnakeGameEngine {
         if (ateFood) {
             snake.incrementScore();
             this.food = getRandomPosition(this.config);
+
+            if (snake.score >= WINNING_SCORE){
+                if (this.isMultiplayer) {
+                        this.winner = snake === this.snake1 ? 1 : 2;
+                        this.gameOver = true;
+                        return true;
+                }
+                else {
+                    // single just win if it reaches 10 foods
+                    this.winner = 1;
+                }
+            }
         }
 
         snake.move(ateFood);
@@ -93,13 +106,18 @@ export class SnakeGameEngine {
         if (this.gameOver || this.waitingToStart) return;
 
         // Update snake 1
-        const snake1Alive = this.updateSnake(this.snake1, this.snake2);
-        if (!snake1Alive) {
-            this.winner = 2;
+            const snake1Alive = this.updateSnake(this.snake1, this.snake2);
+            if (!snake1Alive) {
+            if (this.isMultiplayer) {
+                this.winner = 2;
+            }
             this.gameOver = true;
             this.endedAt = new Date().toISOString();
             return;
         }
+
+        // If snake1 eats 10 times
+        if (this.gameOver) return;
 
         // Update snake 2 if multiplayer
         if (this.isMultiplayer && this.snake2) {
@@ -122,12 +140,9 @@ export class SnakeGameEngine {
         this.endedAt = null;
         this.food = getRandomPosition(this.config);
 
-        // Reset snakes to center positions
-        const centerY = Math.floor(this.config.gridSizeY / 2);
-        
-        this.snake1.reset({ x: Math.floor(this.config.gridSizeX * 0.25), y: centerY }, 'RIGHT');
+        this.snake1.reset({ x: Math.floor(this.config.gridSizeX * 0.25), y: Math.floor(this.config.gridSizeY * 0.3)}, 'RIGHT');
         if (this.snake2) {
-            this.snake2.reset({ x: Math.floor(this.config.gridSizeX * 0.75), y: centerY }, 'LEFT');
+            this.snake2.reset({ x: Math.floor(this.config.gridSizeX * 0.75), y: Math.floor(this.config.gridSizeY * 0.7) }, 'LEFT');
         }
     }
 
@@ -166,14 +181,22 @@ export class SnakeGameEngine {
 
     // Get winner name
     public getWinnerName(): string {
-        if (!this.isMultiplayer) return this.snake1.name;
-        
         if (this.winner === 1) return this.snake1.name;
         if (this.winner === 2) return this.snake2?.name || 'Guest';
         
         return '';
     }
 
+    getWinner(): string {
+        if (!this.isMultiplayer) {
+            return this.winner === 1 ? 'player1' : 'tie';
+        }
+
+        if (this.winner === 1) return 'player1';
+        if (this.winner === 2) return 'player2';
+
+        return 'tie';
+    }
     public getConfig(): SnakeGameConfig {
         return this.config;
     }
