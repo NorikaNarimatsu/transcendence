@@ -70,6 +70,10 @@ export async function initializeDatabase() {
         `);
 
         try {
+            const tiePassword = await hashPassword('tie');
+            db.exec(`INSERT INTO users (userID, name, email, password, avatarUrl, createdAt) 
+                        VALUES (0, 'TIE', 'tie@gmail.com', '${tiePassword}', '/avatars/AI.jpeg', '${new Date().toISOString()}')`);
+            console.log('TIE user created successfully with userID: 0');
             const aiPassword = await hashPassword('ai');
             insertUser.run(
                 'AI', 

@@ -16,6 +16,7 @@ export const addMatch = async (request, response) => {
             user2ID,        // Player 2 ID (number - 1=AI, 2=Guest, 3+=users)
             user1Score,     // Player 1 final score
             user2Score,     // Player 2 final score
+            winnerID,       // the ID from the winner
             tournamentBracketID = null,
             tournamentMatchID = null
         } = request.body;
@@ -48,6 +49,16 @@ export const addMatch = async (request, response) => {
 
         console.log("Input validation passed");
 
+        if (user2ID === null && winnerID !== 0 && winnerID !== user1ID) {
+            console.log("Invalid winnerID for single player game");
+            return response.code(400).send({ message: "Winner must be user1 or 0 (tie/failure) in single player games" });
+        }
+
+        if (user2ID !== null && winnerID !== 0 && winnerID !== user1ID && winnerID !== user2ID) {
+            console.log("Invalid winnerID for multiplayer game");
+            return response.code(400).send({ message: "Winner must be either user1, user2, or 0 (tie) in multiplayer games" });
+        }
+
         // SIMPLIFIED: Validate user IDs exist in database
         const user1 = db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(user1ID);
         const user2 = user2ID !== null ? db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(user2ID) : null;
@@ -57,7 +68,7 @@ export const addMatch = async (request, response) => {
             return response.code(404).send({ message: `User with ID ${user1ID} not found` });
         }
         
-        // FIXED: Handle null user2ID for single player games
+
         if (user2ID !== null && !user2) {
             console.log("User2 not found with ID:", user2ID);
             return response.code(404).send({ message: `User with ID ${user2ID} not found` });
@@ -68,25 +79,6 @@ export const addMatch = async (request, response) => {
             user2: user2 ? user2.name : 'None (Single Player)' 
         });
 
-        // FIXED: Determine winner (handle single player)
-        let winnerID;
-        if (user2ID === null) {
-            // Single player game - user1 is always the "winner"
-            winnerID = user1ID;
-        } else {
-            // Multiplayer game - determine winner by score
-            if (user1Score > user2Score) {
-                winnerID = user1ID;
-            } else if (user2Score > user1Score) {
-                winnerID = user2ID;
-            } else {
-                winnerID = user1ID; // Default to user1 for ties
-            }
-        }
-
-        console.log("Winner determined:", { winnerID, user1Score, user2Score });
-
-        // FIXED: Insert match into database
         console.log("Preparing to insert match...");
         const insertMatch = db.prepare(`
             INSERT INTO match (
@@ -96,8 +88,8 @@ export const addMatch = async (request, response) => {
         `);
 
         const result = insertMatch.run(
-            matchType,      // FIXED: Use original values, not sanitized
-            matchMode,      // FIXED: Use original values, not sanitized
+            matchType,
+            matchMode,
             tournamentBracketID,
             tournamentMatchID,
             user1ID,
@@ -109,7 +101,9 @@ export const addMatch = async (request, response) => {
 
         console.log("Insert successful:", result);
 
-        const winnerName = user2ID === null ? user1.name : (winnerID === user1ID ? user1.name : user2.name);
+        const winnerName = winnerID === 0 
+            ? 'Tie' 
+            : (user2ID === null ? user1.name : (winnerID === user1ID ? user1.name : user2.name));
 
         return response.code(201).send({
             message: "Match saved successfully",
@@ -173,8 +167,8 @@ export const getUserMatches = async (request, response) => {
 
         const sanitizedMatches = matches.map(match => ({
             matchID: match.matchID,
-            matchType: match.matchType,    // FIXED: No sanitization needed
-            matchMode: match.matchMode,    // FIXED: No sanitization needed
+            matchType: match.matchType,
+            matchMode: match.matchMode,
             user1ID: match.user1ID,
             user1Name: sanitizeInput.sanitizeUsername(match.user1Name),
             user2ID: match.user2ID,
@@ -253,8 +247,8 @@ export const getUserStats = async (request, response) => {
                 winRate: `${winRate}%`
             },
             byGame: stats.map(stat => ({
-                matchType: stat.matchType,     // FIXED: No sanitization needed
-                matchMode: stat.matchMode,     // FIXED: No sanitization needed
+                matchType: stat.matchType,
+                matchMode: stat.matchMode,
                 totalMatches: stat.totalMatches,
                 wins: stat.wins,
                 losses: stat.losses,
