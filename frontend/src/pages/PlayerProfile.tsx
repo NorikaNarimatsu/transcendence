@@ -197,9 +197,9 @@ export default function PlayerProfile(): JSX.Element {
 				const a = document.createElement('a');
 				a.href = url;
 				a.download = `user_data_${user.name}_$new Date().toISOString().split('T')[0]}.json`;
-				document.body.appendChild(a);
+				// document.body.appendChild(a); -> check if it works at school without these lines
 				a.click();
-				document.body.removeChild(a);
+				// document.body.removeChild(a);
 				window.URL.revokeObjectURL(url);
 			} else {
 				const errorText = await response.text();
