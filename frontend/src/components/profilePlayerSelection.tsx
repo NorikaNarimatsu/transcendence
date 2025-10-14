@@ -17,7 +17,7 @@ export function PlayerSelection({ open, users, onSelect, onCancel }: PlayerSelec
                 <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
                     {users.map((user) => (
                         <button
-                            key={user.id}
+                            key={user.userID}
                             onClick={() => onSelect(user)}
                             className="px-4 py-2 bg-blue-light text-blue-deep font-pixelify rounded hover:bg-blue-medium transition-colors flex items-center gap-2"
                         >

@@ -151,7 +151,17 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #1900a7;
+    background-color: #7c3aed;
+}
+
+/* Prevent arrow key scrolling globally */
+body {
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Prevent arrow keys from scrolling during games */
+body.game-active {
+    overflow: hidden; /* Prevent all scrolling when game is active */
 }
 
 /*Player Profile*/

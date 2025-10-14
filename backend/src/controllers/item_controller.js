@@ -124,8 +124,6 @@ export const validatePasswordByUserID = async (request, reply) => {
         if (!user) {
             return reply.code(404).send({ message: "User not found" });
         }
-        
-        // FIXED: Use comparePassword instead of bcrypt.compare (to match your existing pattern)
         const isValidPassword = await comparePassword(password, user.password);
         
         if (isValidPassword) {
@@ -244,32 +242,72 @@ export const getUserInfoByEmail = async (request, reply) => {
     }
 };
 
+export const getUserById = async (request, reply) => {
+    try {
+        const { userID } = request.params;
+        
+        if (!userID) {
+            return reply.code(400).send({ message: "UserID is required" });
+        }
 
-// Not by EMAIL BUT ID
+        const sanitizedUserID = parseInt(userID);
+        if (isNaN(sanitizedUserID)) {
+            return reply.code(400).send({ message: "Invalid userID format" });
+        }
+
+        const user = db.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID = ?").get(sanitizedUserID);
+        
+        if (!user) {
+            return reply.code(404).send({ message: "User not found" });
+        }
+
+        return reply.code(200).send({
+            userID: user.userID,
+            name: user.name,
+            avatarUrl: user.avatarUrl
+        });
+
+    } catch (error) {
+        console.error('getUserById error:', error);
+        return reply.code(500).send({ message: "Internal server error" });
+    }
+};
+
 export const getUsersExceptUserID = async (request, reply) => {
     try {
         const { userID } = request.params;
         const sanitizedUserID = parseInt(userID);
         
         if (isNaN(sanitizedUserID)) {
+            console.log('Invalid userID - not a number');
             return reply.code(400).send({ message: "Invalid userID" });
         }
         const users = db
             .prepare(`
                 SELECT userID, name, avatarUrl 
                 FROM users 
-                WHERE userID != ? AND userID != 1 AND userID != 2 AND userID != 0
+                WHERE userID != ?
+                    AND userID != 1
+                    AND userID != 2
+                    AND userID != 0
+                    AND name NOT LIKE 'deleted_user_%'
                 ORDER BY userID
             `)
             .all(sanitizedUserID);
+
         const formattedUsers = users.map(user => ({
             userID: user.userID,
-            name: sanitizeInput.sanitizeUsername(user.name),
+            name: user.name,
             avatarUrl: user.avatarUrl
         }));
+        
+        console.log('Formatted users:', formattedUsers);
+        
         return reply.code(200).send(formattedUsers);
+        
     } catch (error) {
-        request.log.error("Failed to get users except userID:", error);
+        console.error("getUsersExceptUserID error:", error);
+        console.error("Error stack:", error.stack);
         return reply.code(500).send({
             message: "Internal server error",
         });
@@ -292,13 +330,14 @@ export const getUserFriendsByUserID = async (request, reply) => {
             FROM friends f
             JOIN users u ON f.user2ID = u.userID
             WHERE f.user1ID = ?
+                AND name NOT LIKE 'deleted_user_%'
             ORDER BY u.name
         `).all(sanitizedUserID);
         
         // Format response to match SelectedPlayer interface
         const formattedFriends = friends.map(friend => ({
             userID: friend.userID,
-            name: sanitizeInput.sanitizeUsername(friend.name),
+            name: friend.name,
             avatarUrl: friend.avatarUrl
         }));
         
@@ -383,7 +422,7 @@ const itemController = {
     addNewUser,
     getUserByEmail,
     getUserInfoByEmail,
-    // getAllUsers,
+    getUserById,
     getUsersExceptUserID,
     
     // Friends management

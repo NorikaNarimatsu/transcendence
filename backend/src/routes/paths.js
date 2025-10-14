@@ -13,7 +13,7 @@ export default async function itemRoutes(fastify, options) {
     fastify.post('/addNewUser', itemController.addNewUser);
     fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
     fastify.get('/getUserInfoByEmail/:email', itemController.getUserInfoByEmail);
-    // fastify.get('/listUsers', itemController.getAllUsers);
+    fastify.get('/getUserById/:userID', itemController.getUserById);
     fastify.get('/users/except/:userID', itemController.getUsersExceptUserID);
 
     // Friends management (using userID)
@@ -28,5 +28,5 @@ export default async function itemRoutes(fastify, options) {
     // Game management
     fastify.get('/user/:userID/matches', gameController.getUserMatches);      
     fastify.get('/user/:userID/stats', gameController.getUserStats);          
-    fastify.post('/match', gameController.addMatch);                          
+    fastify.post('/match', gameController.addMatch);
 }

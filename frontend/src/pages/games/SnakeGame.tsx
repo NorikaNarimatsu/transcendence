@@ -330,14 +330,18 @@ export default function SnakeGame(): JSX.Element {
                             top: engine.food.y * gameConfig.cellSize + gameConfig.cellSize * 0.2,
                             width: gameConfig.cellSize * 0.6,
                             height: gameConfig.cellSize * 0.6,
-                            background: '#7c3aed',
                             zIndex: 3,
                         }}
                     />
 
                    {/* Waiting to Start */}
                     {engine.waitingToStart && (
-                        <GameInstructions></GameInstructions>
+                        <div 
+                            className="absolute inset-0 flex items-center justify-center"
+                            style={{ zIndex: 10 }}
+                        >
+                            <GameInstructions />
+                        </div>
                     )}
 
                     {engine.gameOver && (
@@ -363,7 +367,7 @@ export default function SnakeGame(): JSX.Element {
                                 <div className="text-white text-2xl font-pixelify mb-4">
                                     <div>Final Score: {engine.snake1.score}/10 foods</div>
                                     {engine.snake1.score >= 10 && (
-                                        <div className="text-lg text-green-400 mt-2">🎉 Goal Achieved!</div>
+                                        <div className="text-lg text-400 mt-2">🎉 Goal Achieved! You WIN!</div>
                                     )}
                                 </div>
                             )}
