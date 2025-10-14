@@ -1,4 +1,5 @@
 import { db } from '../server.js';
+import gameController from './game_controller.js';
 
 const userAnon = {
     anonymizeUserData: (userId) => {
@@ -85,6 +86,113 @@ const userController = {
             }
         }
     },
+
+	exportUserData: async (request, reply) => {
+
+		try {
+			const { userID } = request.body;
+
+			if (!userID) {
+				reply.status(400).send({ error: 'userID is required' });
+				return;
+			}
+			
+			// getting user's basic info
+			const user = db.prepare(`
+				SELECT userID, name, email, createdAt, lastLoginAt, lang
+				FROM users
+				WHERE userID = ?
+			`).get(userID);
+
+			if (!user) {
+				reply.status(404).send({ error: 'User not found' });
+				return;
+			}
+
+			// getting user's match history
+			const matches = db.prepare(`
+				SELECT
+					m.matchID,
+					m.matchType,
+					m.matchMode,
+					m.user1Score,
+					m.user2Score,
+					m.winnerID,
+					m.startedAt,
+					m.endedAt,
+					u1.name as user1Name,
+					u2.name as user2Name
+				FROM match m
+				LEFT JOIN users u1 ON m.user1ID = u1.userID
+				LEFT JOIN users u2 ON m.user2ID = u2.userID
+				WHERE m.user1ID =? OR m.user2ID = ?
+				ORDER BY m.startedAt DESC
+			`).all(user.userID, user.userID);
+
+
+			const overallStats = db.prepare(`
+				SELECT
+					COUNT(*) as totalMatches,
+					SUM(CASE WHEN winnerID = ? THEN 1 ELSE 0 END) as totalWins,
+					SUM(CASE WHEN winnerID != ? THEN 1 ELSE 0 END) as totalLosses
+				FROM match
+				WHERE user1ID = ? OR user2ID = ?
+			`).get(userID, userID, userID, userID);
+
+			const winRate = overallStats.totalMatches > 0 
+				? (overallStats.totalWins / overallStats.totalMatches * 100).toFixed(1) 
+				: 0;
+			
+			// getting friends list
+			const friends = db.prepare(`
+				SELECT
+					f.registeredAt,
+					CASE
+						WHEN f.user1ID = ? THEN u2.name
+						ELSE u1.name
+					END as friendName,
+					CASE
+						WHEN f.user1ID = ? THEN u2.email
+						ELSE u1.email
+					END as friendEmail
+				FROM friends f
+				LEFT JOIN users u1 ON f.user1ID = u1.userID
+				LEFT JOIN users u2 ON f.user2ID = u2.userID
+				WHERE f.user1ID = ? OR f.user2ID = ?
+				ORDER BY f.registeredAt DESC
+			`).all(userID, userID, userID, userID);
+			
+			const exportData = {
+				exportDate: new Date().toISOString(),
+				userData: {
+					userID: user.userID,
+					nickname: user.name,
+					email: user.email,
+					accountCreated: user.createdAt,
+					lastLogin: user.lastLoginAt,
+					languagePreference: user.lang,
+				},
+				gameStatistics: {
+					totalMatches: overallStats.totalMatches || 0,
+					wins: overallStats.totalWins || 0,
+					losses: overallStats.totalLosses || 0,
+					winRate: `${winRate}%`
+				},
+				matchHistory: matches,
+				friendsList: friends.map(friend => ({
+					friendsName: friend.friendName,
+				}))
+			};
+
+			reply.header('Content-Type', 'application/json');
+			reply.header('Content-Disposition', `attachment; filename="user_data_${user.name}_${new Date().toISOString().split('T')[0]}.json"`);
+
+			reply.send(exportData);
+		} catch (err) {
+			console.error('Export error:', err);
+			reply.status(500).send({ error: 'Failed to export user data', details: err.message });
+		}
+	},
 };
 
 export default userController;

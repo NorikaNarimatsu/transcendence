@@ -23,6 +23,7 @@ export default async function itemRoutes(fastify, options) {
     // User profile
     fastify.get('/api/user/profile', userController.getProfile);
     fastify.post('/api/user/anonymize', userController.anonymizeUser);
+	fastify.post('/api/user/export-data', userController.exportUserData);
 
     // Game management
     fastify.get('/user/:userID/matches', gameController.getUserMatches);      

@@ -176,6 +176,40 @@ export default function PlayerProfile(): JSX.Element {
         }
     };
 
+	const downloadUserData = async () => {
+		if (!user?.userID) {
+			console.log('no user or userID found');
+			return;
+		}
+
+		try {
+			const response = await fetch ('https://localhost:8443/api/user/export-data', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ userID: user.userID })
+			});
+
+			if (response.ok) {
+				const blob = await response.blob();
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `user_data_${user.name}_$new Date().toISOString().split('T')[0]}.json`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				window.URL.revokeObjectURL(url);
+			} else {
+				const errorText = await response.text();
+				console.error('Failed to download user data: ', response.status, errorText);
+			}
+		} catch (error) {
+			console.error('Error downloading user data:', error);
+		}
+	};
+
     const getButtonsForCategory = (category: string) => {
         switch(category) {
             case 'Games':
@@ -209,6 +243,7 @@ export default function PlayerProfile(): JSX.Element {
                 return [
                     { name: 'Delete Account', action: () => setShowDeleteConfirmation(true) },
                     { name: 'Update data', action: () => console.log('Updating account data') },
+					{ name: 'Download data', action: () => downloadUserData() },
 					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
                     { name: 'Preference', action: () => console.log('customizing preference') },
                     { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
