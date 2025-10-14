@@ -15,22 +15,22 @@ const userAnon = {
         };
     },
 
-    performAnonymization: async (email) => {
+    performAnonymization: async (userID) => {
         // Check if user exists
-        const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+        const user = db.prepare('SELECT userID FROM users WHERE userID = ?').get(userID);
         if (!user) {
             throw new Error('User not found');
         }
 
         // Generate anonymous data
-        const anonymizedData = userAnon.anonymizeUserData(user.id);
+        const anonymizedData = userAnon.anonymizeUserData(userID);
 
         // Update user with anonymized data
         const updateResult = db.prepare(`
             UPDATE users 
             SET name = ?, email = ?, password = ?, avatarUrl = ? 
-            WHERE email = ?
-        `).run(anonymizedData.name, anonymizedData.email, anonymizedData.password, anonymizedData.avatarUrl, email);
+            WHERE userID = ?
+        `).run(anonymizedData.name, anonymizedData.email, anonymizedData.password, anonymizedData.avatarUrl, userID);
 
         if (updateResult.changes === 0) {
             throw new Error('Failed to anonymize user data');
@@ -67,14 +67,20 @@ const userController = {
 
     anonymizeUser: async (request, reply) => {
         try {
-            const { email } = request.body;
+            const { userID } = request.body; 
             
-            if (!email) {
-                reply.status(400).send({ error: 'Email is required' });
+            if (!userID) {
+                reply.status(400).send({ error: 'UserID is required' });
                 return;
             }
 
-            const result = await userAnon.performAnonymization(email);
+            const sanitizedUserID = parseInt(userID);
+            if (isNaN(sanitizedUserID)) {
+                reply.status(400).send({ error: 'Invalid userID format' });
+                return;
+            }
+
+            const result = await userAnon.performAnonymization(sanitizedUserID);
             reply.send(result);
 
         } catch (err) {

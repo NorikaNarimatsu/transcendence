@@ -66,7 +66,7 @@ export default function PlayerProfile(): JSX.Element {
     }, [setSelectedPlayer]);
 
     useEffect(() => {
-        if (user?.userID) {  // CHANGED: Check userID instead of email
+        if (user?.userID) {
             fetch(`https://localhost:8443/users/except/${user.userID}`)
                 .then(res => res.ok ? res.text() : Promise.reject(res.status))
                 .then(text => {
@@ -375,7 +375,7 @@ export default function PlayerProfile(): JSX.Element {
                                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4">
                                     {getButtonsForCategory(selectedCategory).map((button, index) => (
                                         <button
-                                            key={index}
+                                            key={button.name}
                                             className="button-pp-purple shadow-no-blur-60"
                                             onClick={button.action}
                                         >{button.name}</button>
