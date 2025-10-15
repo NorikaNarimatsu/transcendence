@@ -35,6 +35,7 @@ export default function SnakeGame(): JSX.Element {
     const handleBackToProfile = () => {
         navigate('/playerProfile');
     };
+    
     const getOpponent = (): SelectedPlayer | null => {
         if (mode === 'single') {
             return null; // No opponent in single mode

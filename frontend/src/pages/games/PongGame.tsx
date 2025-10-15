@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { JSX } from 'react';
@@ -13,8 +14,12 @@ import home_icon from '../../assets/icons/Home.png';
 import gear_icon from '../../assets/icons/Settings.png';
 import star_icon from '../../assets/icons/Star.png';
 
-//Game instructions component
-import GameInstructions from '../../components/GameInstructionsPongGame';import type { SelectedPlayer } from '../user/PlayerContext';
+//Game instructions+Settings+Stats components
+import GameInstructions from '../../components/GameInstructionsPongGame';
+import GameSettings from '../../components/SettingsPongGame';
+import GameStats from '../../components/StatsPongGame';
+
+import type { SelectedPlayer } from '../user/PlayerContext';
 
 export default function PongGame(): JSX.Element {
     const { user } = useUser();
@@ -45,6 +50,16 @@ export default function PongGame(): JSX.Element {
     const handleBackToProfile = () => {
         navigate('/playerProfile');
     };
+
+    const [view, setView] = useState<"game"|"instructions"|"settings"|"stats">('instructions')
+
+    //To make sure the game settings and game Stats dont show when we start a match:
+    useEffect(() => {
+    if (!gameState.gameStarted && !gameState.gameEnded && 
+        (gameState.leftScore > 0 || gameState.rightScore > 0)) {
+        setView("instructions");
+    }
+  }, [gameState.gameStarted, gameState.gameEnded, gameState.leftScore, gameState.rightScore]);
 
     const getOpponent = (): SelectedPlayer | null => {
       if (mode === 'single') {
@@ -256,8 +271,16 @@ export default function PongGame(): JSX.Element {
             </div>
           )}
 
-          {!gameState.gameStarted && !gameState.gameEnded && (
-            <GameInstructions></GameInstructions>
+          {!gameState.gameStarted && !gameState.gameEnded && view === `instructions` && (
+              <GameInstructions></GameInstructions>
+          )}
+
+          {!gameState.gameStarted && !gameState.gameEnded && view === "settings" && (
+              <GameSettings onClose={() => setView("instructions")} />
+          )}
+
+          {!gameState.gameStarted && !gameState.gameEnded && view === 'stats' && (
+              <GameStats onClose={() => setView("instructions")} />
           )}
         </div>
       </section>
@@ -267,13 +290,26 @@ export default function PongGame(): JSX.Element {
               <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl animate-marquee">PONG GAME</h1>
           </div>
           <div className="col-start-1 row-start-1 z-10 flex gap-4">
-              <ButtonPink onClick={handleBackToProfile} className="mt-0">
+              <ButtonPink onClick={handleBackToProfile} className="!mt-0">
                   <img src={home_icon} alt="Home" className="h-8 w-auto"/>
               </ButtonPink>
-              <ButtonPink onClick={handleBackToProfile} className="mt-0" >
+              <ButtonPink onClick={() => {
+                if (view === "settings"){
+                  setView("instructions")
+                } else {
+                  setView("settings")
+                }
+              }
+                } className="!mt-0" >
                   <img src={gear_icon} alt="Game Settings" className="h-8 w-auto"/>
               </ButtonPink>
-              <ButtonPink onClick={handleBackToProfile} className="mt-0">
+              <ButtonPink onClick={() => {
+                if (view === "stats"){
+                  setView("instructions")
+                } else {
+                  setView("stats")
+                }
+              }} className="!mt-0">
                   <img src={star_icon} alt="Game Stats" className="h-8 w-auto"/>
               </ButtonPink>
           </div>
