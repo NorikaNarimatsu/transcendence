@@ -49,14 +49,6 @@ export default function PlayerProfile(): JSX.Element {
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
-    const [basicStats, setBasicStats] = useState<{
-        wins: number;
-        losses: number;
-        totalMatches: number;
-    } | null>(null);
-    const [showBasicStats, setShowBasicStats] = useState(false);
-
-
     const navigate = useNavigate();
     const { user, logout } = useUser();
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
@@ -159,23 +151,6 @@ export default function PlayerProfile(): JSX.Element {
         }
     };
 
-    const fetchBasicStats = async () => {
-        if (!user?.userID) return;
-        
-        try {
-            const response = await fetch(`https://localhost:8443/user/${user.userID}/stats`);
-            if (response.ok) {
-                const data = await response.json();
-                setBasicStats(data.overall);
-                setShowBasicStats(true);
-            } else {
-                console.error('Failed to fetch stats');
-            }
-        } catch (error) {
-            console.error('Error fetching stats:', error);
-        }
-    };
-
 	const downloadUserData = async () => {
 		if (!user?.userID) {
 			console.log('no user or userID found');
@@ -237,7 +212,6 @@ export default function PlayerProfile(): JSX.Element {
             case 'Dashboard':
                 return [
                     { name: 'Go to Dashboard', action: () => navigate('/dashboard') },
-                    { name: 'Basic Stats', action: () => fetchBasicStats() }
                 ];
             case 'Settings':
                 return [
@@ -364,47 +338,6 @@ export default function PlayerProfile(): JSX.Element {
                                 )}
                             </div>
                         )}
-
-                            {showBasicStats && basicStats && (
-                                <div className="absolute inset-0 flex items-center justify-center z-30 bg-black bg-opacity-50">
-                                    <div className="bg-pink-dark border-4 border-purple-light rounded-lg p-6 shadow-no-blur-60 max-w-sm mx-4">
-                                        <div className="font-pixelify text-white text-3xl text-center mb-6">BASIC STATS</div>
-                                        <div className="space-y-4">
-                                            <div className="text-center">
-                                                <div className="font-dotgothic text-green-400 text-4xl font-bold">
-                                                    {basicStats.wins}
-                                                </div>
-                                                <div className="font-dotgothic text-white text-xl">
-                                                    Wins
-                                                </div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="font-dotgothic text-red-400 text-4xl font-bold">
-                                                    {basicStats.losses}
-                                                </div>
-                                                <div className="font-dotgothic text-white text-xl">
-                                                    Losses
-                                                </div>
-                                            </div>
-                                            <div className="text-center border-t border-purple-light pt-4">
-                                                <div className="font-dotgothic text-blue-400 text-2xl font-bold">
-                                                    {basicStats.totalMatches}
-                                                </div>
-                                                <div className="font-dotgothic text-white text-lg">
-                                                    Total Matches
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => setShowBasicStats(false)}
-                                            className="button-pp-purple shadow-no-blur-60 w-full mt-6"
-                                        >
-                                            Close
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
                             {/* Category Content */}
                             {selectedCategory && !showPlayerSelection && !showPasswordVerification && (
                                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4">
