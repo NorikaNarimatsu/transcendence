@@ -19,7 +19,7 @@ export function PlayerSelection({ open, users, onSelect, onCancel }: PlayerSelec
         if (open && user?.userID) {
             fetch(`https://localhost:8443/friends/userID/${user.userID}`)
                 .then(res => res.ok ? res.json() : [])
-                .then(friendsData => {
+                .then((friendsData: SelectedPlayer[]) => {
                     console.log('Friends loaded:', friendsData);
                     setFriends(friendsData);
                 })
@@ -32,8 +32,8 @@ export function PlayerSelection({ open, users, onSelect, onCancel }: PlayerSelec
 
     if (!open) return null;
 
-    const friendsIDs = new Set(friends.map(friend => friend.userID));
-    let displayUsers;
+    const friendsIDs = new Set(friends.map((friend: SelectedPlayer) => friend.userID));
+    let displayUsers: SelectedPlayer[];
     if(showFriendsOnly === true) {
         displayUsers = [];
         for (let user of users) {
@@ -68,8 +68,8 @@ export function PlayerSelection({ open, users, onSelect, onCancel }: PlayerSelec
                 </div>
 
                 <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
-                    {displayUsers.map((user) => {
-                        const isFriend = friends.some(friend => friend.userID === user.userID);
+                    {displayUsers.map((user: SelectedPlayer) => {
+                        const isFriend = friendsIDs.has(user.userID);
                         return (
                             <button
                                 key={user.userID}
