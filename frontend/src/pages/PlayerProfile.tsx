@@ -192,13 +192,13 @@ export default function PlayerProfile(): JSX.Element {
                 return [
                     { name: 'Single', action: () => navigate('./pongGame?mode=single') },
                     { name: '2 Players', action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => setShowTournamentRegistration(true) }
+                    { name: 'Tournaments', action: () =>{ setPlayerSelectionGame('Pong'); setShowTournamentRegistration(true); } }
                 ];
             case 'Snake':
                 return [
                     { name: 'Single', action: () => navigate('./snakeGame?mode=single') },
                     { name: '2 Players', action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => setShowTournamentRegistration(true) }
+                    { name: 'Tournaments', action: () => { setPlayerSelectionGame('snake'); setShowTournamentRegistration(true); } }
                 ];
             case 'Friends':
                 return [
@@ -316,6 +316,7 @@ export default function PlayerProfile(): JSX.Element {
                                     setSelectedParticipants={setSelectedTournamentParticipants}
                                     setVerifyingUser={setTournamentVerifyingUser}
                                     user={user}
+                                    gameType={playerSelectionGame as 'pong' | 'snake'}
                                 />
                                 {tournamentVerifyingUser && (
                                     <PasswordVerification

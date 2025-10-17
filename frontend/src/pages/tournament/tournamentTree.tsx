@@ -1,6 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTournament } from './tournamentContext';
+import type { Match } from './tournamentContext';
+
+function generateInitialMatches(participants: any[]): Match[] {
+    const matches: Match[] = [];
+    
+    // Create first round matches
+    const firstRoundPairs = Math.floor(participants.length / 2);
+    
+    for (let i = 0; i < firstRoundPairs; i++) {
+        matches.push({
+            id: `1-${i}`, // Round 1, Match i
+            player1: participants[i * 2],
+            player2: participants[i * 2 + 1],
+            winner: null,
+            round: 1,
+            position: i
+        });
+    }
+    
+    console.log('Generated matches:', matches);
+    return matches;
+}
 
 export default function TournamentTree() {
     const navigate = useNavigate();
@@ -29,9 +51,11 @@ export default function TournamentTree() {
 
 
     return (
-        <div className="min-h-screen flex flex-col">
+               <div className="min-h-screen flex flex-col">
             <header className="h-40 bg-blue-deep flex">
-                <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">Tournament Registration</div>
+                <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">
+                    {tournamentData.gameType.toUpperCase()} Tournament Registration
+                </div>
             </header>
             <section className="flex-1 bg-pink-grid flex items-center justify-center">
                 <div className="relative bg-pink-dark w-[825px] h-[600px] m-[10px] flex justify-between items-center px-[50px]">
@@ -101,6 +125,7 @@ export default function TournamentTree() {
                         <p className="font-pixelify text-blue-deep text-lg mb-4 text-center">
                             Number of players: <b>{tournamentData.players}</b>
                         </p>
+                        
                         <button
                             className="button-pp-blue font-pixelify px-6 py-2 rounded mt-2 text-lg flex justify-center items-center text-center"
                             style={{ minWidth: 100 }}
@@ -114,9 +139,13 @@ export default function TournamentTree() {
                                     name: displayNames[p.userID.toString()] || p.name
                                 }));
 
+                                // Generate initial matches
+                                const initialMatches = generateInitialMatches(updatedParticipants);
+
                                 setTournamentData({
                                     ...tournamentData,
-                                    participants: updatedParticipants
+                                    participants: updatedParticipants,
+                                    matches: initialMatches
                                 });
 
                                 navigate('/tournament/bracket');

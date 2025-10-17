@@ -13,6 +13,7 @@ interface TournamentRegistrationProps {
     setSelectedParticipants: (users: SelectedPlayer[]) => void;
     setVerifyingUser: (user: SelectedPlayer | null) => void;
     user: User;
+    gameType: 'pong' | 'snake';
 }
 
 
@@ -26,6 +27,7 @@ export function TournamentRegistration({
     setSelectedParticipants,
     setVerifyingUser,
     user,
+    gameType,
 }: TournamentRegistrationProps) {
     const navigate = useNavigate();
     const { setTournamentData } = useTournament();
@@ -99,31 +101,15 @@ export function TournamentRegistration({
                 <div className="flex w-full gap-2 mb-2">
                     <button
                         onClick={() => {
-                            // const ids = [
-                            //     { id: user.userID, displayName: user.name, avatarUrl: user.avatarUrl },
-                            //     ...selectedParticipants.map(u => ({
-                            //         id: u.userID,
-                            //         displayName: u.name,
-                            //         avatarUrl: u.avatarUrl || '',
-                            //     })),
-                            // ];
-                            // navigate(
-                            //     `/tournament/tree?players=${tournamentPlayers}&ids=${ids
-                            //         .map(
-                            //             p =>
-                            //                 `${p.id}:${encodeURIComponent(p.displayName)}:${encodeURIComponent(p.avatarUrl)}`
-                            //         )
-                            //         .join(',')}`
-                            // );
                             setTournamentData({
                                 players: tournamentPlayers,
                                 participants: [
-                                    user, // Current user
+                                    user,
                                     ...selectedParticipants
-                                ]
+                                ],
+                                gameType: gameType,
                             });
-                            
-                            // Navigate without URL parameters
+
                             navigate('/tournament/tree');
                             onClose();
                         }}
