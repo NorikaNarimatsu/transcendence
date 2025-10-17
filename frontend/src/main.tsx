@@ -15,6 +15,7 @@ import Dashboard from './pages/games/Dashboard.tsx'
 
 import { UserProvider } from './pages/user/UserContext'
 import { SelectedPlayerProvider } from './pages/user/PlayerContext'
+import { TournamentProvider } from './pages/tournament/tournamentContext';
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
@@ -33,7 +34,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <UserProvider>
         <SelectedPlayerProvider>
+            <TournamentProvider>
                 <RouterProvider router={router} />
+            </TournamentProvider>
         </SelectedPlayerProvider>
     </UserProvider>
   </React.StrictMode>,

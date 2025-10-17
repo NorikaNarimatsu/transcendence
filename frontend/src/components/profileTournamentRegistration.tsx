@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { User } from '../pages/user/UserContext';
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
+import { useTournament } from '../pages/tournament/tournamentContext';
 
 interface TournamentRegistrationProps {
     open: boolean;
@@ -27,6 +28,7 @@ export function TournamentRegistration({
     user,
 }: TournamentRegistrationProps) {
     const navigate = useNavigate();
+    const { setTournamentData } = useTournament();
 
     if (!open) return null;
 
@@ -97,22 +99,33 @@ export function TournamentRegistration({
                 <div className="flex w-full gap-2 mb-2">
                     <button
                         onClick={() => {
-                            const ids = [
-                                { id: user.userID, displayName: user.name, avatarUrl: user.avatarUrl },
-                                ...selectedParticipants.map(u => ({
-                                    id: u.userID,
-                                    displayName: u.name,
-                                    avatarUrl: u.avatarUrl || '',
-                                })),
-                            ];
-                            navigate(
-                                `/tournament/tree?players=${tournamentPlayers}&ids=${ids
-                                    .map(
-                                        p =>
-                                            `${p.id}:${encodeURIComponent(p.displayName)}:${encodeURIComponent(p.avatarUrl)}`
-                                    )
-                                    .join(',')}`
-                            );
+                            // const ids = [
+                            //     { id: user.userID, displayName: user.name, avatarUrl: user.avatarUrl },
+                            //     ...selectedParticipants.map(u => ({
+                            //         id: u.userID,
+                            //         displayName: u.name,
+                            //         avatarUrl: u.avatarUrl || '',
+                            //     })),
+                            // ];
+                            // navigate(
+                            //     `/tournament/tree?players=${tournamentPlayers}&ids=${ids
+                            //         .map(
+                            //             p =>
+                            //                 `${p.id}:${encodeURIComponent(p.displayName)}:${encodeURIComponent(p.avatarUrl)}`
+                            //         )
+                            //         .join(',')}`
+                            // );
+                            setTournamentData({
+                                players: tournamentPlayers,
+                                participants: [
+                                    user, // Current user
+                                    ...selectedParticipants
+                                ]
+                            });
+                            
+                            // Navigate without URL parameters
+                            navigate('/tournament/tree');
+                            onClose();
                         }}
                         disabled={selectedParticipants.length !== tournamentPlayers - 1}
                         className="button-pp-blue shadow-no-blur flex-1 flex items-center justify-center font-pixelify"

@@ -19,10 +19,6 @@ import { useSelectedPlayer } from './user/PlayerContext';
 import { DeleteAccount } from './user/DeleteUser';
 import Button from '../components/ButtonDarkPink';
 
-// WE CAN USE LIKE THIS AND SEE IT!
-// const { user } = useUser();
-// console.log("Current user:", user);
-
 export default function PlayerProfile(): JSX.Element {
     const [isOpen, setIsOpen] = useState(false);
 

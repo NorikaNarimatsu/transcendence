@@ -1,40 +1,32 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-
-const defaultAvatar = '../assets/avatars/Avatar 1.png';
-
-function useQuery() {
-    return new URLSearchParams(useLocation().search);
-}
-
-function parseParticipants(ids: string[]) {
-    return ids.map(str => {
-        const [id, displayName, avatarUrl] = str.split(':');
-        let decodedAvatar = decodeURIComponent(avatarUrl || '');
-        if (!decodedAvatar || decodedAvatar === 'undefined') {
-            decodedAvatar = defaultAvatar;
-        }
-        return {
-            id,
-            displayName: decodeURIComponent(displayName || ''),
-            avatarUrl: decodedAvatar,
-        };
-    });
-}
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTournament } from './tournamentContext';
 
 export default function TournamentTree() {
-    const query = useQuery();
     const navigate = useNavigate();
-    const players = Number(query.get('players')) || 0;
-    const ids = query.get('ids')?.split(',') || [];
-    const initialParticipants = parseParticipants(ids);
+    const { tournamentData, setTournamentData } = useTournament();
+    const [participants, setParticipants] = useState<any[]>([]);
+    const [displayNames, setDisplayNames] = useState<{[key: string]: string}>({});
+    const [editing, setEditing] = useState<string | null>(null)
 
-    const [displayNames, setDisplayNames] = useState(
-        Object.fromEntries(initialParticipants.map(p => [p.id, p.displayName]))
-    );
-    const [editing, setEditing] = useState<string | null>(null);
-    // Always show edit mode
-    const showEdit = true;
+    useEffect(() => {
+        if (!tournamentData) {
+            navigate('/profile');
+            return;
+        }
+
+        setParticipants(tournamentData.participants);
+
+        const initialNames = Object.fromEntries(
+            tournamentData.participants.map(p => [p.userID.toString(), p.name])
+        );
+        setDisplayNames(initialNames)
+    }, [tournamentData, navigate]);
+
+    if (!tournamentData) {
+        return <div>Loading...</div>;
+    }
+
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -47,32 +39,35 @@ export default function TournamentTree() {
                         <div className="w-full mb-8">
                             <h2 className="font-pixelify text-blue-deep text-xl mb-2 text-center">Participants</h2>
                             <div
-                                className={`grid gap-4 justify-center`}
+                                className="grid gap-4 justify-center"
                                 style={{
                                     gridTemplateColumns:
-                                        initialParticipants.length <= 4
-                                            ? `repeat(${initialParticipants.length}, minmax(120px, 1fr))`
+                                        participants.length <= 4
+                                            ? `repeat(${participants.length}, minmax(120px, 1fr))`
                                             : `repeat(4, minmax(120px, 1fr))`
                                 }}
                             >
-                                {initialParticipants.map((player, idx) => (
+                                {participants.map((participant, idx) => (
                                     <div
-                                        key={player.id + idx}
+                                        key={participant.userID + idx}
                                         className="bg-pink-light px-4 py-2 font-pixelify text-blue-deep text-lg flex flex-col items-center rounded-lg"
                                     >
                                         <img
-                                            src={player.avatarUrl}
-                                            alt={player.displayName}
+                                            src={participant.avatarUrl}
+                                            alt={participant.name}
                                             className="w-10 h-10 rounded-full mb-2"
                                             style={{ objectFit: 'cover', background: '#fff' }}
                                         />
                                         <div className="flex items-center gap-2">
-                                            {showEdit && editing === player.id ? (
+                                            {editing === participant.userID.toString() ? (
                                                 <input
                                                     type="text"
-                                                    value={displayNames[player.id] || ""}
+                                                    value={displayNames[participant.userID.toString()] || ""}
                                                     onChange={e =>
-                                                        setDisplayNames({ ...displayNames, [player.id]: e.target.value })
+                                                        setDisplayNames({ 
+                                                            ...displayNames, 
+                                                            [participant.userID.toString()]: e.target.value 
+                                                        })
                                                     }
                                                     onBlur={() => setEditing(null)}
                                                     onKeyDown={e => {
@@ -84,40 +79,47 @@ export default function TournamentTree() {
                                                 />
                                             ) : (
                                                 <span
-                                                    onClick={() => showEdit && setEditing(player.id)}
-                                                    className={showEdit ? "cursor-pointer hover:underline flex items-center gap-1" : ""}
-                                                    title={showEdit ? "Click to edit display name" : ""}
+                                                    onClick={() => setEditing(participant.userID.toString())}
+                                                    className="cursor-pointer hover:underline flex items-center gap-1"
+                                                    title="Click to edit display name"
                                                     style={{ minWidth: 80 }}
                                                 >
-                                                    {displayNames[player.id] || <span className="text-gray-400">No Name</span>}
-                                                    {showEdit && (
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="inline w-4 h-4 text-blue-deep ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2h6" />
-                                                        </svg>
-                                                    )}
+                                                    {displayNames[participant.userID.toString()] || 
+                                                        <span className="text-gray-400">No Name</span>
+                                                    }
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="inline w-4 h-4 text-blue-deep ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2h6" />
+                                                    </svg>
                                                 </span>
                                             )}
                                         </div>
-                                        {showEdit && (
-                                            <span className="text-xs text-blue-deep mt-1 opacity-60">Click name to edit</span>
-                                        )}
+                                        <span className="text-xs text-blue-deep mt-1 opacity-60">Click name to edit</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
                         <p className="font-pixelify text-blue-deep text-lg mb-4 text-center">
-                            Number of players: <b>{players}</b>
+                            Number of players: <b>{tournamentData.players}</b>
                         </p>
                         <button
                             className="button-pp-blue font-pixelify px-6 py-2 rounded mt-2 text-lg flex justify-center items-center text-center"
                             style={{ minWidth: 100 }}
                             onClick={() => {
-                                // Shuffle participants
-                                const shuffled = [...initialParticipants].sort(() => Math.random() - 0.5);
-                                // Pass display names and avatars as bracket data
-                                navigate(`/tournament/bracket?players=${players}&ids=${shuffled
-                                    .map(p => `${p.id}:${encodeURIComponent(displayNames[p.id] || p.displayName)}:${encodeURIComponent(p.avatarUrl || '')}`)
-                                    .join(',')}`);
+                                // Shuffle participants and update with display names
+                                const shuffled = [...participants].sort(() => Math.random() - 0.5);
+                                
+                                // Update tournament data with edited names
+                                const updatedParticipants = shuffled.map(p => ({
+                                    ...p,
+                                    name: displayNames[p.userID.toString()] || p.name
+                                }));
+
+                                setTournamentData({
+                                    ...tournamentData,
+                                    participants: updatedParticipants
+                                });
+
+                                navigate('/tournament/bracket');
                             }}
                         >
                             Start
