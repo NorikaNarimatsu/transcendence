@@ -24,6 +24,8 @@ export default function SnakeGame(): JSX.Element {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const mode = params.get('mode') || 'single';
+    const tournamentBracketID = params.get('tournamentBracketID') || null;
+    const tournamentMatchID  = params.get('tournamentMatchID') || null;
     
     const { selectedPlayer, guestPlayer } = useSelectedPlayer();
 
@@ -118,6 +120,8 @@ export default function SnakeGame(): JSX.Element {
             const matchData = {
                 matchType: 'snake',
                 matchMode: mode,
+                tournamentBracketID: tournamentBracketID,
+                tournamentMatchID: tournamentMatchID, 
                 user1ID: user?.userID, // Current user
                 user2ID: mode === '2players' ? (opponent?.userID || 2) : null, // Opponent or Guest (userID=2) or null for single
                 user1Score: engine.snake1.score,

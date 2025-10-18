@@ -12,6 +12,8 @@ export const addMatch = async (request, response) => {
         const { 
             matchType,      // 'pong' or 'snake'
             matchMode,      // 'single', '2players', 'tournament'
+            tournamentBracketID,
+            tournamentMatchID,
             user1ID,        // Player 1 ID (number)
             user2ID,        // Player 2 ID (number - 1=AI, 2=Guest, 3+=users)
             user1Score,     // Player 1 final score
@@ -19,8 +21,6 @@ export const addMatch = async (request, response) => {
             winnerID,       // the ID from the winner
             startedAt,      // Match start timestamp
             endedAt,        // Match end timestamp
-            tournamentBracketID = null,
-            tournamentMatchID = null
         } = request.body;
 
         console.log("Extracted values:", { matchType, matchMode, user1ID, user2ID, user1Score, user2Score, startedAt, endedAt });

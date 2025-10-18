@@ -25,7 +25,8 @@ export default function PongGame(): JSX.Element {
     const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
     const mode = params.get('mode') || 'single';
-    const players = params.get('players');
+    const tournamentBracketID = params.get('tournamentBracketID') || null;
+    const tournamentMatchID  = params.get('tournamentMatchID') || null;
     
     // ADD: Get all players from global context
     const { selectedPlayer, aiPlayer, guestPlayer } = useSelectedPlayer();
@@ -104,6 +105,8 @@ export default function PongGame(): JSX.Element {
           const matchData = {
               matchType: 'pong',
               matchMode: mode,
+              tournamentBracketID: tournamentBracketID,
+              tournamentMatchID: tournamentMatchID, 
               user1ID: user?.userID, // Current user
               user2ID: opponent?.userID || 2, // Opponent or Guest (userID=2)
               user1Score: finalGameState.leftScore,
