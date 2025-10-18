@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import type { User } from '../pages/user/UserContext';
+import type { User } from '../pages/user/UserContext'; // maybe delete?
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
 import { useTournament } from '../pages/tournament/tournamentContext';
 
@@ -14,7 +14,6 @@ interface TournamentRegistrationProps {
     setVerifyingUser: (user: SelectedPlayer | null) => void;
     user: User;
 }
-
 
 export function TournamentRegistration({
     open,

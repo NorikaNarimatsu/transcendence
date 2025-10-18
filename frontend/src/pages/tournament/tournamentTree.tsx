@@ -11,7 +11,7 @@ export default function TournamentTree() {
 
     useEffect(() => {
         if (!tournamentData) {
-            navigate('/profile');
+            navigate('/playerProfile');
             return;
         }
 

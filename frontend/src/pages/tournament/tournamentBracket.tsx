@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTournament } from './tournamentContext';
 
 function getBracketRounds(participants: any[]) {
+    console.log('Generating bracket rounds for participants:', participants);
     const rounds = [];
     let current = participants;
     while (current.length > 1) {
@@ -16,6 +17,11 @@ function getBracketRounds(participants: any[]) {
 export default function Bracket() {
     const navigate = useNavigate();
     const { tournamentData } = useTournament();
+    console.log('Tournament Data:', tournamentData);
+
+    const tournamentBracketID = 100;
+    const tournamentMatchID = 200;
+
 
     useEffect(() => {
         if (!tournamentData) {
@@ -77,13 +83,13 @@ export default function Bracket() {
             const right = { x: pos.x + boxWidth, y: pos.y + boxHeight / 2 };
             const top = { x: pos.x + boxWidth / 2, y: pos.y };
             const bottom = { x: pos.x + boxWidth / 2, y: pos.y + boxHeight };
-            console.log(
-                `Round ${roundIdx}, Box ${idx}:`,
-                'Left', left,
-                'Right', right,
-                'Top', top,
-                'Bottom', bottom
-            );
+            // console.log(
+            //     `Round ${roundIdx}, Box ${idx}:`,
+            //     'Left', left,
+            //     'Right', right,
+            //     'Top', top,
+            //     'Bottom', bottom
+            // );
         });
     });
 
@@ -177,11 +183,21 @@ export default function Bracket() {
                                     );
                                 })}
                             </div>
+                            
                         ))}
                     </div>
+                    <button
+                        onClick={() => {
+                            navigate(`../playerProfile/pongGame?mode=2players&tournamentBracketID=${tournamentBracketID}&tournamentMatchID=${tournamentMatchID}`);
+                        }}>
+
+                        Start Game
+                    </button>
                 </div>
             </section>
             <footer className="h-40 bg-blue-deep"></footer>
         </div>
     );
 }
+
+

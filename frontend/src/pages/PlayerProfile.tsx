@@ -143,6 +143,7 @@ export default function PlayerProfile(): JSX.Element {
             });
             if (response.ok) {
                 setSelectedTournamentParticipants(prev => [...prev, tournamentVerifyingUser]);
+                console.log('Added to tournament:', tournamentVerifyingUser);
                 setTournamentVerifyingUser(null);
                 setTournamentVerifyPassword('');
                 setTournamentVerifyError('');
