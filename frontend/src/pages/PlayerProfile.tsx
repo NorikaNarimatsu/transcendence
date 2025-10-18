@@ -215,7 +215,6 @@ export default function PlayerProfile(): JSX.Element {
                     { name: 'Update data', action: () => console.log('Updating account data') },
 					{ name: 'Download data', action: () => downloadUserData() },
 					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
-                    { name: 'Preference', action: () => console.log('customizing preference') },
                     { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
                     { name: 'Language', action: () => console.log('Updating Language Setting') }, //TODO.
                 ];
