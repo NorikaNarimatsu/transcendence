@@ -147,6 +147,73 @@ export default function PlayerProfile(): JSX.Element {
         }
     };
 
+    const fetchBasicStats = async () => {
+        if (!user?.userID) return;
+        try {
+            const response = await fetch(`https://localhost:8443/user/${user.userID}/stats`); 
+            if (response.ok) {
+                const data = await response.json();
+                setBasicStats(data.overall);
+            } else {
+                console.error('Failed to fetch stats');
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        }
+    };
+
+
+    ///////////////// WORK IN PROGRESS //////////////////
+    const [avatarUrlLocal, setAvatarUrlLocal] = useState<string | null>(null);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    
+    useEffect(() => {
+      setAvatarUrlLocal(user?.avatarUrl ?? null);
+    }, [user?.avatarUrl]);
+    
+    const handleSelectAvatar = async (avatarUrl: string) => {
+      if (!user?.userID) return;
+      setUploadingAvatar(true);
+      try {
+        const res = await fetch('https://localhost:8443/user/updateAvatar', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userID: user.userID, avatarUrl })
+        });
+        console.log('SENDING THIS URL:', avatarUrl);
+        if (!res.ok) {
+          const text = await res.text();
+          console.error('Failed to update avatar:', res.status, text);
+          return;
+        }
+    
+        setAvatarUrlLocal(avatarUrl);
+        // update stored user so other parts can pick up change
+        const raw = localStorage.getItem('user');
+        if (raw) {
+          const stored = JSON.parse(raw);
+          stored.avatarUrl = avatarUrl;
+          localStorage.setItem('user', JSON.stringify(stored));
+          window.dispatchEvent(new CustomEvent('userUpdated', { detail: stored }));
+        }
+        setIsOpen(false);
+      } catch (err) {
+        console.error('Error updating avatar:', err);
+      } finally {
+        setUploadingAvatar(false);
+      }
+    };
+    ///////////////// WORK IN PROGRESS //////////////////
+
+    useEffect(() => {
+        if (user?.userID) {
+            fetchBasicStats();
+        } else {
+            setBasicStats(null);
+            setShowBasicStats(false);
+        }
+    }, [user?.userID]);
+    
 	const downloadUserData = async () => {
 		if (!user?.userID) {
 			console.log('no user or userID found');
@@ -208,6 +275,7 @@ export default function PlayerProfile(): JSX.Element {
             case 'Dashboard':
                 return [
                     { name: 'Go to Dashboard', action: () => navigate('/dashboard') },
+                    // { name: 'Basic Stats', action: () => fetchBasicStats() }
                 ];
             case 'Settings':
                 return [
@@ -215,8 +283,8 @@ export default function PlayerProfile(): JSX.Element {
                     { name: 'Update data', action: () => console.log('Updating account data') },
 					{ name: 'Download data', action: () => downloadUserData() },
 					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
-                    { name: 'Preference', action: () => console.log('customizing preference') },
                     { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
+                    { name: 'Language', action: () => console.log('Updating Language Setting') }, //TODO.
                 ];
             default:
                 return [];
@@ -244,12 +312,18 @@ export default function PlayerProfile(): JSX.Element {
                     <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
                         <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">PLAYER INFO</div>
                         <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
-                                <img onClick={() => setIsOpen(!isOpen)} src={user.avatarUrl} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/>
-                                <AvatarSelection open={isOpen} onClose={() => setIsOpen(false)}/>
+                                <img onClick={() => setIsOpen(!isOpen)} src={user.avatarUrl} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/> 
+                                {/* update the local strage here*/}
+                                <AvatarSelection open={isOpen} onClose={() => setIsOpen(false)} onSelect={handleSelectAvatar} />
+                                
                             <div className="flex flex-col m-auto justify-evenly">
                                 <div className="font-pixelify text-white text-[40px]">{user.name}</div>
-                                <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">Wins: {user.wins}</div> {/* TODO: API CALL USER.WINS */}
-                                <div className="font-dotgothic font-bold text-white text-base text-border-blue">Losses: {user.losses}</div> {/* TODO: API CALL USER.LOSSES */}
+                                <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">
+                                    Wins: {basicStats?.wins ?? user.wins ?? 0}
+                                </div>
+                                <div className="font-dotgothic font-bold text-white text-base text-border-blue">
+                                    Losses: {basicStats?.losses ?? user.losses ?? 0}
+                                </div>
                             </div>
                         </div>
                         <CategoryButtons

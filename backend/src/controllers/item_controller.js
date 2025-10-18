@@ -255,7 +255,7 @@ export const getUserById = async (request, reply) => {
             return reply.code(400).send({ message: "Invalid userID format" });
         }
 
-        const user = db.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID = ?").get(sanitizedUserID);
+        const user = db.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID = ?").get(sanitizedUserID); // TODO? userID
         
         if (!user) {
             return reply.code(404).send({ message: "User not found" });
@@ -290,7 +290,7 @@ export const getUsersExceptUserID = async (request, reply) => {
                     AND userID != 1
                     AND userID != 2
                     AND userID != 0
-                    AND name NOT LIKE 'deleted_user_%'
+                    AND name NOT LIKE 'anon%'
                 ORDER BY userID
             `)
             .all(sanitizedUserID);
@@ -330,7 +330,7 @@ export const getUserFriendsByUserID = async (request, reply) => {
             FROM friends f
             JOIN users u ON f.user2ID = u.userID
             WHERE f.user1ID = ?
-                AND name NOT LIKE 'deleted_user_%'
+                AND name NOT LIKE 'anon%'
             ORDER BY u.name
         `).all(sanitizedUserID);
         
@@ -409,6 +409,25 @@ export const addFriendByUserID = async (request, response) => {
     }
 };
 
+
+export function updateAvatarUrl(request, response) {
+	try {
+        const { userID, avatarUrl } = request.body;
+        const result = db.prepare(
+            "UPDATE users SET avatarUrl = ? WHERE userID = ?").run(avatarUrl, userID);
+        if (result.changes === 0)
+            response.code(404).send({ error: "Item not found" });
+        return response.code(200).send({
+            message: "Avatar updated successfully",
+            avatarUrl: avatarUrl,
+        });
+    } catch (error) {
+        request.log.error("update error: ", error);
+        return response.code(400).send({ 
+            error: error.message || "Invalid input data" });
+    }
+}
+
 ////////////////////////////// CONTROLLER //////////////////////////////
 
 const itemController = {
@@ -424,6 +443,7 @@ const itemController = {
     getUserInfoByEmail,
     getUserById,
     getUsersExceptUserID,
+    updateAvatarUrl,
     
     // Friends management
     addFriendByUserID,

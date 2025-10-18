@@ -45,3 +45,27 @@ export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelec
         </div>
     )
 }
+
+/*
+Strategy:
+2 endpoitns:
+- handleAvatarSelect
+            const form = new FormData();
+            form.append('avatar', file);
+            form.append('userID', String(user.userID));
+
+            const res = await fetch('https://localhost:8443/user/upload-avatar', {
+                method: 'POST',
+                body: form
+            });
+
+- handleAvatarUpload
+            const res = await fetch('https://localhost:8443/user/update-avatar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userID: user.userID, avatarUrl })
+            });
+
+
+*/
+ 

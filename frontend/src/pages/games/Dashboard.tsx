@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../user/UserContext';
 import Button from '../../components/ButtonDarkPink';
-import log_out_icon from '../../assets/icons/Log_out.png';
+import home_icon from '../../assets/icons/Home.png';
 
 interface MatchData {
     matchID: number;
@@ -55,11 +55,6 @@ export default function Dashboard(): JSX.Element {
     const calculateLevel = (xp: number): number => Math.floor(xp / 100) + 1;
     const getXPForNextLevel = (level: number): number => level * 100;
 
-    const handleLogout = () => {
-        logout();
-        navigate('/signup');
-    };
-
     // Analyze match data for achievements and streaks
     const analyzeMatches = (matches: MatchData[]) => {
         const perfectGames = matches.filter(m => 
@@ -72,7 +67,7 @@ export default function Dashboard(): JSX.Element {
         let maxStreak = 0;
         let tempStreak = 0;
 
-        // Assuming matches are ordered by most recent first, reverse to get chronological order
+        // reverse to get chronological order
         const chronologicalMatches = [...matches].reverse();
         
         for (const match of chronologicalMatches) {
@@ -161,6 +156,10 @@ export default function Dashboard(): JSX.Element {
                 target: 25
             }
         ];
+    };
+
+    const handleBackToProfile = () => {
+        navigate('/playerProfile');
     };
 
     // Fetch data
@@ -521,9 +520,9 @@ export default function Dashboard(): JSX.Element {
 
             {/* Footer */}
             <footer className="h-40 bg-blue-deep flex justify-center items-center">
-                <Button onClick={handleLogout} style={{ marginTop: 0 }}>
-                    <img src={log_out_icon} alt="Log out button" className="h-8 w-auto"/>
-                </Button>
+                <Button onClick={handleBackToProfile} className="!mt-0">
+                  <img src={home_icon} alt="Home" className="h-8 w-auto"/>
+              </Button>
             </footer>
         </main>
     );

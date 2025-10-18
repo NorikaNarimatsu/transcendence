@@ -15,6 +15,7 @@ export default async function itemRoutes(fastify, options) {
     fastify.get('/getUserInfoByEmail/:email', itemController.getUserInfoByEmail);
     fastify.get('/getUserById/:userID', itemController.getUserById);
     fastify.get('/users/except/:userID', itemController.getUsersExceptUserID);
+    fastify.put('/user/updateAvatar', itemController.updateAvatarUrl); // new avatar route
 
     // Friends management (using userID)
     fastify.post('/friends/add', itemController.addFriendByUserID);
