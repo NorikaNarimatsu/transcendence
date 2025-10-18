@@ -1,25 +1,6 @@
-import { useLocation } from 'react-router-dom';
-
-const defaultAvatar = '../assets/avatars/Avatar 1.png';
-
-function useQuery() {
-    return new URLSearchParams(useLocation().search);
-}
-
-function parseParticipants(ids: string[]) {
-    return ids.map(str => {
-        const [id, displayName, avatarUrl] = str.split(':');
-        let decodedAvatar = decodeURIComponent(avatarUrl || '');
-        if (!decodedAvatar || decodedAvatar === 'undefined') {
-            decodedAvatar = defaultAvatar;
-        }
-        return {
-            id,
-            displayName: decodeURIComponent(displayName || ''),
-            avatarUrl: decodedAvatar,
-        };
-    });
-}
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTournament } from './tournamentContext';
 
 function getBracketRounds(participants: any[]) {
     const rounds = [];
@@ -33,9 +14,24 @@ function getBracketRounds(participants: any[]) {
 }
 
 export default function Bracket() {
-    const query = useQuery();
-    const ids = query.get('ids')?.split(',') || [];
-    const participants = parseParticipants(ids);
+    const navigate = useNavigate();
+    const { tournamentData } = useTournament();
+
+    useEffect(() => {
+        if (!tournamentData) {
+            navigate('/profile');
+        }
+    }, [tournamentData, navigate]);
+
+    if (!tournamentData) {
+        return <div>Loading...</div>;
+    }
+
+    const participants = tournamentData.participants.map(p => ({
+        id: p.userID.toString(),
+        displayName: p.name,
+        avatarUrl: p.avatarUrl,
+    }));
 
     const rounds = getBracketRounds(participants);
 
