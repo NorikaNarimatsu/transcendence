@@ -44,6 +44,13 @@ export default function PlayerProfile(): JSX.Element {
 
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+	
+		const [basicStats, setBasicStats] = useState<{
+			wins: number;
+			losses: number;
+			totalMatches: number;
+		} | null>(null);
+		const [showBasicStats, setShowBasicStats] = useState(false);
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
