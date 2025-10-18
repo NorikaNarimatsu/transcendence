@@ -72,7 +72,7 @@ export default function Dashboard(): JSX.Element {
         let maxStreak = 0;
         let tempStreak = 0;
 
-        // Assuming matches are ordered by most recent first, reverse to get chronological order
+        // reverse to get chronological order
         const chronologicalMatches = [...matches].reverse();
         
         for (const match of chronologicalMatches) {

@@ -409,6 +409,25 @@ export const addFriendByUserID = async (request, response) => {
     }
 };
 
+
+export function updateAvatarUrl(request, response) {
+	try {
+        const { userID, avatarUrl } = request.body;
+        const result = db.prepare(
+            "UPDATE users SET avatarUrl = ? WHERE userID = ?").run(avatarUrl, userID);
+        if (result.changes === 0)
+            response.code(404).send({ error: "Item not found" });
+        return response.code(200).send({
+            message: "Avatar updated successfully",
+            avatarUrl: avatarUrl,
+        });
+    } catch (error) {
+        request.log.error("update error: ", error);
+        return response.code(400).send({ 
+            error: error.message || "Invalid input data" });
+    }
+}
+
 ////////////////////////////// CONTROLLER //////////////////////////////
 
 const itemController = {
@@ -424,6 +443,7 @@ const itemController = {
     getUserInfoByEmail,
     getUserById,
     getUsersExceptUserID,
+    updateAvatarUrl,
     
     // Friends management
     addFriendByUserID,
