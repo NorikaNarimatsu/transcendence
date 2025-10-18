@@ -12,12 +12,10 @@ import ButtonPink from '../../components/ButtonDarkPink';
 //Icons import
 import home_icon from '../../assets/icons/Home.png';
 import gear_icon from '../../assets/icons/Settings.png';
-import star_icon from '../../assets/icons/Star.png';
 
 //Game instructions+Settings+Stats components
 import GameInstructions from '../../components/GameInstructionsPongGame';
 import GameSettings from '../../components/SettingsGames';
-import GameStats from '../../components/StatsPongGame';
 
 import type { SelectedPlayer } from '../user/PlayerContext';
 
@@ -51,7 +49,7 @@ export default function PongGame(): JSX.Element {
         navigate('/playerProfile');
     };
 
-    const [view, setView] = useState<"game"|"instructions"|"settings"|"stats">('instructions')
+    const [view, setView] = useState<"game"|"instructions"|"settings">('instructions')
     const [backgroundColor, setBackgroundColor] = useState<string>('bg-pink-dark');
     //To make sure the game settings and game Stats dont show when we start a match:
     useEffect(() => {
@@ -296,10 +294,6 @@ export default function PongGame(): JSX.Element {
                   currentBackground={backgroundColor}
                />
           )}
-
-          {!gameState.gameStarted && !gameState.gameEnded && view === 'stats' && (
-              <GameStats onClose={() => setView("instructions")} />
-          )}
         </div>
       </section>
 
@@ -320,15 +314,6 @@ export default function PongGame(): JSX.Element {
               }
                 } className="!mt-0" >
                   <img src={gear_icon} alt="Game Settings" className="h-8 w-auto"/>
-              </ButtonPink>
-              <ButtonPink onClick={() => {
-                if (view === "stats"){
-                  setView("instructions")
-                } else {
-                  setView("stats")
-                }
-              }} className="!mt-0">
-                  <img src={star_icon} alt="Game Stats" className="h-8 w-auto"/>
               </ButtonPink>
           </div>
       </footer>
