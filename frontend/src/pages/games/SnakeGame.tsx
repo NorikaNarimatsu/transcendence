@@ -15,7 +15,10 @@ import home_icon from '../../assets/icons/Home.png'
 import gear_icon from '../../assets/icons/Settings.png'
 import star_icon from '../../assets/icons/Star.png'
 
+//Import Game Instructions + Settings + Stats
 import GameInstructions from '../../components/GameInstructionsSnakeGame';
+import GameSettings from '../../components/SettingsGames';
+import GameStats from '../../components/StatsPongGame';
 
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();
@@ -35,6 +38,10 @@ export default function SnakeGame(): JSX.Element {
     const handleBackToProfile = () => {
         navigate('/playerProfile');
     };
+
+    const [view, setView] = useState<"game"|"instructions"|"settings"|"stats">('instructions');
+    const [backgroundColor, setBackgroundColor] = useState<string>('bg-pink-light');
+    
     const getOpponent = (): SelectedPlayer | null => {
         if (mode === 'single') {
             return null; // No opponent in single mode
@@ -163,14 +170,28 @@ export default function SnakeGame(): JSX.Element {
 
     // Keyboard input
     useEffect(() => {
-        const handleKey = (e: KeyboardEvent) => {
-            gameEngineRef.current?.handleInput(e.code === 'Space' ? 'Space' : e.key);
-            forceUpdate({}); // Force re-render for immediate feedback
-        };
+    const handleKey = (e: KeyboardEvent) => {
+        // Prevent SPACE from triggering button clicks
+        if (e.code === 'Space') {
+            e.preventDefault();
+        }
+        
+        gameEngineRef.current?.handleInput(e.code === 'Space' ? 'Space' : e.key);
+        forceUpdate({}); // Force re-render for immediate feedback
+    };
 
-        window.addEventListener('keydown', handleKey);
-        return () => window.removeEventListener('keydown', handleKey);
-    }, []);
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+}, []);
+
+// Also add a useEffect to reset view when game starts:
+useEffect(() => {
+    if (gameEngineRef.current && !gameEngineRef.current.waitingToStart && !gameEngineRef.current.gameOver) {
+        // Game is running, make sure settings are closed
+        setView("instructions");
+    }
+}, [gameEngineRef.current?.waitingToStart, gameEngineRef.current?.gameOver]);
+
 
     useEffect(() => {
         if (gameEngineRef.current?.gameOver) {
@@ -233,7 +254,7 @@ export default function SnakeGame(): JSX.Element {
             {/* Game Area */}
             <section className="flex-1 bg-pink-dark-grid bg-pink-dark flex items-center justify-center">
                 <div
-                    className="relative bg-pink-light shadow-no-blur-70"
+                    className={`relative shadow-no-blur-70 ${backgroundColor}`}
                     style={{
                         width: gameConfig.gameWidth,
                         height: gameConfig.gameHeight,
@@ -336,11 +357,24 @@ export default function SnakeGame(): JSX.Element {
 
                    {/* Waiting to Start */}
                     {engine.waitingToStart && (
-                        <div 
-                            className="absolute inset-0 flex items-center justify-center"
-                            style={{ zIndex: 10 }}
-                        >
-                            <GameInstructions />
+                        <div className="absolute inset-0" style={{ zIndex: 200}}>
+                            <GameInstructions></GameInstructions>
+                        </div>
+                    )}
+
+                    {view === "settings" && (
+                        <div className="absolute inset-0" style={{ zIndex: 200}}>
+                            <GameSettings
+                                onClose={() => setView("instructions")}
+                                onBackgroundChange={setBackgroundColor}
+                                currentBackground={backgroundColor}
+                            />
+                        </div>
+                    )}
+
+                    {view === "stats" && (
+                        <div className="absolute inset-0" style={{ zIndex: 200}}>
+                            <GameStats onClose={() => setView("instructions")}/>
                         </div>
                     )}
 
@@ -385,16 +419,29 @@ export default function SnakeGame(): JSX.Element {
             {/* Bottom bar */}
             <footer className="h-40 bg-blue-deep grid place-items-center">
                 <div className="col-start-1 row-start-1">
-                    <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl animate-marquee">SNAKE GAME</h1>
+                    <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl animate-marquee">PONG GAME</h1>
                 </div>
                 <div className="col-start-1 row-start-1 z-10 flex gap-4">
-                    <ButtonPink onClick={handleBackToProfile} style={{ marginTop: 0}}>
+                    <ButtonPink onClick={handleBackToProfile} className="!mt-0">
                         <img src={home_icon} alt="Home" className="h-8 w-auto"/>
                     </ButtonPink>
-                    <ButtonPink onClick={handleBackToProfile} style={{ marginTop: 0}}>
+                    <ButtonPink onClick={() => {
+                        if (view === "settings"){
+                        setView("instructions")
+                        } else {
+                        setView("settings")
+                        }
+                    }
+                        } className="!mt-0" >
                         <img src={gear_icon} alt="Game Settings" className="h-8 w-auto"/>
                     </ButtonPink>
-                    <ButtonPink onClick={handleBackToProfile} style={{ marginTop: 0}}>
+                    <ButtonPink onClick={() => {
+                        if (view === "stats"){
+                        setView("instructions")
+                        } else {
+                        setView("stats")
+                        }
+                    }} className="!mt-0">
                         <img src={star_icon} alt="Game Stats" className="h-8 w-auto"/>
                     </ButtonPink>
                 </div>
