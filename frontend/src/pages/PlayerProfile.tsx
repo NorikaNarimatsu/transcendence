@@ -212,6 +212,7 @@ export default function PlayerProfile(): JSX.Element {
 					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
                     { name: 'Preference', action: () => console.log('customizing preference') },
                     { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
+                    { name: 'Language', action: () => console.log('Updating Language Setting') }, //TODO.
                 ];
             default:
                 return [];

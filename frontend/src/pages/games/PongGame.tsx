@@ -16,7 +16,7 @@ import star_icon from '../../assets/icons/Star.png';
 
 //Game instructions+Settings+Stats components
 import GameInstructions from '../../components/GameInstructionsPongGame';
-import GameSettings from '../../components/SettingsPongGame';
+import GameSettings from '../../components/SettingsGames';
 import GameStats from '../../components/StatsPongGame';
 
 import type { SelectedPlayer } from '../user/PlayerContext';
@@ -52,7 +52,7 @@ export default function PongGame(): JSX.Element {
     };
 
     const [view, setView] = useState<"game"|"instructions"|"settings"|"stats">('instructions')
-
+    const [backgroundColor, setBackgroundColor] = useState<string>('bg-pink-dark');
     //To make sure the game settings and game Stats dont show when we start a match:
     useEffect(() => {
     if (!gameState.gameStarted && !gameState.gameEnded && 
@@ -211,7 +211,7 @@ export default function PongGame(): JSX.Element {
           </header>
       <section className="flex-1 bg-pink-grid flex items-center justify-center">
         <div 
-          className="relative bg-pink-dark shadow-no-blur-70"
+          className={`relative shadow-no-blur-70 ${backgroundColor}`}
           style={{ 
             width: `${gameConfig.gameWidth}px`, 
             height: `${gameConfig.gameHeight}px` 
@@ -276,7 +276,11 @@ export default function PongGame(): JSX.Element {
           )}
 
           {!gameState.gameStarted && !gameState.gameEnded && view === "settings" && (
-              <GameSettings onClose={() => setView("instructions")} />
+              <GameSettings
+                  onClose={() => setView("instructions")}
+                  onBackgroundChange={setBackgroundColor}
+                  currentBackground={backgroundColor}
+               />
           )}
 
           {!gameState.gameStarted && !gameState.gameEnded && view === 'stats' && (
