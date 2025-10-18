@@ -13,12 +13,10 @@ import { calculateSnakeGameConfig, type SnakeGameConfig } from '../../gameEngine
 //Icons import
 import home_icon from '../../assets/icons/Home.png'
 import gear_icon from '../../assets/icons/Settings.png'
-import star_icon from '../../assets/icons/Star.png'
 
 //Import Game Instructions + Settings + Stats
 import GameInstructions from '../../components/GameInstructionsSnakeGame';
 import GameSettings from '../../components/SettingsGames';
-import GameStats from '../../components/StatsPongGame';
 
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();
@@ -39,7 +37,7 @@ export default function SnakeGame(): JSX.Element {
         navigate('/playerProfile');
     };
 
-    const [view, setView] = useState<"game"|"instructions"|"settings"|"stats">('instructions');
+    const [view, setView] = useState<"game"|"instructions"|"settings">('instructions');
     const [backgroundColor, setBackgroundColor] = useState<string>('bg-pink-light');
     
     const getOpponent = (): SelectedPlayer | null => {
@@ -372,12 +370,6 @@ useEffect(() => {
                         </div>
                     )}
 
-                    {view === "stats" && (
-                        <div className="absolute inset-0" style={{ zIndex: 200}}>
-                            <GameStats onClose={() => setView("instructions")}/>
-                        </div>
-                    )}
-
                     {engine.gameOver && (
                         <div 
                             className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50"
@@ -434,15 +426,6 @@ useEffect(() => {
                     }
                         } className="!mt-0" >
                         <img src={gear_icon} alt="Game Settings" className="h-8 w-auto"/>
-                    </ButtonPink>
-                    <ButtonPink onClick={() => {
-                        if (view === "stats"){
-                        setView("instructions")
-                        } else {
-                        setView("stats")
-                        }
-                    }} className="!mt-0">
-                        <img src={star_icon} alt="Game Stats" className="h-8 w-auto"/>
                     </ButtonPink>
                 </div>
             </footer>
