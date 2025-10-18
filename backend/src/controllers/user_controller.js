@@ -3,7 +3,7 @@ import gameController from './game_controller.js';
 
 const userAnon = {
     anonymizeUserData: (userId) => {
-        const anonymizedName = `deleted_user_${userId}`;
+        const anonymizedName = `anon${userId}`;
         const anonymizedEmail = `deleted_${userId}@anonymized.com`;
         const anonymizedPassword = 'ANONYMIZED';
         const defaultAvatarUrl = '/avatars/Avatar_1.png';
@@ -75,13 +75,13 @@ const userController = {
                 return;
             }
 
-            const sanitizedUserID = parseInt(userID);
-            if (isNaN(sanitizedUserID)) {
-                reply.status(400).send({ error: 'Invalid userID format' });
-                return;
-            }
+            // const sanitizedUserID = parseInt(userID);
+            // if (isNaN(sanitizedUserID)) {
+            //     reply.status(400).send({ error: 'Invalid userID format' });
+            //     return;
+            // }
 
-            const result = await userAnon.performAnonymization(sanitizedUserID);
+            const result = await userAnon.performAnonymization(userID);
             reply.send(result);
 
         } catch (err) {
