@@ -211,6 +211,7 @@ export const getTournamentMatches = async (request, response ) => {
         const matches = db.prepare( `
             SELECT
                 m.matchID,
+                m.tournamentMatchID,
                 m.matchType,
                 m.user1Score,
                 m.user2Score,
@@ -229,6 +230,8 @@ export const getTournamentMatches = async (request, response ) => {
             WHERE m.tournamentBracketID = ?
             ORDER BY m.tournamentMatchID ASC
         `).all(bracketID);
+
+        console.log(`Found ${matches.length} matches for bracket ${bracketID}:`, matches); // Add logging
 
         return response.code(200).send({
             tournamentBracketID: bracketID,

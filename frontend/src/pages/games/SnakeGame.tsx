@@ -118,7 +118,7 @@ export default function SnakeGame(): JSX.Element {
 
                 const winner = engine.getWinner();
                 if (winner === 'player1') {
-                    winnerID = player1.userID;
+                    winnerID = player1?.userID;
                 } else if (winner === 'player2') {
                     winnerID = player2?.userID || 2;
                 }
@@ -130,8 +130,8 @@ export default function SnakeGame(): JSX.Element {
                 matchMode: mode,
                 tournamentBracketID: mode === 'tournament' ? currentMatch?.tournamentBracketID : null,
                 tournamentMatchID: mode === 'tournament' ? currentMatch?.tournamentMatchID : null,
-                user1ID: user?.userID, // Current user
-                user2ID: mode === '2players' ? (player2?.userID || 2) : null, // Opponent or Guest (userID=2) or null for single
+                user1ID: player1?.userID, // Current user
+                user2ID: mode === 'single' ? null : (player2?.userID || 2),
                 user1Score: engine.snake1.score,
                 user2Score: engine.isMultiplayer ? (engine.snake2?.score || 0) : 0,
                 winnerID: winnerID,
@@ -141,6 +141,9 @@ export default function SnakeGame(): JSX.Element {
 
             console.log('=== SENDING SNAKE MATCH RESULT ===');
             console.log('Match Data:', matchData);
+            console.log('Expected: user1ID should be', player1?.userID, 'user2ID should be', player2?.userID);
+            console.log('Actual player1:', player1);
+            console.log('Actual player2:', player2);
 
             const response = await fetch('https://localhost:8443/match', {
                 method: 'POST',
