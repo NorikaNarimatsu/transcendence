@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTournament } from './tournamentContext';
+import type { TournamentMatch } from './tournamentContext';
+
 
 function getBracketRounds(participants: any[]) {
     console.log('Generating bracket rounds for participants:', participants);
@@ -16,16 +18,14 @@ function getBracketRounds(participants: any[]) {
 
 export default function Bracket() {
     const navigate = useNavigate();
-    const { tournamentData } = useTournament();
+    const { tournamentData, setCurrentMatch } = useTournament();
+    const [matchCounter, setMatchCounter] = useState(1);
+
     console.log('Tournament Data:', tournamentData);
-
-    const tournamentBracketID = 100;
-    const tournamentMatchID = 200;
-
 
     useEffect(() => {
         if (!tournamentData) {
-            navigate('/profile');
+            navigate('/playerProfile');
         }
     }, [tournamentData, navigate]);
 
@@ -92,6 +92,37 @@ export default function Bracket() {
             // );
         });
     });
+
+    const startMatch = (player1: any, player2: any) => {
+        const gameType = tournamentData?.gameType || 'pong';
+
+        const match: TournamentMatch = {
+            player1: {
+                userID: parseInt(player1.id),
+                name: player1.displayName,
+                avatarUrl: player1.avatarUrl
+            },
+            player2: {
+                userID: parseInt(player2.id),
+                name: player2.displayName,
+                avatarUrl: player2.avatarUrl
+            },
+            tournamentBracketID: tournamentData.tournamentBracketID || 0,
+            tournamentMatchID: 0
+        };
+        
+        console.log('Starting tournament match:', match);
+        setCurrentMatch(match);
+        
+        // Increment match counter for display purposes
+        setMatchCounter(prev => prev + 1);
+        console.log("*******this is the game type", gameType);
+        if (gameType === 'snake') {
+            navigate(`/playerProfile/snakeGame?mode=tournament`);
+        } else {
+            navigate(`/playerProfile/pongGame?mode=tournament`);
+        }
+    };
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -186,11 +217,14 @@ export default function Bracket() {
                             
                         ))}
                     </div>
-                    <button
+                    {/* <button
                         onClick={() => {
-                            navigate(`../playerProfile/pongGame?mode=2players&tournamentBracketID=${tournamentBracketID}&tournamentMatchID=${tournamentMatchID}`);
-                        }}>
-
+                            // Example: start match between first two participants
+                            if (participants.length >= 2) {
+                                startMatch(participants[0], participants[1], 'pong');
+                            }
+                        }}
+                        >
                         Start Game
                     </button>
                 </div>
@@ -198,6 +232,23 @@ export default function Bracket() {
             <footer className="h-40 bg-blue-deep"></footer>
         </div>
     );
+} */}
+                    <div className="absolute bottom-4 flex gap-2">
+                        <button
+                            className="button-pp-blue font-pixelify px-4 py-2 rounded"
+                            onClick={() => {
+                                if (participants.length >= 2) {
+                                    startMatch(participants[0], participants[1]);
+                                }
+                            }}
+                        >
+                            Start Match #{matchCounter}
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <footer className="h-40 bg-blue-deep"></footer>
+        </div>
+    );
 }
-
 

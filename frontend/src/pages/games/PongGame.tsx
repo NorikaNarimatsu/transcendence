@@ -7,6 +7,7 @@ import type { GameState, GameConfig } from '../../gameEngines/PongEngine';
 import { calculateGameConfig } from '../../gameEngines/pongConfig';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
+import { useTournament } from '../tournament/tournamentContext';
 import ButtonPink from '../../components/ButtonDarkPink';
 
 //Icons import
@@ -25,11 +26,14 @@ export default function PongGame(): JSX.Element {
     const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
     const mode = params.get('mode') || 'single';
-    const tournamentBracketID = params.get('tournamentBracketID') || null;
-    const tournamentMatchID  = params.get('tournamentMatchID') || null;    
+    // const tournamentBracketID = params.get('tournamentBracketID') || null;
+    // const tournamentMatchID  = params.get('tournamentMatchID') || null;    
 
     // ADD: Get all players from global context
     const { selectedPlayer, aiPlayer, guestPlayer } = useSelectedPlayer();
+
+    const { currentMatch } = useTournament();
+
 
     const [gameConfig, setGameConfig] = useState<GameConfig>(calculateGameConfig());
     const [gameState, setGameState] = useState<GameState>({
@@ -63,7 +67,7 @@ export default function PongGame(): JSX.Element {
     const getLeftPlayer = (): SelectedPlayer | null => {
         if (mode === 'tournament') {
             // For tournament, use selectedPlayer array with index 0 for left player
-            return selectedPlayer && selectedPlayer[0] ? selectedPlayer[0] : null;
+            return currentMatch?.player1 || null;
         } else {
             // For single and 2players mode, left player is always the current user
             return user;
@@ -77,7 +81,7 @@ export default function PongGame(): JSX.Element {
             return selectedPlayer || guestPlayer;
         } else if (mode === 'tournament') {
             // For tournament, use selectedPlayer array with index 1 for right player
-            return selectedPlayer && selectedPlayer[1] ? selectedPlayer[1] : null;
+            return currentMatch?.player2 || null;
         }
         return null;
     };
@@ -116,8 +120,8 @@ export default function PongGame(): JSX.Element {
           const matchData = {
               matchType: 'pong',
               matchMode: mode,
-              tournamentBracketID: tournamentBracketID,
-              tournamentMatchID: tournamentMatchID, 
+              tournamentBracketID: mode  === 'tournament' ? currentMatch?.tournamentBracketID : null,
+              tournamentMatchID: mode === 'tournament' ? currentMatch?.tournamentMatchID : null,
               user1ID: leftPlayer?.userID, // Left player
               user2ID: rightPlayer?.userID || 2, // Right player or Guest (userID=2)
               user1Score: finalGameState.leftScore,
@@ -145,6 +149,10 @@ export default function PongGame(): JSX.Element {
               if (result.duration) {
                   console.log('Match Duration:', result.duration, 'seconds');
               }
+
+              if (mode === 'tournament') {
+                    navigate('/tournament/bracket');
+                }
           } else {
               const error = await response.json();
               console.error('Failed to save match:', error);
@@ -153,6 +161,15 @@ export default function PongGame(): JSX.Element {
           console.error('Error sending match result:', error);
       }
   };
+
+    // Add tournament mode validation
+    useEffect(() => {
+        if (mode === 'tournament' && !currentMatch) {
+            console.error('Tournament mode requires match info');
+            navigate('/tournament/bracket');
+            return;
+        }
+    }, [mode, currentMatch, navigate]);
 
     // Game engine and keyboard events
     useEffect(() => {

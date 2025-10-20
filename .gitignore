@@ -12,3 +12,5 @@ certs/
 *.log
 .vscode
 *.pem
+
+*.db

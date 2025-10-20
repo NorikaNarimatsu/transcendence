@@ -1,11 +1,11 @@
 import type { JSX } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import ButtonPurple from '../../components/ButtonPurple';
 import ButtonPink from '../../components/ButtonDarkPink';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 import type { SelectedPlayer } from '../user/PlayerContext';
+import { useTournament } from '../tournament/tournamentContext';
 
 import { SnakeGameEngine, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
 import { calculateSnakeGameConfig, type SnakeGameConfig } from '../../gameEngines/SnakeConfig';
@@ -24,10 +24,11 @@ export default function SnakeGame(): JSX.Element {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const mode = params.get('mode') || 'single';
-    const tournamentBracketID = params.get('tournamentBracketID') || null;
-    const tournamentMatchID  = params.get('tournamentMatchID') || null;
+    // const tournamentBracketID = params.get('tournamentBracketID') || null;
+    // const tournamentMatchID  = params.get('tournamentMatchID') || null;
     
     const { selectedPlayer, guestPlayer } = useSelectedPlayer();
+    const { currentMatch } = useTournament();
 
     // Game engine reference
     const [gameConfig, setGameConfig] = useState<SnakeGameConfig>(calculateSnakeGameConfig());
@@ -42,41 +43,48 @@ export default function SnakeGame(): JSX.Element {
     const [view, setView] = useState<"game"|"instructions"|"settings">('instructions');
     const [backgroundColor, setBackgroundColor] = useState<string>('bg-pink-light');
     
-    const getOpponent = (): SelectedPlayer | null => {
+    const getPlayer1 = (): SelectedPlayer => {
+        if (mode === 'tournament') {
+            return currentMatch?.player1;
+        } else {
+            return user;
+        }
+    };
+
+    const getPlayer2 = (): SelectedPlayer | null => {
         if (mode === 'single') {
             return null; // No opponent in single mode
         } else if (mode === '2players') {
-            // If a player is selected, use them; otherwise use Guest
             return selectedPlayer || guestPlayer;
+        } else if (mode === 'tournament') {
+            return currentMatch?.player2 || null;
         }
         return null;
     };
-    
-    const opponent = getOpponent();
+
+    const player1 = getPlayer1();
+    const player2 = getPlayer2();
 
     useEffect(() => {
-        const isMultiplayer = mode === '2players';
-        const player1Name = user?.name || 'Player 1';
-        const player2Name = opponent?.name || 'Guest';
+        const isMultiplayer = mode === '2players' || mode === 'tournament'; // Add tournament
+        const player1Name = player1?.name || 'Player 1';
+        const player2Name = player2?.name || 'Guest';
 
         console.log('=== SNAKE GAME STARTED ===');
         console.log('Game Mode:', mode);
+        console.log('Is Multiplayer:', isMultiplayer);
         console.log('Player 1 (User):', {
-            name: user?.name,
-            userID: user?.userID,
-            avatarUrl: user?.avatarUrl
+            name: player1.name,
+            userID: player1.userID,
+            avatarUrl: player1.avatarUrl
         });
         
-        if (mode === '2players') {
+        if (isMultiplayer) {
             console.log('Player 2 (Opponent):', {
-                name: opponent?.name,
-                userID: opponent?.userID,
-                avatarUrl: opponent?.avatarUrl,
-                type: selectedPlayer ? 'Selected Player' : 'Guest'
-            });
-            console.log('Global Context Players:', {
-                selectedPlayer: selectedPlayer,
-                guestPlayer: guestPlayer
+                name: player2?.name,
+                userID: player2?.userID,
+                avatarUrl: player2?.avatarUrl,
+                type: mode === 'tournament' ? 'Tournament Player' : (selectedPlayer ? 'Selected Player' : 'Guest')
             });
         } else {
             console.log('Single player mode - no opponent');
@@ -89,7 +97,7 @@ export default function SnakeGame(): JSX.Element {
         console.log('========================');
 
         gameEngineRef.current = new SnakeGameEngine(gameConfig, isMultiplayer, player1Name, player2Name);
-    }, [mode, user?.name, opponent]);
+    }, [gameConfig, mode, player1.name, player2?.name]); // Fix: Use stable references
 
     useEffect(() => {
         const handleResize = () => {
@@ -110,9 +118,9 @@ export default function SnakeGame(): JSX.Element {
 
                 const winner = engine.getWinner();
                 if (winner === 'player1') {
-                    winnerID = user?.userID;
+                    winnerID = player1.userID;
                 } else if (winner === 'player2') {
-                    winnerID = opponent?.userID || 2;
+                    winnerID = player2?.userID || 2;
                 }
                 else
                     winnerID = 0;
@@ -120,10 +128,10 @@ export default function SnakeGame(): JSX.Element {
             const matchData = {
                 matchType: 'snake',
                 matchMode: mode,
-                tournamentBracketID: tournamentBracketID,
-                tournamentMatchID: tournamentMatchID, 
+                tournamentBracketID: mode === 'tournament' ? currentMatch?.tournamentBracketID : null,
+                tournamentMatchID: mode === 'tournament' ? currentMatch?.tournamentMatchID : null,
                 user1ID: user?.userID, // Current user
-                user2ID: mode === '2players' ? (opponent?.userID || 2) : null, // Opponent or Guest (userID=2) or null for single
+                user2ID: mode === '2players' ? (player2?.userID || 2) : null, // Opponent or Guest (userID=2) or null for single
                 user1Score: engine.snake1.score,
                 user2Score: engine.isMultiplayer ? (engine.snake2?.score || 0) : 0,
                 winnerID: winnerID,
@@ -149,6 +157,11 @@ export default function SnakeGame(): JSX.Element {
                 if (result.duration) {
                     console.log('Match Duration:', result.duration, 'seconds');
                 }
+
+                // Navigate back to bracket after tournament match
+                if (mode === 'tournament' && response.ok) {
+                    navigate('/tournament/bracket');
+                }
             } else {
                 const error = await response.json();
                 console.error('Failed to save match:', error);
@@ -157,6 +170,15 @@ export default function SnakeGame(): JSX.Element {
             console.error('Error sending match result:', error);
         }
     };
+
+    // Add tournament validation
+    useEffect(() => {
+        if (mode === 'tournament' && !currentMatch) {
+            console.error('Tournament mode requires match info');
+            navigate('/tournament/bracket');
+            return;
+        }
+    }, [mode, currentMatch, navigate]);
     
     // Game loop
     useEffect(() => {
@@ -225,8 +247,8 @@ useEffect(() => {
             {/* Top bar */}
             <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
                 <div className="flex items-center justify-start gap-2">
-                    <h1 className="player-name">{user.name}</h1>
-                    <img src={user.avatarUrl} alt="Avatar" className="avatar" />
+                    <h1 className="player-name">{player1.name}</h1>
+                    <img src={player1.avatarUrl} alt="Avatar" className="avatar" />
                 </div>
 
                 {/* Center Score */}
@@ -242,12 +264,12 @@ useEffect(() => {
                 {engine.isMultiplayer && (
                     <div className="flex items-center justify-end gap-2">
                         <img 
-                            src={opponent?.avatarUrl || '/avatars/Avatar_2.png'} 
+                            src={player2?.avatarUrl || '/avatars/Avatar_2.png'} 
                             alt="Opponent Avatar" 
                             className="avatar" 
                         />
                         <h2 className="player-name">
-                            {opponent?.name || 'Guest'}
+                            {player2?.name || 'Guest'}
                         </h2>
                     </div>
                 )}
