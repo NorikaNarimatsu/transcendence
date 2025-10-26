@@ -1,6 +1,9 @@
 import { db } from "../server.js";
 import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 import { sanitizeInput } from "../utils/sanitizeInput.js";
+import twoFactorController from "./2fa_controller.js";
+import { emailUtils } from "../utils/emailUtils.js";
+import bcrypt from 'bcrypt';
 
 //////// Avatar Array //////
 const avatars = [
@@ -75,11 +78,77 @@ export const validatePasswordbyEmail = async (request, response) => {
 
 		//TODO for Gosia - should I also validate here password? in case of frontend bypass
 		const isPasswordMatch = await comparePassword(password, user.password);
-		if (isPasswordMatch) return response.code(200).send();
-		else return response.code(401).send({ message: "Invalid password" });
+		if (!isPasswordMatch) {
+			return response.code(401).send({ message: "Invalid password" });
+		}
+
+		if (user['2FA']) {
+			db.prepare('DELETE FROM two_factor_auth WHERE userID = ? AND used = 0').run(user.userID);
+			const verificationCode = emailUtils.generateAuthCode();
+			const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes from now
+			const saltRounds = 11;
+			const hashedCode = await bcrypt.hash(verificationCode, saltRounds);
+
+			db.prepare(`
+				INSERT INTO two_factor_auth (userID, code, expiresAt, attempts)
+				VALUES (?, ?, ?, ?)
+			`).run(user.userID, hashedCode, expiresAt, 0);
+
+			await emailUtils.sendAuthCodeEmail(user.email, user.name, verificationCode);
+
+			const temporaryToken = request.server.jwt.sign({
+				userID: user.userID,
+				email: user.email,
+				name: user.name,
+				has2FA: true,
+				requires2FA: true,
+				temp: true
+			}, { expiresIn: '10m' });
+
+			return response.code(200).send({
+				message: "Verification code sent",
+				requires2FA: true,
+				temporaryToken: temporaryToken,
+				user: {
+					userID: user.userID,
+					email: user.email,
+					name: user.name,
+					avatarUrl: user.avatarUrl,
+					has2FA: true,
+					verified2FA: false
+				}
+			});
+
+		} else {
+			const fullToken = request.server.jwt.sign({
+				userID: user.userID,
+				email: user.email,
+				name: user.name,
+				has2FA: false,
+				verified2FA: false,
+				iat: Math.floor(Date.now() / 1000),
+				exp: Math.floor(Date.now() / 1000) + 3 * 60 * 60,
+				lastActivity: Math.floor(Date.now() / 1000)
+			}, { expiresIn: '3h' });
+
+			return response.code(200).send({
+				message: "Login successful",
+				requires2FA: false,
+				token: fullToken,
+				user: {
+					userID: user.userID,
+					email: user.email,
+					name: user.name,
+					avatarUrl: user.avatarUrl,
+					has2FA: false,
+					verified2FA: false
+				}
+			});
+		}
 	} catch (error) {
+		console.error("validatePasswordByEmail error: ", error);
 		request.log.error("validatePasswordbyEmail error: ", error);
-		return response.code(500).send();
+		return response.code(500).send({ message: "Internal server error" });
 	}
 };
 
@@ -101,19 +170,19 @@ export const validatePasswordbyEmail = async (request, response) => {
 // 	}
 // };
 
-export const validatePasswordByUserID = async (request, reply) => {
+export const validatePasswordByUserID = async (request, response) => {
     try {
         const { userID, password } = request.body;
         
         if (!userID || !password) {
-            return reply.code(400).send({ 
+            return response.code(400).send({ 
                 message: "userID and password are required" 
             });
         }
         
         const sanitizedUserID = parseInt(userID);
         if (isNaN(sanitizedUserID)) {
-            return reply.code(400).send({ message: "Invalid userID" });
+            return response.code(400).send({ message: "Invalid userID" });
         }
         
         // Get user by userID
@@ -122,22 +191,22 @@ export const validatePasswordByUserID = async (request, reply) => {
             .get(sanitizedUserID);
         
         if (!user) {
-            return reply.code(404).send({ message: "User not found" });
+            return response.code(404).send({ message: "User not found" });
         }
         const isValidPassword = await comparePassword(password, user.password);
         
         if (isValidPassword) {
-            return reply.code(200).send({ 
+            return response.code(200).send({
                 message: "Password is valid",
                 userID: user.userID 
             });
         } else {
-            return reply.code(401).send({ message: "Invalid password" });
+            return response.code(401).send({ message: "Invalid password" });
         }
         
     } catch (error) {
         request.log.error("Password validation error:", error);
-        return reply.code(500).send({
+        return response.code(500).send({
             message: "Internal server error",
         });
     }

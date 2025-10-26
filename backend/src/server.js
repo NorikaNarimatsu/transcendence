@@ -1,5 +1,6 @@
 // import helmet from "@fastify/helmet";
 import Fastify from "fastify";
+import FastifyJWT from "@fastify/jwt";
 import cors from '@fastify/cors';
 import fs from 'fs';
 import path from 'path';
@@ -40,7 +41,11 @@ await app.register(cors, {
     'https://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true // allow cookies to be sent to gosia
+  credentials: true // allow cookies to be sent to gosia -> not needed?
+});
+
+await app.register(FastifyJWT, {
+  secret: process.env.JWT_SECRET
 });
 
 // // Register security headers

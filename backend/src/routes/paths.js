@@ -1,6 +1,7 @@
 import itemController from '../controllers/item_controller.js'
 import userController from '../controllers/user_controller.js';
 import gameController from '../controllers/game_controller.js';
+import twoFactorController from '../controllers/2fa_controller.js';
 
 export default async function itemRoutes(fastify, options) {
     // User validation
@@ -30,4 +31,11 @@ export default async function itemRoutes(fastify, options) {
     fastify.get('/user/:userID/matches', gameController.getUserMatches);      
     fastify.get('/user/:userID/stats', gameController.getUserStats);          
     fastify.post('/match', gameController.addMatch);
+
+	// 2FA endpoints
+	fastify.post('/2fa/enable', twoFactorController.enable2FA);
+	fastify.post('/2fa/disable', twoFactorController.disable2FA);
+	fastify.post('/2fa/send-code', twoFactorController.sendVerificationCode);
+	fastify.post('/2fa/verify-code',twoFactorController.verifyCode);
+	fastify.get('/2fa/status', twoFactorController.get2FAstatus);
 }

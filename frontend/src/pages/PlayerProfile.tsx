@@ -13,6 +13,8 @@ import { PlayerSelection } from '../components/profilePlayerSelection';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import { FriendsManager } from '../components/FriendsManager';
 
+import TwoFactorSettings from '../components/2FSettings';
+
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
 import { useSelectedPlayer } from './user/PlayerContext';
@@ -45,12 +47,14 @@ export default function PlayerProfile(): JSX.Element {
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 	
-		const [basicStats, setBasicStats] = useState<{
-			wins: number;
-			losses: number;
-			totalMatches: number;
-		} | null>(null);
-		const [showBasicStats, setShowBasicStats] = useState(false);
+	const [basicStats, setBasicStats] = useState<{
+		wins: number;
+		losses: number;
+		totalMatches: number;
+	} | null>(null);
+	const [showBasicStats, setShowBasicStats] = useState(false);
+
+	const [show2FASettings, setShow2FASettings] = useState(false);
 
     const navigate = useNavigate();
     const { user, logout } = useUser();
@@ -241,10 +245,10 @@ export default function PlayerProfile(): JSX.Element {
 				const url = window.URL.createObjectURL(blob);
 				const a = document.createElement('a');
 				a.href = url;
-				a.download = `user_data_${user.name}_$new Date().toISOString().split('T')[0]}.json`;
-				document.body.appendChild(a);
+				a.download = `user_data_${user.name}_${new Date().toISOString().split('T')[0]}.json`;
+				// document.body.appendChild(a);
 				a.click();
-				document.body.removeChild(a);
+				// document.body.removeChild(a);
 				window.URL.revokeObjectURL(url);
 			} else {
 				const errorText = await response.text();
@@ -290,7 +294,7 @@ export default function PlayerProfile(): JSX.Element {
                     { name: 'Update data', action: () => console.log('Updating account data') },
 					{ name: 'Download data', action: () => downloadUserData() },
 					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
-                    { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
+                    { name: 'Edit 2FA', action: () => setShow2FASettings(true) },
                     { name: 'Language', action: () => console.log('Updating Language Setting') }, //TODO.
                 ];
             default:
@@ -309,138 +313,189 @@ export default function PlayerProfile(): JSX.Element {
     }
 
     return (
-        <main className="min-h-screen flex flex-col">
-            <header className="h-40 bg-blue-deep flex">
-                <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">What should we play today?</div>
-            </header>
-            <section className="flex-1 bg-pink-grid flex items-center justify-center">
-                <div className="relative bg-pink-dark w-[825px] h-[600px] m-[10px] flex justify-between items-center px-[50px]">
-                    {/* LEFT SIDE: Player Card */}
-                    <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
-                        <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">PLAYER INFO</div>
-                        <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
-                                <img onClick={() => setIsOpen(!isOpen)} src={user.avatarUrl} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/> 
-                                {/* update the local strage here*/}
-                                <AvatarSelection open={isOpen} onClose={() => setIsOpen(false)} onSelect={handleSelectAvatar} />
-                                
-                            <div className="flex flex-col m-auto justify-evenly">
-                                <div className="font-pixelify text-white text-[40px]">{user.name}</div>
-                                <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">
-                                    Wins: {basicStats?.wins ?? user.wins ?? 0}
-                                </div>
-                                <div className="font-dotgothic font-bold text-white text-base text-border-blue">
-                                    Losses: {basicStats?.losses ?? user.losses ?? 0}
-                                </div>
-                            </div>
-                        </div>
-                        <CategoryButtons
-                            buttons={[
-                                { name: 'Games', icon: arrow_icon, onClick: () => setSelectedCategory('Games') },
-                                { name: 'Friends', icon: arrow_icon, onClick: () => setSelectedCategory('Friends') },
-                                { name: 'Dashboard', icon: arrow_icon, onClick: () => setSelectedCategory('Dashboard') },
-                                { name: 'Settings', icon: arrow_icon, className: "button-pp-blue-settings shadow-no-blur flex items-center justify-between", onClick: () => setSelectedCategory('Settings') }
-                            ]}
-                        />
-                    </div>
-                    {/* Delete Account Modal */}
-                    <DeleteAccount 
-                        open={showDeleteConfirmation}
-                        onClose={() => setShowDeleteConfirmation(false)}
-                    />
-					{/* Privacy Policy Modal */}
-					<PrivacyPolicyModal
-						isOpen={showPrivacyModal}
-						onClose={() => setShowPrivacyModal(false)}
-					/>
-                    {/* RIGHT SIDE: Content Box */}
-                    <div
-                        className="w-[350px] h-[500px] overflow-hidden bg-cover bg-center relative border-img"
-                        style={{
-                            backgroundImage: `url(${bgimage})`,
-                            opacity: 0.5,
-                            boxShadow: 'inset 8px 0 2px -4px rgba(0, 0, 0, 0.6), inset 0 8px 2px -4px rgba(0, 0, 0, 0.6)'
-                        }}
-                    >
-                        <div className="absolute inset-0 overflow-y-auto">
-                            {/* Game 2 Player Mode */}
-                            <PlayerSelection
-                                open={showPlayerSelection}
-                                users={users}
-                                onSelect={handlePlayerSelect}
-                                onCancel={() => {
-                                    setShowPlayerSelection(false);
-                                    setSelectedCategory(playerSelectionGame);
-                                }}
-                            />
-                            {/* Password Verification Modal */}
-                            {showPasswordVerification && selectedPlayer && (
-                                <PasswordVerification
-                                    open={showPasswordVerification && !!selectedPlayer}
-                                    user={selectedPlayer}
-                                    password={password}
-                                    error={passwordError}
-                                    onPasswordChange={setPassword}
-                                    onVerify={handlePasswordSubmit}
-                                    onCancel={resetToPlayerSelection}
-                                />
-                            )}
-                            {/* Tournament Registration Modal */}
-                            {showTournamentRegistration && (
-                            <div className="absolute inset-0 flex items-center justify-center z-20">
-                                <TournamentRegistration
-                                    open={showTournamentRegistration}
-                                    onClose={() => setShowTournamentRegistration(false)}
-                                    allUsers={allUsers}
-                                    tournamentPlayers={tournamentPlayers}
-                                    setTournamentPlayers={setTournamentPlayers}
-                                    selectedParticipants={selectedTournamentParticipants}
-                                    setSelectedParticipants={setSelectedTournamentParticipants}
-                                    setVerifyingUser={setTournamentVerifyingUser}
-                                    user={user}
-                                />
-                                {tournamentVerifyingUser && (
-                                    <PasswordVerification
-                                        open={!!tournamentVerifyingUser}
-                                        user={tournamentVerifyingUser}
-                                        password={tournamentVerifyPassword}
-                                        error={tournamentVerifyError}
-                                        onPasswordChange={setTournamentVerifyPassword}
-                                        onVerify={handleVerifyPassword}
-                                        onCancel={() => {
-                                            setTournamentVerifyingUser(null);
-                                            setTournamentVerifyPassword('');
-                                            setTournamentVerifyError('');
-                                        }}
-                                    />
-                                )}
-                            </div>
-                        )}
-                            {/* Category Content */}
-                            {selectedCategory && !showPlayerSelection && !showPasswordVerification && (
-                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4">
-                                    {getButtonsForCategory(selectedCategory).map((button, index) => (
-                                        <button
-                                            key={button.name}
-                                            className="button-pp-purple shadow-no-blur-60"
-                                            onClick={button.action}
-                                        >{button.name}</button>
-                                    ))}
-                                </div>
-                            )}
-                            {/* Friends Manager Component */}
-                            <FriendsManager 
-                            ref={friendsManagerRef}
-                            user={user}
-                        />
-                        </div>
-                    </div>
+      <main className="min-h-screen flex flex-col">
+        <header className="h-40 bg-blue-deep flex">
+          <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">
+            What should we play today?
+          </div>
+        </header>
+        <section className="flex-1 bg-pink-grid flex items-center justify-center">
+          <div className="relative bg-pink-dark w-[825px] h-[600px] m-[10px] flex justify-between items-center px-[50px]">
+            {/* LEFT SIDE: Player Card */}
+            <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
+              <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">
+                PLAYER INFO
+              </div>
+              <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
+                <img
+                  onClick={() => setIsOpen(!isOpen)}
+                  src={user.avatarUrl}
+                  alt="Avatar"
+                  className="avatar m-auto shadow-no-blur"
+                  style={{ borderColor: "#7a63fe" }}
+                />
+                {/* update the local strage here*/}
+                <AvatarSelection
+                  open={isOpen}
+                  onClose={() => setIsOpen(false)}
+                  onSelect={handleSelectAvatar}
+                />
+
+                <div className="flex flex-col m-auto justify-evenly">
+                  <div className="font-pixelify text-white text-[40px]">
+                    {user.name}
+                  </div>
+                  <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">
+                    Wins: {basicStats?.wins ?? user.wins ?? 0}
+                  </div>
+                  <div className="font-dotgothic font-bold text-white text-base text-border-blue">
+                    Losses: {basicStats?.losses ?? user.losses ?? 0}
+                  </div>
                 </div>
-            </section>
-            <footer className="h-40 bg-blue-deep flex justify-center items-center">
-                <Button onClick={handleLogout} style={{ marginTop: 0 }}>
-                    <img src={log_out_icon} alt="Log out button" className="h-8 w-auto"/>
-                </Button>
-            </footer>
-        </main>
+              </div>
+              <CategoryButtons
+                buttons={[
+                  {
+                    name: "Games",
+                    icon: arrow_icon,
+                    onClick: () => setSelectedCategory("Games"),
+                  },
+                  {
+                    name: "Friends",
+                    icon: arrow_icon,
+                    onClick: () => setSelectedCategory("Friends"),
+                  },
+                  {
+                    name: "Dashboard",
+                    icon: arrow_icon,
+                    onClick: () => setSelectedCategory("Dashboard"),
+                  },
+                  {
+                    name: "Settings",
+                    icon: arrow_icon,
+                    className:
+                      "button-pp-blue-settings shadow-no-blur flex items-center justify-between",
+                    onClick: () => setSelectedCategory("Settings"),
+                  },
+                ]}
+              />
+            </div>
+            {/* Delete Account Modal */}
+            <DeleteAccount
+              open={showDeleteConfirmation}
+              onClose={() => setShowDeleteConfirmation(false)}
+            />
+            {/* Privacy Policy Modal */}
+            <PrivacyPolicyModal
+              isOpen={showPrivacyModal}
+              onClose={() => setShowPrivacyModal(false)}
+            />
+            {/* 2FA Settings Modal */}
+            {show2FASettings && user && (
+              <TwoFactorSettings
+                user={user}
+                onClose={() => setShow2FASettings(false)}
+              />
+            )}
+            {/* RIGHT SIDE: Content Box */}
+            <div
+              className="w-[350px] h-[500px] overflow-hidden bg-cover bg-center relative border-img"
+              style={{
+                backgroundImage: `url(${bgimage})`,
+                opacity: 0.5,
+                boxShadow:
+                  "inset 8px 0 2px -4px rgba(0, 0, 0, 0.6), inset 0 8px 2px -4px rgba(0, 0, 0, 0.6)",
+              }}
+            >
+              <div className="absolute inset-0 overflow-y-auto">
+                {/* Game 2 Player Mode */}
+                <PlayerSelection
+                  open={showPlayerSelection}
+                  users={users}
+                  onSelect={handlePlayerSelect}
+                  onCancel={() => {
+                    setShowPlayerSelection(false);
+                    setSelectedCategory(playerSelectionGame);
+                  }}
+                />
+                {/* Password Verification Modal */}
+                {showPasswordVerification && selectedPlayer && (
+                  <PasswordVerification
+                    open={showPasswordVerification && !!selectedPlayer}
+                    user={selectedPlayer}
+                    password={password}
+                    error={passwordError}
+                    onPasswordChange={setPassword}
+                    onVerify={handlePasswordSubmit}
+                    onCancel={resetToPlayerSelection}
+                  />
+                )}
+                {/* Tournament Registration Modal */}
+                {showTournamentRegistration && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <TournamentRegistration
+                      open={showTournamentRegistration}
+                      onClose={() => setShowTournamentRegistration(false)}
+                      allUsers={allUsers}
+                      tournamentPlayers={tournamentPlayers}
+                      setTournamentPlayers={setTournamentPlayers}
+                      selectedParticipants={selectedTournamentParticipants}
+                      setSelectedParticipants={
+                        setSelectedTournamentParticipants
+                      }
+                      setVerifyingUser={setTournamentVerifyingUser}
+                      user={user}
+                    />
+                    {tournamentVerifyingUser && (
+                      <PasswordVerification
+                        open={!!tournamentVerifyingUser}
+                        user={tournamentVerifyingUser}
+                        password={tournamentVerifyPassword}
+                        error={tournamentVerifyError}
+                        onPasswordChange={setTournamentVerifyPassword}
+                        onVerify={handleVerifyPassword}
+                        onCancel={() => {
+                          setTournamentVerifyingUser(null);
+                          setTournamentVerifyPassword("");
+                          setTournamentVerifyError("");
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+                {/* Category Content */}
+                {selectedCategory &&
+                  !showPlayerSelection &&
+                  !showPasswordVerification && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4">
+                      {getButtonsForCategory(selectedCategory).map(
+                        (button, index) => (
+                          <button
+                            key={button.name}
+                            className="button-pp-purple shadow-no-blur-60"
+                            onClick={button.action}
+                          >
+                            {button.name}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  )}
+                {/* Friends Manager Component */}
+                <FriendsManager ref={friendsManagerRef} user={user} />
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer className="h-40 bg-blue-deep flex justify-center items-center">
+          <Button onClick={handleLogout} style={{ marginTop: 0 }}>
+            <img
+              src={log_out_icon}
+              alt="Log out button"
+              className="h-8 w-auto"
+            />
+          </Button>
+        </footer>
+      </main>
     );
 }

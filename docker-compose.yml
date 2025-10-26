@@ -10,6 +10,10 @@ services:
       - ./backend/https:/app/https:ro
     ports:
       - "8443:8443"
+    environment:
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - JWT_SECRET=${JWT_SECRET}
     networks:
       - transcendence_network
     healthcheck:

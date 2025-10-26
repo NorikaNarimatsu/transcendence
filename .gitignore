@@ -12,3 +12,6 @@ certs/
 *.log
 .vscode
 *.pem
+
+# to create a new JWT_SECRET:
+# node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"

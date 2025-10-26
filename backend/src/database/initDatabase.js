@@ -59,6 +59,17 @@ export async function initializeDatabase() {
                 FOREIGN KEY (user2ID) REFERENCES users(userID),
                 FOREIGN KEY (winnerID) REFERENCES users(userID)
             );
+			-- 2FA TABLE
+			CREATE TABLE IF NOT EXISTS two_factor_auth (
+				codeID		INTEGER PRIMARY KEY AUTOINCREMENT,
+				code		TEXT NOT NULL,
+				attempts	INTEGER NOT NULL DEFAULT 0,
+				userID		INTEGER NOT NULL,
+				expiresAt	DATETIME NOT NULL,
+				createdAt	DATETIME NOT NULL DEFAULT (datetime('now')),
+				used		BOOLEAN NOT NULL DEFAULT 0,
+				FOREIGN KEY (userID) REFERENCES users(userID)
+			);
         `);
         console.log("Database schema created successfully");
         
