@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import type { User } from '../pages/user/UserContext';
+import type { User } from '../pages/user/UserContext'; // maybe delete?
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
 import { useTournament } from '../pages/tournament/tournamentContext';
 
@@ -13,8 +13,8 @@ interface TournamentRegistrationProps {
     setSelectedParticipants: (users: SelectedPlayer[]) => void;
     setVerifyingUser: (user: SelectedPlayer | null) => void;
     user: User;
+    gameType: 'Pong' | 'Snake';
 }
-
 
 export function TournamentRegistration({
     open,
@@ -26,9 +26,38 @@ export function TournamentRegistration({
     setSelectedParticipants,
     setVerifyingUser,
     user,
+    gameType,
 }: TournamentRegistrationProps) {
     const navigate = useNavigate();
     const { setTournamentData } = useTournament();
+
+    const createTournamentBracket = async (participantIDs: number[]) => {
+        try {
+            const response = await fetch('https://localhost:8443/tournament/bracket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    participants: participantIDs,
+                    creatorID: user.userID
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Tournament bracket created:', result);
+                return result.tournamentBracketID;
+            } else {
+                const error = await response.json();
+                console.error('Failed to create tournament bracket:', error);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating tournament bracket:', error);
+            return null;
+        }
+    };
 
     if (!open) return null;
 
@@ -98,35 +127,26 @@ export function TournamentRegistration({
                 </div>
                 <div className="flex w-full gap-2 mb-2">
                     <button
-                        onClick={() => {
-                            // const ids = [
-                            //     { id: user.userID, displayName: user.name, avatarUrl: user.avatarUrl },
-                            //     ...selectedParticipants.map(u => ({
-                            //         id: u.userID,
-                            //         displayName: u.name,
-                            //         avatarUrl: u.avatarUrl || '',
-                            //     })),
-                            // ];
-                            // navigate(
-                            //     `/tournament/tree?players=${tournamentPlayers}&ids=${ids
-                            //         .map(
-                            //             p =>
-                            //                 `${p.id}:${encodeURIComponent(p.displayName)}:${encodeURIComponent(p.avatarUrl)}`
-                            //         )
-                            //         .join(',')}`
-                            // );
-                            setTournamentData({
-                                players: tournamentPlayers,
-                                participants: [
-                                    user, // Current user
-                                    ...selectedParticipants
-                                ]
-                            });
+                        onClick={ async () => {
+                            const allParticipants = [user, ...selectedParticipants];
+                            const participantIDs = allParticipants.map(p => p.userID);
+
+                            const bracketID = await createTournamentBracket(participantIDs);
+
+                            if (bracketID){
+                                setTournamentData({
+                                    players: tournamentPlayers,
+                                    participants: allParticipants,
+                                    tournamentBracketID: bracketID,
+                                    gameType: gameType
+                                });
                             
-                            // Navigate without URL parameters
                             navigate('/tournament/tree');
                             onClose();
-                        }}
+                        } else {
+                            alert ('Failed to create tournament bracket');
+                        }
+                    }}
                         disabled={selectedParticipants.length !== tournamentPlayers - 1}
                         className="button-pp-blue shadow-no-blur flex-1 flex items-center justify-center font-pixelify"
                         style={{

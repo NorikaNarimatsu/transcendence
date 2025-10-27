@@ -7,6 +7,7 @@ import type { GameState, GameConfig } from '../../gameEngines/PongEngine';
 import { calculateGameConfig } from '../../gameEngines/pongConfig';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
+import { useTournament } from '../tournament/tournamentContext';
 import ButtonPink from '../../components/ButtonDarkPink';
 
 //Icons import
@@ -25,10 +26,14 @@ export default function PongGame(): JSX.Element {
     const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
     const mode = params.get('mode') || 'single';
-    const players = params.get('players');
-    
+    // const tournamentBracketID = params.get('tournamentBracketID') || null;
+    // const tournamentMatchID  = params.get('tournamentMatchID') || null;    
+
     // ADD: Get all players from global context
     const { selectedPlayer, aiPlayer, guestPlayer } = useSelectedPlayer();
+
+    const { currentMatch } = useTournament();
+
 
     const [gameConfig, setGameConfig] = useState<GameConfig>(calculateGameConfig());
     const [gameState, setGameState] = useState<GameState>({
@@ -59,19 +64,30 @@ export default function PongGame(): JSX.Element {
     }
   }, [gameState.gameStarted, gameState.gameEnded, gameState.leftScore, gameState.rightScore]);
 
-    const getOpponent = (): SelectedPlayer | null => {
-      if (mode === 'single') {
-          return aiPlayer;
-      } else if (mode === '2players') {
-          // If a player is selected, use them; otherwise use Guest
-          return selectedPlayer || guestPlayer;
-      }
-      return null;
-  };
-  
-  const opponent = getOpponent();
+    const getLeftPlayer = (): SelectedPlayer | null => {
+        if (mode === 'tournament') {
+            // For tournament, use selectedPlayer array with index 0 for left player
+            return currentMatch?.player1 || null;
+        } else {
+            // For single and 2players mode, left player is always the current user
+            return user;
+        }
+    };
 
-  
+    const getRightPlayer = (): SelectedPlayer | null => {
+        if (mode === 'single') {
+            return aiPlayer;
+        } else if (mode === '2players') {
+            return selectedPlayer || guestPlayer;
+        } else if (mode === 'tournament') {
+            // For tournament, use selectedPlayer array with index 1 for right player
+            return currentMatch?.player2 || null;
+        }
+        return null;
+    };
+    
+    const leftPlayer = getLeftPlayer();
+    const rightPlayer = getRightPlayer();
 
     // Resize handler
     useEffect(() => {
@@ -80,32 +96,34 @@ export default function PongGame(): JSX.Element {
             setGameConfig(newConfig);
             if (engineRef.current) {
                 engineRef.current.stop();
-                const leftPlayer = user?.name || 'Player 1';
-                const rightPlayer = opponent?.name || 'Player 2';
-                engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayer, rightPlayer);
+                const leftPlayerName = leftPlayer?.name || 'Player 1';
+                const rightPlayerName = rightPlayer?.name || 'Player 2';
+                engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayerName, rightPlayerName);
                 engineRef.current.start();
             }
         };
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [mode, user?.name, opponent]);
+    }, [mode, leftPlayer?.name, rightPlayer?.name]);
 
     const sendMatchResult = async (finalGameState: GameState) => {
       try {
           let winnerID: number;
           if (finalGameState.leftScore > finalGameState.rightScore) {
-              winnerID = user?.userID || 0;
+              winnerID = leftPlayer?.userID || 0;
           } else if (finalGameState.rightScore > finalGameState.leftScore) {
-              winnerID = opponent?.userID || 2;
+              winnerID = rightPlayer?.userID || 2;
           } else {
-              winnerID = user?.userID || 0; // Default to user1 for ties
+              winnerID = leftPlayer?.userID || 0; // Default to left player for ties
           }
           const matchData = {
               matchType: 'pong',
               matchMode: mode,
-              user1ID: user?.userID, // Current user
-              user2ID: opponent?.userID || 2, // Opponent or Guest (userID=2)
+              tournamentBracketID: mode  === 'tournament' ? currentMatch?.tournamentBracketID : null,
+              tournamentMatchID: mode === 'tournament' ? currentMatch?.tournamentMatchID : null,
+              user1ID: leftPlayer?.userID, // Left player
+              user2ID: rightPlayer?.userID || 2, // Right player or Guest (userID=2)
               user1Score: finalGameState.leftScore,
               user2Score: finalGameState.rightScore,
               winnerID: winnerID,
@@ -131,6 +149,10 @@ export default function PongGame(): JSX.Element {
               if (result.duration) {
                   console.log('Match Duration:', result.duration, 'seconds');
               }
+
+              if (mode === 'tournament') {
+                    navigate('/tournament/bracket');
+                }
           } else {
               const error = await response.json();
               console.error('Failed to save match:', error);
@@ -140,23 +162,32 @@ export default function PongGame(): JSX.Element {
       }
   };
 
+    // Add tournament mode validation
+    useEffect(() => {
+        if (mode === 'tournament' && !currentMatch) {
+            console.error('Tournament mode requires match info');
+            navigate('/tournament/bracket');
+            return;
+        }
+    }, [mode, currentMatch, navigate]);
+
     // Game engine and keyboard events
     useEffect(() => {
-        const leftPlayer = user?.name || 'Player 1';
-        const rightPlayer = opponent?.name || 'Player 2';
+        const leftPlayerName = leftPlayer?.name || 'Player 1';
+        const rightPlayerName = rightPlayer?.name || 'Player 2';
 
          // SHOULD BE DELETED THESE COMENTS LATER // THIS IS FOR DEGUB
         console.log('=== PONG GAME STARTED ===');
         console.log('Game Mode:', mode);
         console.log('Left Player (User):', {
-            name: user?.name,
-            userID: user?.userID,
-            avatarUrl: user?.avatarUrl
+            name: leftPlayer?.name,
+            userID: leftPlayer?.userID,
+            avatarUrl: leftPlayer?.avatarUrl
         });
         console.log('Right Player (Opponent):', {
-            name: opponent?.name,
-            userID: opponent?.userID,
-            avatarUrl: opponent?.avatarUrl,
+            name: rightPlayer?.name,
+            userID: rightPlayer?.userID,
+            avatarUrl: rightPlayer?.avatarUrl,
             type: mode === 'single' ? 'AI' : (selectedPlayer ? 'Selected Player' : 'Guest')
         });
         console.log('Global Context Players:', {
@@ -165,13 +196,13 @@ export default function PongGame(): JSX.Element {
             guestPlayer: guestPlayer
         });
         console.log('Final Player Names:', {
-            leftPlayerName: leftPlayer,
-            rightPlayerName: rightPlayer
+            leftPlayerName: leftPlayerName,
+            rightPlayerName: rightPlayerName
         });
         console.log('========================');
         // SHOULD BE DELETED THESE COMENTS LATER
 
-        engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayer, rightPlayer);
+        engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayerName, rightPlayerName);
 
         const handleKeyDown = (e: KeyboardEvent) => {
             engineRef.current?.handleKeyDown(e.key);
@@ -191,7 +222,7 @@ export default function PongGame(): JSX.Element {
             window.removeEventListener('keyup', handleKeyUp);
             engineRef.current?.stop();
         };
-    }, [gameConfig, mode, user?.name, opponent]);
+    }, [gameConfig, mode, leftPlayer?.name, rightPlayer]);
 
     useEffect(() => {
       if (gameState.gameEnded && gameState.winner) {
@@ -204,20 +235,20 @@ export default function PongGame(): JSX.Element {
       <main className="min-h-screen flex flex-col">
           <header className="h-40 bg-blue-deep grid grid-cols-3 items-center">
               <div className="flex items-center justify-start gap-2">
-                  <h1 className="player-name">{user?.name}</h1>
-                  <img src={user?.avatarUrl} alt="Avatar" className="avatar" />
+                  <h1 className="player-name">{leftPlayer?.name}</h1>
+                  <img src={leftPlayer?.avatarUrl} alt="Avatar" className="avatar" />
               </div>
               <div className="flex justify-center">
                   <p className="player-name">{gameState.leftScore} - {gameState.rightScore}</p>
               </div>
               <div className="flex items-center justify-end gap-2">
                   <img 
-                      src={opponent?.avatarUrl || '/avatars/Avatar_2.png'} 
+                      src={rightPlayer?.avatarUrl || '/avatars/Avatar_2.png'} 
                       alt="Opponent Avatar" 
                       className="avatar" 
                   />
                   <h2 className="player-name">
-                      {opponent?.name || 'Guest'}
+                      {rightPlayer?.name || 'Guest'}
                   </h2>
               </div>
           </header>

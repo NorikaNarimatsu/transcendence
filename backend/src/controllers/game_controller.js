@@ -3,6 +3,54 @@ import { sanitizeInput } from "../utils/sanitizeInput.js";
 
 const db = await initializeDatabase();
 
+export const createTournamentBracket = async (request, response) => {
+    try {
+        const { 
+            participants,  // Array of participant IDs
+            creatorID     // User who created the tournament
+        } = request.body;
+
+        console.log("Creating tournament bracket:", { participants, creatorID });
+
+        // Validate required fields
+        if (!participants || !Array.isArray(participants) || participants.length < 3) {
+            return response.code(400).send({ 
+                message: "Tournament needs at least 3 participants" 
+            });
+        }
+
+        if (!creatorID) {
+            return response.code(400).send({ 
+                message: "Creator ID is required" 
+            });
+        }
+
+        // Get the next sequential tournament bracket ID from existing matches
+        const lastBracket = db.prepare(`
+            SELECT MAX(tournamentBracketID) as maxID 
+            FROM match 
+            WHERE tournamentBracketID IS NOT NULL
+        `).get();
+        
+        const nextBracketID = (lastBracket?.maxID || 0) + 1;
+
+        console.log(`Generated tournament bracket ID: ${nextBracketID}`);
+
+        return response.code(201).send({
+            message: "Tournament bracket ID generated successfully",
+            tournamentBracketID: nextBracketID,
+            participants: participants.length
+        });
+
+    } catch (error) {
+        console.error("createTournamentBracket error:", error);
+        return response.code(500).send({ 
+            message: "Internal server error", 
+            details: error.message 
+        });
+    }
+};
+
 // Add a new match result
 export const addMatch = async (request, response) => {
     console.log("=== addMatch called ===");
@@ -12,6 +60,8 @@ export const addMatch = async (request, response) => {
         const { 
             matchType,      // 'pong' or 'snake'
             matchMode,      // 'single', '2players', 'tournament'
+            tournamentBracketID,
+            tournamentMatchID,
             user1ID,        // Player 1 ID (number)
             user2ID,        // Player 2 ID (number - 1=AI, 2=Guest, 3+=users)
             user1Score,     // Player 1 final score
@@ -19,8 +69,6 @@ export const addMatch = async (request, response) => {
             winnerID,       // the ID from the winner
             startedAt,      // Match start timestamp
             endedAt,        // Match end timestamp
-            tournamentBracketID = null,
-            tournamentMatchID = null
         } = request.body;
 
         console.log("Extracted values:", { matchType, matchMode, user1ID, user2ID, user1Score, user2Score, startedAt, endedAt });
@@ -81,6 +129,23 @@ export const addMatch = async (request, response) => {
             user2: user2 ? user2.name : 'None (Single Player)' 
         });
 
+        // Tournament match, sequential match ID within bracket
+        let finalTournamentBracketID = tournamentBracketID;
+        let finalTournamentMatchID = tournamentMatchID;
+
+        if (matchMode === 'tournament' && tournamentBracketID){
+            // get next match id for the tournament bracket
+            const lastMatch = db.prepare(
+                `SELECT MAX(tournamentMatchID) as maxMatchID
+                from match
+                WHERE tournamentBracketID = ?`
+            ).get(tournamentBracketID);
+
+            finalTournamentMatchID = (lastMatch?.maxMatchID || 0) + 1;
+            console.log(`Generated tournament match ID: ${finalTournamentMatchID} for bracket ${tournamentBracketID}`);
+
+        }
+
         console.log("Preparing to insert match...");
         const insertMatch = db.prepare(`
             INSERT INTO match (
@@ -92,8 +157,8 @@ export const addMatch = async (request, response) => {
         const result = insertMatch.run(
             matchType,
             matchMode,
-            tournamentBracketID,
-            tournamentMatchID,
+            finalTournamentBracketID,
+            finalTournamentMatchID,
             user1ID,
             user2ID,
             parseInt(user1Score),
@@ -112,6 +177,8 @@ export const addMatch = async (request, response) => {
         return response.code(201).send({
             message: "Match saved successfully",
             matchID: result.lastInsertRowid,
+            tournamentBracketID: finalTournamentBracketID,
+            tournamentMatchID: finalTournamentMatchID,
             winner: winnerName,
             winnerID: winnerID,
             duration: startedAt && endedAt ? 
@@ -124,6 +191,56 @@ export const addMatch = async (request, response) => {
         console.error("Error stack:", error.stack);
         request.log.error("addMatch error: ", error);
         return response.code(500).send({ message: "Internal server error", details: error.message });
+    }
+};
+
+export const getTournamentMatches = async (request, response ) => {
+    try {
+        const { tournamentBracketID } = request.params;
+
+        if (!tournamentBracketID) {
+            return response.code(400).send({ message: "Tournament bracket ID is required" });
+        }
+
+        const bracketID = parseInt(tournamentBracketID);
+
+        if (isNaN(bracketID)) {
+            return response.code(400).send({ message: "Invalid tournament bracket ID"});
+        }
+
+        const matches = db.prepare( `
+            SELECT
+                m.matchID,
+                m.tournamentMatchID,
+                m.matchType,
+                m.user1Score,
+                m.user2Score,
+                u1.userID as user1ID,
+                u1.name as user1Name,
+                u2.userID as user2ID,
+                u2.name as user2Name,
+                winner.userID as winnerID,
+                winner.name as winnerName,
+                m.startedAt,
+                m.endedAt
+            FROM match m
+            JOIN users u1 ON m.user1ID = u1.userID
+            JOIN users u2 ON m.user2ID = u2.userID
+            LEFT JOIN users winner ON m.winnerID = winner.userID
+            WHERE m.tournamentBracketID = ?
+            ORDER BY m.tournamentMatchID ASC
+        `).all(bracketID);
+
+        console.log(`Found ${matches.length} matches for bracket ${bracketID}:`, matches); // Add logging
+
+        return response.code(200).send({
+            tournamentBracketID: bracketID,
+            totalMatches: matches.length,
+            matches: matches
+        });
+    } catch (error) {
+        console.error("getTournamentMatches error:", error);
+        return response.code(500).send({ message: "Internal server Error" });
     }
 };
 
@@ -272,6 +389,8 @@ const gameController = {
     addMatch,
     getUserMatches,
     getUserStats,
+    createTournamentBracket,
+    getTournamentMatches,
 };
 
 export default gameController;

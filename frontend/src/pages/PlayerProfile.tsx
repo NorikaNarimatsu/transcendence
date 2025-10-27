@@ -38,7 +38,8 @@ export default function PlayerProfile(): JSX.Element {
     const [tournamentVerifyingUser, setTournamentVerifyingUser] = useState<SelectedPlayer | null>(null);
     const [tournamentVerifyPassword, setTournamentVerifyPassword] = useState('');
     const [tournamentVerifyError, setTournamentVerifyError] = useState('');
-    
+    const [tournamentGameType, setTournamentGameType] = useState<'pong' | 'snake'>('pong');
+
     const [users, setUsers] = useState<SelectedPlayer[]>([]);
     const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
 
@@ -52,7 +53,7 @@ export default function PlayerProfile(): JSX.Element {
 		losses: number;
 		totalMatches: number;
 	} | null>(null);
-	const [showBasicStats, setShowBasicStats] = useState(false);
+	// const [setShowBasicStats] = useState(false);
 
 	const [show2FASettings, setShow2FASettings] = useState(false);
 
@@ -147,6 +148,7 @@ export default function PlayerProfile(): JSX.Element {
             });
             if (response.ok) {
                 setSelectedTournamentParticipants(prev => [...prev, tournamentVerifyingUser]);
+                console.log('Added to tournament:', tournamentVerifyingUser);
                 setTournamentVerifyingUser(null);
                 setTournamentVerifyPassword('');
                 setTournamentVerifyError('');
@@ -221,7 +223,7 @@ export default function PlayerProfile(): JSX.Element {
             fetchBasicStats();
         } else {
             setBasicStats(null);
-            setShowBasicStats(false);
+            // setShowBasicStats(false);
         }
     }, [user?.userID]);
     
@@ -270,13 +272,13 @@ export default function PlayerProfile(): JSX.Element {
                 return [
                     { name: 'Single', action: () => navigate('./pongGame?mode=single') },
                     { name: '2 Players', action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => setShowTournamentRegistration(true) }
+                    { name: 'Tournaments', action: () => { setTournamentGameType('pong'); setShowTournamentRegistration(true); } }
                 ];
             case 'Snake':
                 return [
                     { name: 'Single', action: () => navigate('./snakeGame?mode=single') },
                     { name: '2 Players', action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => setShowTournamentRegistration(true) }
+                    { name: 'Tournaments', action: () => { setTournamentGameType('snake'); setShowTournamentRegistration(true); } }
                 ];
             case 'Friends':
                 return [
@@ -286,7 +288,6 @@ export default function PlayerProfile(): JSX.Element {
             case 'Dashboard':
                 return [
                     { name: 'Go to Dashboard', action: () => navigate('/dashboard') },
-                    // { name: 'Basic Stats', action: () => fetchBasicStats() }
                 ];
             case 'Settings':
                 return [
@@ -445,6 +446,7 @@ export default function PlayerProfile(): JSX.Element {
                       }
                       setVerifyingUser={setTournamentVerifyingUser}
                       user={user}
+                                    gameType={tournamentGameType}
                     />
                     {tournamentVerifyingUser && (
                       <PasswordVerification

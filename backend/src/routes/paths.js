@@ -28,9 +28,11 @@ export default async function itemRoutes(fastify, options) {
 	fastify.post('/api/user/export-data', userController.exportUserData);
 
     // Game management
-    fastify.get('/user/:userID/matches', gameController.getUserMatches);      
-    fastify.get('/user/:userID/stats', gameController.getUserStats);          
+    fastify.get('/user/:userID/matches', gameController.getUserMatches);
+    fastify.get('/user/:userID/stats', gameController.getUserStats);
     fastify.post('/match', gameController.addMatch);
+    fastify.post('/tournament/bracket', gameController.createTournamentBracket);
+    fastify.get('/tournament/:tournamentBracketID/matches', gameController.getTournamentMatches);
 
 	// 2FA endpoints
 	fastify.post('/2fa/enable', twoFactorController.enable2FA);
