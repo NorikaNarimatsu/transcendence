@@ -199,4 +199,104 @@ export async function prefillDatabase(db) {
     }
 
     console.log(`${allMatches.length} matches added successfully`);
+
+
+    // ADD TOURNAMENT DATA
+    console.log("Adding tournament data...");
+    
+    // Tournament matches need tournamentMatchID added to insertMatch
+    const insertTournamentMatch = db.prepare(`
+        INSERT INTO match (matchType, matchMode, user1ID, user2ID, user1Score, user2Score, winnerID, startedAt, endedAt, tournamentMatchID)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    // Tournament 1: Completed tournament (bracket ID 1)
+    const tournament1Matches = [
+        // Round 1 matches (bracket 1)
+        { matchType: 'pong', matchMode: 'tournament', tournamentBracketID: 1, tournamentMatchID: 1, user1ID: 3, user2ID: 4, user1Score: 3, user2Score: 1, winnerID: 3, daysAgo: 10, baseMinutes: 5 }, // test1 beats test2
+        { matchType: 'pong', matchMode: 'tournament', tournamentBracketID: 1, tournamentMatchID: 2, user1ID: 5, user2ID: 6, user1Score: 3, user2Score: 2, winnerID: 5, daysAgo: 10, baseMinutes: 5 }, // test3 beats test4
+        
+        // Semifinals (bracket 1)
+        { matchType: 'pong', matchMode: 'tournament', tournamentBracketID: 1, tournamentMatchID: 3, user1ID: 3, user2ID: 5, user1Score: 3, user2Score: 0, winnerID: 3, daysAgo: 10, baseMinutes: 6 }, // test1 beats test3
+        
+        // Finals (bracket 1) - test1 vs test5 (bye player)
+        { matchType: 'pong', matchMode: 'tournament', tournamentBracketID: 1, tournamentMatchID: 4, user1ID: 3, user2ID: 7, user1Score: 3, user2Score: 2, winnerID: 3, daysAgo: 10, baseMinutes: 8 }, // test1 wins tournament
+    ];
+
+    // Tournament 2: Ongoing tournament (bracket ID 2) - only some matches completed
+    const tournament2Matches = [
+        // Round 1 matches (bracket 2) - completed
+        { matchType: 'pong', matchMode: 'tournament', tournamentBracketID: 2, tournamentMatchID: 1, user1ID: 6, user2ID: 8, user1Score: 3, user2Score: 1, winnerID: 6, daysAgo: 2, baseMinutes: 4 }, // test4 beats test6
+        { matchType: 'pong', matchMode: 'tournament', tournamentBracketID: 2, tournamentMatchID: 2, user1ID: 9, user2ID: 10, user1Score: 3, user2Score: 2, winnerID: 9, daysAgo: 2, baseMinutes: 4 }, // test7 beats test8
+        
+        // Semifinals (bracket 2) - completed
+        { matchType: 'pong', matchMode: 'tournament', tournamentBracketID: 2, tournamentMatchID: 3, user1ID: 6, user2ID: 9, user1Score: 3, user2Score: 1, winnerID: 6, daysAgo: 1, baseMinutes: 5 }, // test4 beats test7
+        
+        // Finals (bracket 2) - completed
+        { matchType: 'pong', matchMode: 'tournament', tournamentBracketID: 2, tournamentMatchID: 4, user1ID: 6, user2ID: 7, user1Score: 3, user2Score: 2, winnerID: 6, daysAgo: 0, baseMinutes: 8 }, // test4 wins tournament
+    ];
+
+    // Tournament 3: Completed Snake tournament (bracket ID 3)
+    const tournament3Matches = [
+        // Round 1 matches (bracket 3)
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 3, tournamentMatchID: 1, user1ID: 11, user2ID: 12, user1Score: 10, user2Score: 8, winnerID: 11, daysAgo: 8, baseMinutes: 10 }, // test9 beats test10
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 3, tournamentMatchID: 2, user1ID: 13, user2ID: 14, user1Score: 3, user2Score: 2, winnerID: 13, daysAgo: 8, baseMinutes: 10 }, // test11 beats test12
+        
+        // Semifinals (bracket 3)
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 3, tournamentMatchID: 3, user1ID: 11, user2ID: 13, user1Score: 10, user2Score: 8, winnerID: 11, daysAgo: 7, baseMinutes: 12 }, // test9 beats test11
+        
+        // Finals (bracket 3) - test9 vs test13 (bye player)
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 3, tournamentMatchID: 4, user1ID: 11, user2ID: 15, user1Score: 10, user2Score: 8, winnerID: 11, daysAgo: 7, baseMinutes: 15 }, // test9 wins tournament
+    ];
+
+    // Tournament 4: Another completed Snake tournament (bracket ID 4)
+    const tournament4Matches = [
+        // Round 1 matches (bracket 4)
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 4, tournamentMatchID: 1, user1ID: 3, user2ID: 8, user1Score: 4, user2Score: 2, winnerID: 3, daysAgo: 5, baseMinutes: 10 }, // test1 beats test6
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 4, tournamentMatchID: 2, user1ID: 4, user2ID: 16, user1Score: 5, user2Score: 10, winnerID: 16, daysAgo: 5, baseMinutes: 10 }, // test14 beats test2
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 4, tournamentMatchID: 3, user1ID: 5, user2ID: 17, user1Score: 10, user2Score: 9, winnerID: 5, daysAgo: 5, baseMinutes: 10 }, // test3 beats test15
+        
+        // Semifinals (bracket 4)
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 4, tournamentMatchID: 4, user1ID: 3, user2ID: 16, user1Score: 8, user2Score: 10, winnerID: 16, daysAgo: 4, baseMinutes: 12 }, // test14 beats test1
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 4, tournamentMatchID: 5, user1ID: 5, user2ID: 7, user1Score: 5, user2Score: 0, winnerID: 5, daysAgo: 4, baseMinutes: 12 }, // test3 beats test5 (bye player)
+        
+        // Finals (bracket 4)
+        { matchType: 'snake', matchMode: 'tournament', tournamentBracketID: 4, tournamentMatchID: 6, user1ID: 16, user2ID: 5, user1Score: 10, user2Score: 8, winnerID: 16, daysAgo: 3, baseMinutes: 18 }, // test14 wins tournament (close final!)
+    ];
+
+    // Combine all tournament matches
+    const tournamentMatches = [
+        ...tournament1Matches,
+        ...tournament2Matches,
+        ...tournament3Matches,
+        ...tournament4Matches
+    ];
+
+    // Insert tournament matches
+    for (const match of tournamentMatches) {
+        try {
+            const timing = generateMatchTiming(match.daysAgo, match.baseMinutes);
+            
+            insertTournamentMatch.run(
+                match.matchType,
+                match.matchMode,
+                match.user1ID,
+                match.user2ID,
+                match.user1Score,
+                match.user2Score,
+                match.winnerID,
+                timing.startedAt,
+                timing.endedAt,
+                match.tournamentMatchID
+            );
+            
+            console.log(`Created tournament match (Bracket ${match.tournamentBracketID}, Match ${match.tournamentMatchID}): ${match.user1Score}-${match.user2Score}`);
+        } catch (error) {
+            console.error(`Error inserting tournament match:`, error);
+        }
+    }
+
+    console.log(`${tournamentMatches.length} tournament matches added successfully`);
+
+    console.log("Database prefill completed successfully!");
 }
