@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTournament } from './tournamentContext';
+import Button from '../../components/ButtonDarkPink';
+import home_icon from '../../assets/icons/Home.png';
 
 export default function TournamentTree() {
     const navigate = useNavigate();
@@ -26,6 +28,10 @@ export default function TournamentTree() {
     if (!tournamentData) {
         return <div>Loading...</div>;
     }
+
+    const handleBackToProfile = () => {
+        navigate('/playerProfile');
+    };
 
 
     return (
@@ -127,7 +133,12 @@ export default function TournamentTree() {
                     </div>
                 </div>
             </section>
-            <footer className="h-40 bg-blue-deep"></footer>
+            {/* Footer */}
+            <footer className="h-40 bg-blue-deep flex justify-center items-center">
+                <Button onClick={handleBackToProfile} className="!mt-0">
+                    <img src={home_icon} alt="Home" className="h-8 w-auto"/>
+                </Button>
+            </footer>
         </div>
     );
 }

@@ -440,7 +440,7 @@ useEffect(() => {
             {/* Bottom bar */}
             <footer className="h-40 bg-blue-deep grid place-items-center">
                 <div className="col-start-1 row-start-1">
-                    <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl animate-marquee">PONG GAME</h1>
+                    <h1 className="font-pixelify text-pink-light text-opacity-25 text-9xl animate-marquee">SNAKE GAME</h1>
                 </div>
                 <div className="col-start-1 row-start-1 z-10 flex gap-4">
                     <ButtonPink onClick={handleBackToProfile} className="!mt-0">

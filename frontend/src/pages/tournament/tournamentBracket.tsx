@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTournament } from './tournamentContext';
 import type { TournamentMatch } from './tournamentContext';
 import type { SelectedPlayer } from '../user/PlayerContext';
+import Button from '../../components/ButtonDarkPink';
+import home_icon from '../../assets/icons/Home.png';
 
 interface MatchResult {
     matchID: number;
@@ -256,6 +258,10 @@ export default function Bracket() {
         boxPositions.push(positions);
     });
 
+    const handleBackToProfile = () => {
+        navigate('/playerProfile');
+    };
+
     const startMatch = (matchInfo: any) => {
         const gameType = tournamentData?.gameType || 'pong';
 
@@ -358,7 +364,12 @@ export default function Bracket() {
                     </div>
                 </div>
             </section>
-            <footer className="h-40 bg-blue-deep"></footer>
+            {/* Footer */}
+            <footer className="h-40 bg-blue-deep flex justify-center items-center">
+                <Button onClick={handleBackToProfile} className="!mt-0">
+                    <img src={home_icon} alt="Home" className="h-8 w-auto"/>
+                </Button>
+            </footer>
         </div>
     );
 }
