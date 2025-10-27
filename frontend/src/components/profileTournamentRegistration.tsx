@@ -33,8 +33,6 @@ export function TournamentRegistration({
 
     const createTournamentBracket = async (participantIDs: number[]) => {
         try {
-            console.log('Creating tournament bracket with participants:', participantIDs);
-            
             const response = await fetch('https://localhost:8443/tournament/bracket', {
                 method: 'POST',
                 headers: {

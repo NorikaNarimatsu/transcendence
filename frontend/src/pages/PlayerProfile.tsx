@@ -284,7 +284,6 @@ export default function PlayerProfile(): JSX.Element {
             case 'Dashboard':
                 return [
                     { name: 'Go to Dashboard', action: () => navigate('/dashboard') },
-                    // { name: 'Basic Stats', action: () => fetchBasicStats() }
                 ];
             case 'Settings':
                 return [
