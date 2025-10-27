@@ -114,22 +114,22 @@ export async function prefillDatabase(db) {
         { matchType: 'pong', matchMode: '2players', user1ID: 3, user2ID: 8, user1Score: 3, user2Score: 2, winnerID: 3, daysAgo: 18, baseMinutes: 4 },
 
         // Snake single player matches - no opponent (user2ID = null)
-        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 150, user2Score: 0, winnerID: 3, daysAgo: 19, baseMinutes: 8 },
-        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 89, user2Score: 0, winnerID: 3, daysAgo: 20, baseMinutes: 8 },
-        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 220, user2Score: 0, winnerID: 3, daysAgo: 21, baseMinutes: 8 },
-        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 167, user2Score: 0, winnerID: 3, daysAgo: 22, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 15, user2Score: 0, winnerID: 3, daysAgo: 19, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 28, user2Score: 0, winnerID: 3, daysAgo: 20, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 20, user2Score: 0, winnerID: 3, daysAgo: 21, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 67, user2Score: 0, winnerID: 3, daysAgo: 22, baseMinutes: 8 },
         
         // Snake 2-player matches (vs Guest or other users)
-        { matchType: 'snake', matchMode: '2players', user1ID: 3, user2ID: 2, user1Score: 180, user2Score: 160, winnerID: 3, daysAgo: 23, baseMinutes: 12 },
-        { matchType: 'snake', matchMode: '2players', user1ID: 3, user2ID: 4, user1Score: 140, user2Score: 170, winnerID: 4, daysAgo: 24, baseMinutes: 12 },
-        { matchType: 'snake', matchMode: '2players', user1ID: 3, user2ID: 5, user1Score: 200, user2Score: 180, winnerID: 3, daysAgo: 25, baseMinutes: 12 },
+        { matchType: 'snake', matchMode: '2players', user1ID: 3, user2ID: 2, user1Score: 10, user2Score: 5, winnerID: 3, daysAgo: 23, baseMinutes: 12 },
+        { matchType: 'snake', matchMode: '2players', user1ID: 3, user2ID: 4, user1Score: 7, user2Score: 10, winnerID: 4, daysAgo: 24, baseMinutes: 12 },
+        { matchType: 'snake', matchMode: '2players', user1ID: 3, user2ID: 5, user1Score: 10, user2Score: 8, winnerID: 3, daysAgo: 25, baseMinutes: 12 },
 
         // Additional matches to reach different achievement tiers
         { matchType: 'pong', matchMode: 'single', user1ID: 3, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 3, daysAgo: 26, baseMinutes: 3 },
         { matchType: 'pong', matchMode: 'single', user1ID: 3, user2ID: 1, user1Score: 3, user2Score: 2, winnerID: 3, daysAgo: 27, baseMinutes: 3 },
-        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 190, user2Score: 0, winnerID: 3, daysAgo: 28, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 3, user2ID: null, user1Score: 10, user2Score: 0, winnerID: 3, daysAgo: 28, baseMinutes: 8 },
         { matchType: 'pong', matchMode: '2players', user1ID: 3, user2ID: 9, user1Score: 3, user2Score: 1, winnerID: 3, daysAgo: 29, baseMinutes: 4 },
-        { matchType: 'snake', matchMode: '2players', user1ID: 3, user2ID: 10, user1Score: 170, user2Score: 150, winnerID: 3, daysAgo: 30, baseMinutes: 12 },
+        { matchType: 'snake', matchMode: '2players', user1ID: 3, user2ID: 10, user1Score: 10, user2Score: 8, winnerID: 3, daysAgo: 30, baseMinutes: 12 },
     ];
 
     // Matches for other users to create variety
@@ -139,13 +139,13 @@ export async function prefillDatabase(db) {
         { matchType: 'pong', matchMode: 'single', user1ID: 4, user2ID: 1, user1Score: 1, user2Score: 3, winnerID: 1, daysAgo: 1, baseMinutes: 3 },
         { matchType: 'pong', matchMode: 'single', user1ID: 4, user2ID: 1, user1Score: 3, user2Score: 0, winnerID: 4, daysAgo: 2, baseMinutes: 3 },
         { matchType: 'pong', matchMode: '2players', user1ID: 4, user2ID: 2, user1Score: 2, user2Score: 3, winnerID: 2, daysAgo: 3, baseMinutes: 4 },
-        { matchType: 'snake', matchMode: 'single', user1ID: 4, user2ID: null, user1Score: 160, user2Score: 0, winnerID: 4, daysAgo: 4, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 4, user2ID: null, user1Score: 60, user2Score: 0, winnerID: 4, daysAgo: 4, baseMinutes: 8 },
 
         // test3 (userID: 5) matches
         { matchType: 'pong', matchMode: 'single', user1ID: 5, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 5, daysAgo: 5, baseMinutes: 3 },
         { matchType: 'pong', matchMode: 'single', user1ID: 5, user2ID: 1, user1Score: 2, user2Score: 3, winnerID: 1, daysAgo: 6, baseMinutes: 3 },
         { matchType: 'pong', matchMode: '2players', user1ID: 5, user2ID: 6, user1Score: 3, user2Score: 2, winnerID: 5, daysAgo: 7, baseMinutes: 4 },
-        { matchType: 'snake', matchMode: 'single', user1ID: 5, user2ID: null, user1Score: 200, user2Score: 0, winnerID: 5, daysAgo: 8, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 5, user2ID: null, user1Score: 100, user2Score: 0, winnerID: 5, daysAgo: 8, baseMinutes: 8 },
 
         // test4 (userID: 6) matches - a user with mostly losses
         { matchType: 'pong', matchMode: 'single', user1ID: 6, user2ID: 1, user1Score: 1, user2Score: 3, winnerID: 1, daysAgo: 9, baseMinutes: 3 },
@@ -161,14 +161,14 @@ export async function prefillDatabase(db) {
         { matchType: 'pong', matchMode: 'single', user1ID: 7, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 7, daysAgo: 17, baseMinutes: 3 },
         { matchType: 'pong', matchMode: 'single', user1ID: 7, user2ID: 1, user1Score: 3, user2Score: 2, winnerID: 7, daysAgo: 18, baseMinutes: 3 },
         { matchType: 'pong', matchMode: '2players', user1ID: 7, user2ID: 2, user1Score: 3, user2Score: 0, winnerID: 7, daysAgo: 19, baseMinutes: 4 },
-        { matchType: 'snake', matchMode: 'single', user1ID: 7, user2ID: null, user1Score: 300, user2Score: 0, winnerID: 7, daysAgo: 20, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 7, user2ID: null, user1Score: 23, user2Score: 0, winnerID: 7, daysAgo: 20, baseMinutes: 8 },
 
         // More variety matches
-        { matchType: 'snake', matchMode: '2players', user1ID: 8, user2ID: 9, user1Score: 180, user2Score: 160, winnerID: 8, daysAgo: 21, baseMinutes: 12 },
+        { matchType: 'snake', matchMode: '2players', user1ID: 8, user2ID: 9, user1Score: 10, user2Score: 6, winnerID: 8, daysAgo: 21, baseMinutes: 12 },
         { matchType: 'pong', matchMode: '2players', user1ID: 9, user2ID: 10, user1Score: 3, user2Score: 2, winnerID: 9, daysAgo: 22, baseMinutes: 4 },
-        { matchType: 'snake', matchMode: 'single', user1ID: 10, user2ID: null, user1Score: 140, user2Score: 0, winnerID: 10, daysAgo: 23, baseMinutes: 8 },
+        { matchType: 'snake', matchMode: 'single', user1ID: 10, user2ID: null, user1Score: 40, user2Score: 0, winnerID: 10, daysAgo: 23, baseMinutes: 8 },
         { matchType: 'pong', matchMode: 'single', user1ID: 11, user2ID: 1, user1Score: 3, user2Score: 1, winnerID: 11, daysAgo: 24, baseMinutes: 3 },
-        { matchType: 'snake', matchMode: '2players', user1ID: 12, user2ID: 13, user1Score: 200, user2Score: 190, winnerID: 12, daysAgo: 25, baseMinutes: 12 },
+        { matchType: 'snake', matchMode: '2players', user1ID: 12, user2ID: 13, user1Score: 10, user2Score: 9, winnerID: 12, daysAgo: 25, baseMinutes: 12 },
     ];
 
     // Combine all matches
