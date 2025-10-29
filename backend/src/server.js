@@ -5,7 +5,11 @@ import cors from '@fastify/cors';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv'; // NORIKA ADDED GOSIA
 import { initializeDatabase } from './database/initDatabase.js';
+
+// Load environment variables // NORIKA ADDED GOSIA
+dotenv.config();              // NORIKA ADDED GOSIA
 
 
 const PORT = Number(process.env.PORT || 8443);
