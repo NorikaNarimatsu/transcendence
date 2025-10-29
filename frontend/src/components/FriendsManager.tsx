@@ -196,7 +196,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                 {/* FRIENDS LIST MODAL */}
                 {showFriendsList && (
                     <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-30">
-                        <div className="bg-pink-light p-6 rounded-lg max-h-[400px] overflow-y-auto w-[300px]">
+                        <div className="bg-pink-light p-6 rounded-lg max-h-[400px] overflow-y-auto w-[350px]">
                             <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">My Friends</h3>
                             
                             {loading ? (
@@ -218,7 +218,19 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                                                         className="w-6 h-6 rounded-full object-cover"
                                                     />
                                                 )}
-                                                {friend.name}
+                                                <div className="flex flex-col">
+                                                    <span className="font-pixelify text-blue-deep">{friend.name}</span>
+                                                    {friend.lastLoginedAt && (
+                                                        <span className="font-dotgothic text-xs text-blue-medium opacity-75">
+                                                            Last seen: {new Date(friend.lastLoginedAt).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         ))
                                     )}

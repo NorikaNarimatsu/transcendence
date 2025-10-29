@@ -82,6 +82,10 @@ export const validatePasswordbyEmail = async (request, response) => {
 			return response.code(401).send({ message: "Invalid password" });
 		}
 
+		// Update lastLoginAt immediately when password verification succeeds
+		const updateLastLogin = db.prepare("UPDATE users SET lastLoginAt = datetime('now') WHERE userID = ?");
+		updateLastLogin.run(user.userID);
+
 		if (user['2FA']) {
 			db.prepare('DELETE FROM two_factor_auth WHERE userID = ? AND used = 0').run(user.userID);
 			const verificationCode = emailUtils.generateAuthCode();
@@ -395,7 +399,7 @@ export const getUserFriendsByUserID = async (request, reply) => {
         
         // Get friends where this user is user1ID (one-sided friendship)
         const friends = db.prepare(`
-            SELECT u.userID, u.name, u.avatarUrl
+            SELECT u.userID, u.name, u.avatarUrl, u.lastLoginAt
             FROM friends f
             JOIN users u ON f.user2ID = u.userID
             WHERE f.user1ID = ?
@@ -407,7 +411,8 @@ export const getUserFriendsByUserID = async (request, reply) => {
         const formattedFriends = friends.map(friend => ({
             userID: friend.userID,
             name: friend.name,
-            avatarUrl: friend.avatarUrl
+            avatarUrl: friend.avatarUrl,
+            lastLoginedAt: friend.lastLoginAt
         }));
         
         return reply.code(200).send(formattedFriends);
