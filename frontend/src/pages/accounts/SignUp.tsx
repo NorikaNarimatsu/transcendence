@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../user/UserContext";
 import { sanitizeEmail, getEmailErrorMessage } from "../../utils/emailValidation";
 import SafeError from "../../components/SafeError";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,9 @@ export default function SignUp() {
   const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
   const { logout } = useUser();
+
+  const { lang, t } = useLanguage();
+  const translation = t[lang];
 
   useEffect(() => {
     logout(); // This will clear user state and localStorage
@@ -71,7 +75,7 @@ export default function SignUp() {
             <form onSubmit={handleSubmit} className="flex flex-col h-full">
               <div>
                 <h1 className="text-4xl text-blue-deep font-pixelify mb-[20px] text-shadow font-bold">
-                  SIGN UP
+                  {translation.pages.signup.signup}
                 </h1>
                 {/* Email input */}
                 <div className="relative mb-6">
@@ -100,7 +104,7 @@ export default function SignUp() {
                 {/* <button type="submit" className="w-full"> */}
                 <ButtonPurple type="submit">
                   <span className="flex items-center justify-end gap-2">
-                    Continue
+                    {translation.common.continue}
                     <img src={arrow_icon} alt="Arrow" className="h-4 w-auto" />
                     <img src={arrow_icon} alt="Arrow" className="h-4 w-auto" />
                   </span>

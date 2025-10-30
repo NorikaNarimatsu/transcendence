@@ -9,10 +9,14 @@ import arrow_icon from '../../assets/icons/arrow.png';
 import { validatePasswordRealTime } from '../../utils/passwordValidation';
 import SafeError from '../../components/SafeError';
 import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import { useLanguage } from '../../contexts/LanguageContext';
 
-	export default function signupUnkownUser() {
+export default function signupUnkownUser() {
 	const location = useLocation();
 	const navigate = useNavigate();
+
+	const { lang, t } = useLanguage();
+	const translation = t[lang];
 
 	const email = location.state?.email
 	const [name, setName] = useState('');
@@ -132,17 +136,17 @@ import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 			<form onSubmit={handleSubmit}>
 				<div className="mb-4">
 				<h1 className="text-4xl text-blue-deep font-pixelify mb-[1px] text-shadow font-bold">
-					SIGN UP
+					{translation.pages.signup.signup}
 				</h1>
 				<h2 className="text-xl text-blue-deep font-dotgothic mb-[20px]">
-					You are new here!
+					{translation.pages.signup.newUser}
 				</h2>
 
 				<button 
 					type="button"
 					onClick={() => navigate(-1)}
 					className="text-blue-deep underline mb-4">
-					← Wrong email? Go back 
+					{translation.pages.signup.wrongEmail}
 				</button>
 
 				{/* Form inputs */}
@@ -156,7 +160,7 @@ import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 					type="text"
 					value={name}
 					onChange={handleNameChange}
-					placeholder="Enter Nickname"
+					placeholder={translation.pages.signup.enterNickname}
 					className={`w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 ${
 						nameError ? 'border-red-500' : 'border-black'
 					} focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest`}
@@ -216,13 +220,13 @@ import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 							required
 						/>
 						<label htmlFor="privacy-checkbox" className="text-blue-deep font-dotgothic text-sm leading-tight">
-							I have read and agreed to the{' '}
+							{translation.pages.signup.gdprAgree}{' '}
 							<button
 								type="button"
 								onClick={() => setShowPrivacyModal(true)}
 								className="text-purple-game underline font-bold hover:text-purple-700 transition-colors"
 							>
-								Privacy Policy
+								{translation.common.privacyPolicy}
 							</button>
 						</label>
 					</div>
@@ -237,7 +241,7 @@ import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 				disabled={!nameAvailable || !!nameError || !!passwordError || !privacyAccepted}
 				>
 					<span className="flex items-center justify-end gap-2">
-					Continue
+					{translation.common.continue}
 					<img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
 					<img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
 					</span>

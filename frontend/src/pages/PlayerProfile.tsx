@@ -12,6 +12,7 @@ import { CategoryButtons } from '../components/profileCategoryButtons';
 import { PlayerSelection } from '../components/profilePlayerSelection';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import { FriendsManager } from '../components/FriendsManager';
+import { useLanguage } from '../contexts/LanguageContext';
 
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
@@ -48,6 +49,9 @@ export default function PlayerProfile(): JSX.Element {
     const navigate = useNavigate();
     const { user, logout } = useUser();
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
+
+    const { lang, setLang, t } = useLanguage();
+    const translation = t[lang];
 
     useEffect(() => {
         setSelectedPlayer(null);
@@ -252,39 +256,46 @@ export default function PlayerProfile(): JSX.Element {
         switch(category) {
             case 'Games':
                 return [
-                    { name: 'Play Pong', action: () => setSelectedCategory('Pong') },
-                    { name: 'Play Snake', action: () => setSelectedCategory('Snake') }
+                    { name: translation.pages.profile.playPong, action: () => setSelectedCategory('Pong') },
+                    { name: translation.pages.profile.playSnake, action: () => setSelectedCategory('Snake') }
                 ];
             case 'Pong':
                 return [
-                    { name: 'Single', action: () => navigate('./pongGame?mode=single') },
-                    { name: '2 Players', action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => setShowTournamentRegistration(true) }
+                    { name: translation.pages.profile.single, action: () => navigate('./pongGame?mode=single') },
+                    { name: translation.pages.profile.twoPlayers, action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
+                    { name: translation.pages.profile.tournament, action: () => setShowTournamentRegistration(true) }
                 ];
             case 'Snake':
                 return [
-                    { name: 'Single', action: () => navigate('./snakeGame?mode=single') },
-                    { name: '2 Players', action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => setShowTournamentRegistration(true) }
+                    { name: translation.pages.profile.single, action: () => navigate('./snakeGame?mode=single') },
+                    { name: translation.pages.profile.twoPlayers, action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
+                    { name: translation.pages.profile.tournament, action: () => setShowTournamentRegistration(true) }
                 ];
             case 'Friends':
                 return [
-                    { name: 'See Friends', action: () => friendsManagerRef.current?.handleSeeFriends() },
-                    { name: 'Add Friend', action: () => friendsManagerRef.current?.handleAddFriendsClick() }
+                    { name: translation.pages.profile.seeFriends, action: () => friendsManagerRef.current?.handleSeeFriends() },
+                    { name: translation.pages.profile.addFriends, action: () => friendsManagerRef.current?.handleAddFriendsClick() }
                 ];
             case 'Dashboard':
                 return [
-                    { name: 'Go to Dashboard', action: () => navigate('/dashboard') },
+                    { name: translation.pages.profile.goToDashboard, action: () => navigate('/dashboard') },
                     // { name: 'Basic Stats', action: () => fetchBasicStats() }
                 ];
             case 'Settings':
                 return [
-                    { name: 'Delete Account', action: () => setShowDeleteConfirmation(true) },
-                    { name: 'Update data', action: () => console.log('Updating account data') },
-					{ name: 'Download data', action: () => downloadUserData() },
-					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
-                    { name: 'Edit 2FA', action: () => console.log('Updating 2FA setting') },
-                    { name: 'Language', action: () => console.log('Updating Language Setting') }, //TODO.
+                    { name: translation.pages.profile.deleteAccount, action: () => setShowDeleteConfirmation(true) },
+                    { name: translation.pages.profile.updateData, action: () => console.log('Updating account data') },
+					{ name: translation.pages.profile.downloadData, action: () => downloadUserData() },
+					{ name: translation.common.privacyPolicy, action: () => setShowPrivacyModal(true) },
+                    { name: translation.pages.profile.edit2FA, action: () => console.log('Updating 2FA setting') },
+                    { name: translation.pages.profile.language, action: () => setSelectedCategory('Language') },
+                ];
+            case 'Language':
+                return [
+                    { name: translation.pages.profile.english, action: () => setLang("en") },
+                    { name: translation.pages.profile.portuguese, action: () => setLang("pt") },
+                    { name: translation.pages.profile.polish, action: () => setLang("pl") },
+                    { name: translation.pages.profile.japanese, action: () => setLang("jp") },
                 ];
             default:
                 return [];
@@ -304,13 +315,13 @@ export default function PlayerProfile(): JSX.Element {
     return (
         <main className="min-h-screen flex flex-col">
             <header className="h-40 bg-blue-deep flex">
-                <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">What should we play today?</div>
+                <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">{translation.pages.profile.questionHeader}</div>
             </header>
             <section className="flex-1 bg-pink-grid flex items-center justify-center">
                 <div className="relative bg-pink-dark w-[825px] h-[600px] m-[10px] flex justify-between items-center px-[50px]">
                     {/* LEFT SIDE: Player Card */}
                     <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
-                        <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">PLAYER INFO</div>
+                        <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">{translation.pages.profile.playerInfo}</div>
                         <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
                                 <img onClick={() => setIsOpen(!isOpen)} src={user.avatarUrl} alt="Avatar" className="avatar m-auto shadow-no-blur" style={{borderColor: '#7a63fe'}}/> 
                                 {/* update the local strage here*/}
@@ -319,19 +330,19 @@ export default function PlayerProfile(): JSX.Element {
                             <div className="flex flex-col m-auto justify-evenly">
                                 <div className="font-pixelify text-white text-[40px]">{user.name}</div>
                                 <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">
-                                    Wins: {basicStats?.wins ?? user.wins ?? 0}
+                                    {/* Wins: {basicStats?.wins ?? user.wins ?? 0} */} //TODO: Something wrong with this.
                                 </div>
                                 <div className="font-dotgothic font-bold text-white text-base text-border-blue">
-                                    Losses: {basicStats?.losses ?? user.losses ?? 0}
+                                    {/* Losses: {basicStats?.losses ?? user.losses ?? 0} */} //TODO: Something wrong with this.
                                 </div>
                             </div>
                         </div>
                         <CategoryButtons
                             buttons={[
-                                { name: 'Games', icon: arrow_icon, onClick: () => setSelectedCategory('Games') },
-                                { name: 'Friends', icon: arrow_icon, onClick: () => setSelectedCategory('Friends') },
-                                { name: 'Dashboard', icon: arrow_icon, onClick: () => setSelectedCategory('Dashboard') },
-                                { name: 'Settings', icon: arrow_icon, className: "button-pp-blue-settings shadow-no-blur flex items-center justify-between", onClick: () => setSelectedCategory('Settings') }
+                                { name: translation.pages.profile.games, icon: arrow_icon, onClick: () => setSelectedCategory('Games') },
+                                { name: translation.pages.profile.friends, icon: arrow_icon, onClick: () => setSelectedCategory('Friends') },
+                                { name: translation.pages.profile.dashboard, icon: arrow_icon, onClick: () => setSelectedCategory('Dashboard') },
+                                { name: translation.pages.profile.settings, icon: arrow_icon, className: "button-pp-blue-settings shadow-no-blur flex items-center justify-between", onClick: () => setSelectedCategory('Settings') }
                             ]}
                         />
                     </div>
