@@ -1,37 +1,34 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import bgimage from '../assets/Player_Page.jpg';
-import arrow_icon from '../assets/icons/arrow.png';
-import log_out_icon from '../assets/icons/Log_out.png';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import AvatarSelection from '../components/AvatarSelection';
+// ===== COMPONENTS =====
+import { PlayerInfoCard } from '../components/PlayerProfileInfoCard';
+import { ProfileHeader } from '../components/PlayerProfileHeader';
+import { ProfileFooter } from '../components/PlayerProfileFooter';
+import { PlayerContents } from '../components/PlayerProfileContents';
 
-import { TournamentRegistration } from '../components/profileTournamentRegistration';
-import { PasswordVerification } from '../components/profilePasswordVerification';
-import { CategoryButtons } from '../components/profileCategoryButtons';
-import { PlayerSelection } from '../components/profilePlayerSelection';
-import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
-import { FriendsManager } from '../components/FriendsManager';
-
-import TwoFactorSettings from '../components/2FSettings';
-
-import { useUser} from './user/UserContext';
-import type { SelectedPlayer } from  './user/PlayerContext';
+// ===== CONTEXTS & TYPES =====
+import { useUser } from './user/UserContext';
+import type { SelectedPlayer } from './user/PlayerContext';
 import { useSelectedPlayer } from './user/PlayerContext';
-import { DeleteAccount } from './user/DeleteUser';
-import Button from '../components/ButtonDarkPink';
+
+// ===== CUSTOM HOOKS =====
+import { useUsers, useBasicStats, useUserDataDownload } from '../hooks/useProfileData';
 
 export default function PlayerProfile(): JSX.Element {
-    const [isOpen, setIsOpen] = useState(false);
-
+    // ===== NAVIGATION STATE =====
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    
+    // ===== PLAYER SELECTION STATE =====
     const [showPlayerSelection, setShowPlayerSelection] = useState(false);
     const [playerSelectionGame, setPlayerSelectionGame] = useState<string | null>(null);
     
+    // ===== PASSWORD VERIFICATION STATE =====
     const [showPasswordVerification, setShowPasswordVerification] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
+    // ===== TOURNAMENT STATE =====
     const [showTournamentRegistration, setShowTournamentRegistration] = useState(false);
     const [tournamentPlayers, setTournamentPlayers] = useState(3);
     const [selectedTournamentParticipants, setSelectedTournamentParticipants] = useState<SelectedPlayer[]>([]);
@@ -40,59 +37,57 @@ export default function PlayerProfile(): JSX.Element {
     const [tournamentVerifyError, setTournamentVerifyError] = useState('');
     const [tournamentGameType, setTournamentGameType] = useState<'pong' | 'snake'>('pong');
 
-    const [users, setUsers] = useState<SelectedPlayer[]>([]);
-    const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
-
-    const friendsManagerRef = useRef<any>(null);
-
+    // ===== MODAL STATE =====
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
-	
-	const [basicStats, setBasicStats] = useState<{
-		wins: number;
-		losses: number;
-		totalMatches: number;
-	} | null>(null);
-	// const [setShowBasicStats] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+    const [show2FASettings, setShow2FASettings] = useState(false);
 
-	const [show2FASettings, setShow2FASettings] = useState(false);
-
+    // ===== CORE HOOKS =====
     const navigate = useNavigate();
     const { user, logout, setUser } = useUser();
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
+    
+    // ===== DATA FETCHING HOOKS =====
+    const { users, allUsers } = useUsers(user?.userID);
+    const { basicStats } = useBasicStats(user?.userID);
+    const { downloadUserData } = useUserDataDownload();
 
+    // ===== INITIALIZATION EFFECTS =====
+    // Initialize selected player
     useEffect(() => {
         setSelectedPlayer(null);
     }, [setSelectedPlayer]);
 
-    useEffect(() => {
-        if (user?.userID) {
-            fetch(`https://localhost:8443/users/except/${user.userID}`)
-                .then(res => res.ok ? res.text() : Promise.reject(res.status))
-                .then(text => {
-                    try {
-                        const users = JSON.parse(text);
-                        setUsers(users);
-                        setAllUsers(users);
-                    } catch (err) {
-                        console.error('JSON parse error:', err);
-                    }
-                })
-                .catch(err => console.error('Failed to fetch users:', err));
-        }
-    }, [user?.userID]); 
-
+    // Redirect if no user
     useEffect(() => {
         if (!user) {
             navigate('/signup');
         }
     }, [user, navigate]);
 
+    // ===== CORE EVENT HANDLERS =====
     const handleLogout = () => {
         logout();
         navigate('/signup');
     };
 
+    const handleAvatarUpdate = (avatarUrl: string) => {
+        if (user) {
+            const updatedUser = { ...user, avatarUrl: avatarUrl };
+            setUser(updatedUser);
+        }
+    };
+
+    // ===== NAVIGATION HANDLERS =====
+    const handleNavigate = (path: string) => {
+        if (path === 'Pong' || path === 'Snake') {
+            setSelectedCategory(path);
+        } else {
+            navigate(path);
+        }
+    };
+
+    // ===== PLAYER SELECTION HANDLERS =====
     const handlePlayerSelect = (player: SelectedPlayer | null) => {
         setSelectedPlayer(player);
         if (player === null) {
@@ -108,12 +103,19 @@ export default function PlayerProfile(): JSX.Element {
         }
     };
 
+    const handlePlayerSelection = (game: string) => {
+        setPlayerSelectionGame(game);
+        setShowPlayerSelection(true);
+        setSelectedCategory(null);
+    };
+
+    // ===== PASSWORD VERIFICATION HANDLERS =====
     const handlePasswordSubmit = async () => {
         try {
-            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {  // CHANGED: Use userID endpoint
+            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: selectedPlayer!.userID, password }),  // CHANGED: Send userID
+                body: JSON.stringify({ userID: selectedPlayer!.userID, password }),
             });
             if (response.ok) {
                 setSelectedPlayer(selectedPlayer);
@@ -138,16 +140,17 @@ export default function PlayerProfile(): JSX.Element {
         setSelectedPlayer(null);
     };
 
+    // ===== TOURNAMENT HANDLERS =====
     const handleVerifyPassword = async () => {
         if (!tournamentVerifyingUser) return;
         try {
-            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {  // CHANGED: Use userID endpoint
+            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: tournamentVerifyingUser.userID, password: tournamentVerifyPassword }),  // CHANGED: Send userID
+                body: JSON.stringify({ userID: tournamentVerifyingUser.userID, password: tournamentVerifyPassword }),
             });
             if (response.ok) {
-                setSelectedTournamentParticipants(prev => [...prev, tournamentVerifyingUser]);
+                setSelectedTournamentParticipants((prev: SelectedPlayer[]) => [...prev, tournamentVerifyingUser]);
                 console.log('Added to tournament:', tournamentVerifyingUser);
                 setTournamentVerifyingUser(null);
                 setTournamentVerifyPassword('');
@@ -160,142 +163,16 @@ export default function PlayerProfile(): JSX.Element {
         }
     };
 
-    const fetchBasicStats = async () => {
-        if (!user?.userID) return;
-        try {
-            const response = await fetch(`https://localhost:8443/user/${user.userID}/stats`); 
-            if (response.ok) {
-                const data = await response.json();
-                setBasicStats(data.overall);
-            } else {
-                console.error('Failed to fetch stats');
-            }
-        } catch (error) {
-            console.error('Error fetching stats:', error);
-        }
+    const handleTournamentStart = (gameType: 'pong' | 'snake') => {
+        setTournamentGameType(gameType);
+        setShowTournamentRegistration(true);
     };
 
-
-    ///////////////// WORK IN PROGRESS //////////////////
-    const [avatarUrlLocal, setAvatarUrlLocal] = useState<string | null>(null);
-    const [uploadingAvatar, setUploadingAvatar] = useState(false);
-    
-    useEffect(() => {
-      setAvatarUrlLocal(user?.avatarUrl ?? null);
-    }, [user?.avatarUrl]);
-    
-    const handleSelectAvatar = async (avatarUrl: string) => {
-      if (!user?.userID) return;
-      setUploadingAvatar(true);
-      try {
-        const res = await fetch('https://localhost:8443/user/updateAvatar', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userID: user.userID, avatarUrl })
-        });
-        console.log('SENDING THIS URL:', avatarUrl);
-        if (!res.ok) {
-          const text = await res.text();
-          console.error('Failed to update avatar:', res.status, text);
-          return;
-        }
-    
-        setAvatarUrlLocal(avatarUrl);
-        // Update the user context with the new avatar URL
-        if (user) {
-          const updatedUser = { ...user, avatarUrl: avatarUrl };
-          setUser(updatedUser); // This will update both state and localStorage automatically
-        }
-      } catch (err) {
-        console.error('Error updating avatar:', err);
-      } finally {
-        setUploadingAvatar(false);
-      }
-    };
-    useEffect(() => {
-        if (user?.userID) {
-            fetchBasicStats();
-        } else {
-            setBasicStats(null);
-        }
-    }, [user?.userID]);
-    
-	const downloadUserData = async () => {
-		if (!user?.userID) {
-			console.log('no user or userID found');
-			return;
-		}
-
-		try {
-			const response = await fetch ('https://localhost:8443/api/user/export-data', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ userID: user.userID })
-			});
-
-			if (response.ok) {
-				const blob = await response.blob();
-				const url = window.URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = `user_data_${user.name}_${new Date().toISOString().split('T')[0]}.json`;
-				// document.body.appendChild(a);
-				a.click();
-				// document.body.removeChild(a);
-				window.URL.revokeObjectURL(url);
-			} else {
-				const errorText = await response.text();
-				console.error('Failed to download user data: ', response.status, errorText);
-			}
-		} catch (error) {
-			console.error('Error downloading user data:', error);
-		}
-	};
-
-    const getButtonsForCategory = (category: string) => {
-        switch(category) {
-            case 'Games':
-                return [
-                    { name: 'Play Pong', action: () => setSelectedCategory('Pong') },
-                    { name: 'Play Snake', action: () => setSelectedCategory('Snake') }
-                ];
-            case 'Pong':
-                return [
-                    { name: 'Single', action: () => navigate('./pongGame?mode=single') },
-                    { name: '2 Players', action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => { setTournamentGameType('pong'); setShowTournamentRegistration(true); } }
-                ];
-            case 'Snake':
-                return [
-                    { name: 'Single', action: () => navigate('./snakeGame?mode=single') },
-                    { name: '2 Players', action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => { setTournamentGameType('snake'); setShowTournamentRegistration(true); } }
-                ];
-            case 'Friends':
-                return [
-                    { name: 'See Friends', action: () => friendsManagerRef.current?.handleSeeFriends() },
-                    { name: 'Add Friend', action: () => friendsManagerRef.current?.handleAddFriendsClick() }
-                ];
-            case 'Dashboard':
-                return [
-                    { name: 'Go to Dashboard', action: () => navigate('/dashboard') },
-                ];
-            case 'Settings':
-                return [
-                    { name: 'Delete Account', action: () => setShowDeleteConfirmation(true) },
-                    { name: 'Update data', action: () => console.log('Updating account data') },
-					{ name: 'Download data', action: () => downloadUserData() },
-					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
-                    { name: 'Edit 2FA', action: () => setShow2FASettings(true) },
-                    { name: 'Language', action: () => console.log('Updating Language Setting') }, //TODO.
-                ];
-            default:
-                return [];
-        }
-    };
-
+    // ===== FRIENDS HANDLERS =====
+    const handleFriendsAction = () => {
+        // This will be handled by ContentArea internally
+    };    
+    // ===== EARLY RETURN FOR UNAUTHENTICATED USER =====
     if (!user) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-pink-grid">
@@ -306,194 +183,91 @@ export default function PlayerProfile(): JSX.Element {
         );
     }
 
+    // ===== COMPONENT RENDER =====
     return (
-      <main className="min-h-screen flex flex-col">
-        <header className="h-40 bg-blue-deep flex">
-          <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">
-            What should we play today?
-          </div>
-        </header>
-        <section className="flex-1 bg-pink-grid flex items-center justify-center">
-          <div className="relative bg-pink-dark w-[825px] h-[600px] m-[10px] flex justify-between items-center px-[50px]">
-            {/* LEFT SIDE: Player Card */}
-            <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
-              <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">
-                PLAYER INFO
-              </div>
-              <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
-                <img
-                  onClick={() => {
-                    console.log('Avatar clicked, current isOpen:', isOpen);
-                    setIsOpen(!isOpen);
-                  }}
-                  src={user.avatarUrl}
-                  alt="Avatar"
-                  className="avatar m-auto shadow-no-blur cursor-pointer"
-                  style={{ borderColor: "#7a63fe" }}
-                />
-                {/* update the local strage here*/}
-                <AvatarSelection
-                  open={isOpen}
-                  onClose={() => setIsOpen(false)}
-                  onSelect={handleSelectAvatar}
-                />
-
-                <div className="flex flex-col m-auto justify-evenly">
-                  <div className="font-pixelify text-white text-[40px]">
-                    {user.name}
-                  </div>
-                  <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">
-                    Wins: {basicStats?.wins ?? user.wins ?? 0}
-                  </div>
-                  <div className="font-dotgothic font-bold text-white text-base text-border-blue">
-                    Losses: {basicStats?.losses ?? user.losses ?? 0}
-                  </div>
-                </div>
-              </div>
-              <CategoryButtons
-                buttons={[
-                  {
-                    name: "Games",
-                    icon: arrow_icon,
-                    onClick: () => setSelectedCategory("Games"),
-                  },
-                  {
-                    name: "Friends",
-                    icon: arrow_icon,
-                    onClick: () => setSelectedCategory("Friends"),
-                  },
-                  {
-                    name: "Dashboard",
-                    icon: arrow_icon,
-                    onClick: () => setSelectedCategory("Dashboard"),
-                  },
-                  {
-                    name: "Settings",
-                    icon: arrow_icon,
-                    className:
-                      "button-pp-blue-settings shadow-no-blur flex items-center justify-between",
-                    onClick: () => setSelectedCategory("Settings"),
-                  },
-                ]}
-              />
-            </div>
-            {/* Delete Account Modal */}
-            <DeleteAccount
-              open={showDeleteConfirmation}
-              onClose={() => setShowDeleteConfirmation(false)}
-            />
-            {/* Privacy Policy Modal */}
-            <PrivacyPolicyModal
-              isOpen={showPrivacyModal}
-              onClose={() => setShowPrivacyModal(false)}
-            />
-            {/* 2FA Settings Modal */}
-            {show2FASettings && user && (
-              <TwoFactorSettings
-                user={user}
-                onClose={() => setShow2FASettings(false)}
-              />
-            )}
-            {/* RIGHT SIDE: Content Box */}
-            <div
-              className="w-[350px] h-[500px] overflow-hidden bg-cover bg-center relative border-img"
-              style={{
-                backgroundImage: `url(${bgimage})`,
-                opacity: 0.5,
-                boxShadow:
-                  "inset 8px 0 2px -4px rgba(0, 0, 0, 0.6), inset 0 8px 2px -4px rgba(0, 0, 0, 0.6)",
-              }}
-            >
-              <div className="absolute inset-0 overflow-y-auto">
-                {/* Game 2 Player Mode */}
-                <PlayerSelection
-                  open={showPlayerSelection}
-                  users={users}
-                  onSelect={handlePlayerSelect}
-                  onCancel={() => {
-                    setShowPlayerSelection(false);
-                    setSelectedCategory(playerSelectionGame);
-                  }}
-                />
-                {/* Password Verification Modal */}
-                {showPasswordVerification && selectedPlayer && (
-                  <PasswordVerification
-                    open={showPasswordVerification && !!selectedPlayer}
-                    user={selectedPlayer}
-                    password={password}
-                    error={passwordError}
-                    onPasswordChange={setPassword}
-                    onVerify={handlePasswordSubmit}
-                    onCancel={resetToPlayerSelection}
-                  />
-                )}
-                {/* Tournament Registration Modal */}
-                {showTournamentRegistration && (
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <TournamentRegistration
-                      open={showTournamentRegistration}
-                      onClose={() => setShowTournamentRegistration(false)}
-                      allUsers={allUsers}
-                      tournamentPlayers={tournamentPlayers}
-                      setTournamentPlayers={setTournamentPlayers}
-                      selectedParticipants={selectedTournamentParticipants}
-                      setSelectedParticipants={
-                        setSelectedTournamentParticipants
-                      }
-                      setVerifyingUser={setTournamentVerifyingUser}
-                      user={user}
-                                    gameType={tournamentGameType}
+        <main className="min-h-screen flex flex-col">
+            {/* Header Section */}
+            <ProfileHeader />
+            
+            {/* Main Content Section */}
+            <section className="flex-1 bg-pink-grid flex items-center justify-center">
+                <div className="relative bg-pink-dark w-[825px] h-[600px] m-[10px] flex justify-between items-center px-[50px]">
+                    
+                    {/* Left Side: Player Info Card */}
+                    <PlayerInfoCard
+                        user={user}
+                        basicStats={basicStats}
+                        onCategorySelect={setSelectedCategory}
+                        onAvatarUpdate={handleAvatarUpdate}
                     />
-                    {tournamentVerifyingUser && (
-                      <PasswordVerification
-                        open={!!tournamentVerifyingUser}
-                        user={tournamentVerifyingUser}
-                        password={tournamentVerifyPassword}
-                        error={tournamentVerifyError}
-                        onPasswordChange={setTournamentVerifyPassword}
-                        onVerify={handleVerifyPassword}
-                        onCancel={() => {
-                          setTournamentVerifyingUser(null);
-                          setTournamentVerifyPassword("");
-                          setTournamentVerifyError("");
-                        }}
-                      />
-                    )}
-                  </div>
-                )}
-                {/* Category Content */}
-                {selectedCategory &&
-                  !showPlayerSelection &&
-                  !showPasswordVerification && (
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4">
-                      {getButtonsForCategory(selectedCategory).map(
-                        (button, index) => (
-                          <button
-                            key={button.name}
-                            className="button-pp-purple shadow-no-blur-60"
-                            onClick={button.action}
-                          >
-                            {button.name}
-                          </button>
-                        )
-                      )}
-                    </div>
-                  )}
-                {/* Friends Manager Component */}
-                <FriendsManager ref={friendsManagerRef} user={user} />
-              </div>
-            </div>
-          </div>
-        </section>
-        <footer className="h-40 bg-blue-deep flex justify-center items-center">
-          <Button onClick={handleLogout} style={{ marginTop: 0 }}>
-            <img
-              src={log_out_icon}
-              alt="Log out button"
-              className="h-8 w-auto"
-            />
-          </Button>
-        </footer>
-      </main>
+                    
+                    {/* Right Side: Dynamic Content Area */}
+                    <PlayerContents
+                        // === UI STATE PROPS ===
+                        selectedCategory={selectedCategory}
+                        showPlayerSelection={showPlayerSelection}
+                        playerSelectionGame={playerSelectionGame}
+                        showPasswordVerification={showPasswordVerification}
+                        password={password}
+                        passwordError={passwordError}
+                        
+                        // === TOURNAMENT STATE PROPS ===
+                        showTournamentRegistration={showTournamentRegistration}
+                        tournamentPlayers={tournamentPlayers}
+                        selectedTournamentParticipants={selectedTournamentParticipants}
+                        tournamentVerifyingUser={tournamentVerifyingUser}
+                        tournamentVerifyPassword={tournamentVerifyPassword}
+                        tournamentVerifyError={tournamentVerifyError}
+                        tournamentGameType={tournamentGameType}
+                        
+                        // === MODAL STATE PROPS ===
+                        showDeleteConfirmation={showDeleteConfirmation}
+                        showPrivacyModal={showPrivacyModal}
+                        show2FASettings={show2FASettings}
+                        
+                        // === USER DATA PROPS ===
+                        user={user}
+                        users={users}
+                        allUsers={allUsers}
+                        selectedPlayer={selectedPlayer}
+                        
+                        // === PLAYER SELECTION HANDLERS ===
+                        onPlayerSelect={handlePlayerSelect}
+                        onPlayerSelection={handlePlayerSelection}
+                        
+                        // === PASSWORD VERIFICATION HANDLERS ===
+                        onPasswordSubmit={handlePasswordSubmit}
+                        onPasswordChange={setPassword}
+                        onResetToPlayerSelection={resetToPlayerSelection}
+                        
+                        // === TOURNAMENT HANDLERS ===
+                        onVerifyTournamentPassword={handleVerifyPassword}
+                        onTournamentClose={() => setShowTournamentRegistration(false)}
+                        onSetTournamentPlayers={setTournamentPlayers}
+                        onSetSelectedTournamentParticipants={setSelectedTournamentParticipants}
+                        onSetTournamentVerifyingUser={setTournamentVerifyingUser}
+                        onSetTournamentVerifyPassword={setTournamentVerifyPassword}
+                        onSetTournamentVerifyError={setTournamentVerifyError}
+                        onTournamentStart={handleTournamentStart}
+                        
+                        // === MODAL HANDLERS ===
+                        onCloseDeleteConfirmation={() => setShowDeleteConfirmation(false)}
+                        onClosePrivacyModal={() => setShowPrivacyModal(false)}
+                        onClose2FASettings={() => setShow2FASettings(false)}
+                        onShowDeleteConfirmation={() => setShowDeleteConfirmation(true)}
+                        onShowPrivacyModal={() => setShowPrivacyModal(true)}
+                        onShow2FASettings={() => setShow2FASettings(true)}
+                        
+                        // === NAVIGATION HANDLERS ===
+                        onNavigate={handleNavigate}
+                        onFriendsAction={handleFriendsAction}
+                        onDownloadUserData={() => downloadUserData(user)}
+                    />
+                </div>
+            </section>
+            
+            {/* Footer Section */}
+            <ProfileFooter onLogout={handleLogout} />
+        </main>
     );
 }

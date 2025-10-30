@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { sanitizeInput } from '../utils/sanitizeInput';
+import { sanitizeInput } from '../../utils/sanitizeInput';
 
 interface TypewriterTextProps {
   text: string;

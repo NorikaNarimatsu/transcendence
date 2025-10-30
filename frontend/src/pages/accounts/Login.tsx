@@ -1,5 +1,5 @@
 import login_image from '../../assets/Login.png';
-import ButtonPurple from '../../components/ButtonPurple'
+import ButtonPurple from '../../components/decoration/ButtonPurple'
 import eye_icon from '../../assets/icons/eye.png'
 import arrow_icon from '../../assets/icons/arrow.png'
 import { sanitizeInput } from '../../utils/sanitizeInput';

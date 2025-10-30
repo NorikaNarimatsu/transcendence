@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTournament } from './tournamentContext';
-import Button from '../../components/ButtonDarkPink';
+import Button from '../../components/decoration/ButtonDarkPink';
 import home_icon from '../../assets/icons/Home.png';
 import type { SelectedPlayer } from '../user/PlayerContext';
 

@@ -8,15 +8,15 @@ import { calculateGameConfig } from '../../gameEngines/pongConfig';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 import { useTournament } from '../tournament/tournamentContext';
-import ButtonPink from '../../components/ButtonDarkPink';
+import ButtonPink from '../../components/decoration/ButtonDarkPink';
 
 //Icons import
 import home_icon from '../../assets/icons/Home.png';
 import gear_icon from '../../assets/icons/Settings.png';
 
 //Game instructions+Settings+Stats components
-import GameInstructions from '../../components/GameInstructionsPongGame';
-import GameSettings from '../../components/SettingsGames';
+import GameInstructions from '../../components/games/GameInstructionsPongGame';
+import GameSettings from '../../components/games/SettingsGames';
 
 import type { SelectedPlayer } from '../user/PlayerContext';
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTournament } from './tournamentContext';
 import type { TournamentMatch } from './tournamentContext';
 import type { SelectedPlayer } from '../user/PlayerContext';
-import Button from '../../components/ButtonDarkPink';
+import Button from '../../components/decoration/ButtonDarkPink';
 import home_icon from '../../assets/icons/Home.png';
 
 interface MatchResult {

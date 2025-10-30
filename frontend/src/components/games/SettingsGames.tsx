@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import bgimage from '../assets/Game.jpg'
-import LeftButton from './ButtonPurple'
+import bgimage from '../../assets/Game.jpg'
+import LeftButton from '../decoration/ButtonPurple'
 
 interface GameSettingsProps {
     onClose: () => void;

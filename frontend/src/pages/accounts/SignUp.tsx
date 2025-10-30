@@ -1,5 +1,5 @@
 import signup_image from "../../assets/SignUp.jpg";
-import ButtonPurple from "../../components/ButtonPurple";
+import ButtonPurple from "../../components/decoration/ButtonPurple";
 import mail_icon from "../../assets/icons/mail.png";
 import arrow_icon from "../../assets/icons/arrow.png";
 import { useState, useEffect } from "react";

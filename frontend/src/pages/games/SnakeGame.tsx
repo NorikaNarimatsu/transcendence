@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import ButtonPink from '../../components/ButtonDarkPink';
+import ButtonPink from '../../components/decoration/ButtonDarkPink';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 import type { SelectedPlayer } from '../user/PlayerContext';
@@ -15,8 +15,8 @@ import home_icon from '../../assets/icons/Home.png'
 import gear_icon from '../../assets/icons/Settings.png'
 
 //Import Game Instructions + Settings + Stats
-import GameInstructions from '../../components/GameInstructionsSnakeGame';
-import GameSettings from '../../components/SettingsGames';
+import GameInstructions from '../../components/games/GameInstructionsSnakeGame';
+import GameSettings from '../../components/games/SettingsGames';
 
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();

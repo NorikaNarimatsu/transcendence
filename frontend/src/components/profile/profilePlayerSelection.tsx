@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import type { SelectedPlayer } from '../pages/user/PlayerContext';
-import { useUser } from '../pages/user/UserContext';
+import type { SelectedPlayer } from '../../pages/user/PlayerContext';
+import { useUser } from '../../pages/user/UserContext';
 
 interface PlayerSelectionProps {
     open: boolean;

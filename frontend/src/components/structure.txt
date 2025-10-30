@@ -1,0 +1,41 @@
+PLAYER PROFILE PAGE STRUCTURE
+
+MAIN COMPONENTS:
+1. PlayerProfile.tsx - Main Page (Controls Everything)
+2. ProfileHeader.tsx - Top Navigation Bar
+3. PlayerInfoCard.tsx - Left Side (Avatar + Stats + Menu)
+4. PlayerContents.tsx - Right Side (Dynamic Buttons + Modals)
+5. ProfileFooter.tsx - Bottom (Logout Button)
+
+HOW IT WORKS:
+• PlayerProfile = Boss (manages all state and data)
+• PlayerInfoCard = User info + navigation menu
+• PlayerContents = Shows different buttons based on what user clicks
+• All modals and popups controlled by PlayerContents
+
+ORGANIZED FOLDERS:
+
+/games/ - Game-related stuff
+• GamesButtons.tsx - Main game menu
+• PongButtons.tsx - Pong game options
+• SnakeButtons.tsx - Snake game options
+• Game instructions for both games
+• Game settings
+
+/friends/ - Friend-related stuff
+• FriendsButtons.tsx - Friend action buttons
+• FriendsManager.tsx - Friend list and management
+
+/profile/ - Profile-related modals
+• AvatarSelection.tsx - Choose avatar
+• profilePlayerSelection.tsx - Pick Player 2
+• profilePasswordVerification.tsx - Enter password
+• profileTournamentRegistration.tsx - Set up tournaments
+• profileCategoryButtons.tsx - Menu button definitions
+
+/privacy_security/ - Security stuff
+• 2FSettings.tsx - Two-factor authentication
+• PrivacyPolicyModal.tsx - Privacy policy popup
+
+SIMPLE FLOW:
+User clicks menu → PlayerInfoCard tells PlayerProfile → PlayerProfile updates PlayerContents → PlayerContents shows new buttons/modals

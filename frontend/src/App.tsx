@@ -1,8 +1,8 @@
 // import React from 'react'; -> not needed for React version 17+ and we have 19
 import type { JSX } from 'react';
 import { useState } from 'react';
-import ButtonDarkPink from './components/ButtonDarkPink'
-import TypewriterText from './components/TypewriterAnimation';
+import ButtonDarkPink from './components/decoration/ButtonDarkPink'
+import TypewriterText from './components/decoration/TypewriterAnimation';
 
 export default function App(): JSX.Element{
   const [showSubtitle, setShowSubtitle] = useState(false);

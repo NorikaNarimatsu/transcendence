@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../user/UserContext';
-import Button from '../../components/ButtonDarkPink';
+import Button from '../../components/decoration/ButtonDarkPink';
 import home_icon from '../../assets/icons/Home.png';
 
 interface MatchData {

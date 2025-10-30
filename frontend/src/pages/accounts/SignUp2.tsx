@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import signup_image from '../../assets/SignUp.jpg';
-import ButtonPurple from '../../components/ButtonPurple';
+import ButtonPurple from '../../components/decoration/ButtonPurple';
 import mail_icon from '../../assets/icons/mail.png';
 import person_icon from '../../assets/icons/person.png';
 import eye_icon from '../../assets/icons/eye.png';
 import arrow_icon from '../../assets/icons/arrow.png';
 import { validatePasswordRealTime } from '../../utils/passwordValidation';
 import SafeError from '../../components/SafeError';
-import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import PrivacyPolicyModal from '../../components/privacy_security/PrivacyPolicyModal';
 
 	export default function signupUnkownUser() {
 	const location = useLocation();

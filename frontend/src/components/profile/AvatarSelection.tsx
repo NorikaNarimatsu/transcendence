@@ -1,6 +1,6 @@
 import React from 'react'
-import upload_icon from '../assets/icons/Upload.png';
-import x_icon from '../assets/icons/X.png';
+import upload_icon from '../../assets/icons/Upload.png';
+import x_icon from '../../assets/icons/X.png';
 
 interface AvatarSelectionProps {
     open: boolean;
@@ -8,9 +8,7 @@ interface AvatarSelectionProps {
     onSelect: (avatarUrl: string) => void;
 }
 
-export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelectionProps ) {
-    console.log('AvatarSelection rendered with open:', open);
-    
+export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelectionProps ) {    
     if (!open)
         return null
 
@@ -47,27 +45,3 @@ export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelec
         </div>
     )
 }
-
-/*
-Strategy:
-2 endpoitns:
-- handleAvatarSelect
-            const form = new FormData();
-            form.append('avatar', file);
-            form.append('userID', String(user.userID));
-
-            const res = await fetch('https://localhost:8443/user/upload-avatar', {
-                method: 'POST',
-                body: form
-            });
-
-- handleAvatarUpload
-            const res = await fetch('https://localhost:8443/user/update-avatar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: user.userID, avatarUrl })
-            });
-
-
-*/
- 

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import type { User } from '../pages/user/UserContext'; // maybe delete?
-import type { SelectedPlayer } from '../pages/user/PlayerContext';
-import { useTournament } from '../pages/tournament/tournamentContext';
+import type { User } from '../../pages/user/UserContext'; // maybe delete?
+import type { SelectedPlayer } from '../../pages/user/PlayerContext';
+import { useTournament } from '../../pages/tournament/tournamentContext';
 
 interface TournamentRegistrationProps {
     open: boolean;

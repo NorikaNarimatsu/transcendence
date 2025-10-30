@@ -1,6 +1,6 @@
 import { useState, forwardRef, useImperativeHandle } from 'react';
-import type { SelectedPlayer } from '../pages/user/PlayerContext';
-import type { User } from '../pages/user/UserContext'; 
+import type { SelectedPlayer } from '../../pages/user/PlayerContext';
+import type { User } from '../../pages/user/UserContext'; 
 
 interface FriendsManagerProps {
     user: User;

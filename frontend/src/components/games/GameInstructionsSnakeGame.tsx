@@ -1,6 +1,6 @@
 import React from 'react'
 
-import ArrowIcon from '../assets/icons/arrow.png'
+import ArrowIcon from '../../assets/icons/arrow.png'
 
 export default function GameInstructionsSnakeGame(): JSX.Element {
     return (
