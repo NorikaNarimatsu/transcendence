@@ -4,7 +4,7 @@ export interface SelectedPlayer {
     userID: number;
     name: string;
     avatarUrl: string;
-    lastLoginedAt?: string;
+    // lastLoginedAt?: string;
 }
 
 interface PlayerContextType {

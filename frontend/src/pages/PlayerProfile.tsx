@@ -58,7 +58,7 @@ export default function PlayerProfile(): JSX.Element {
 	const [show2FASettings, setShow2FASettings] = useState(false);
 
     const navigate = useNavigate();
-    const { user, logout } = useUser();
+    const { user, logout, setUser } = useUser();
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
 
     useEffect(() => {
@@ -201,29 +201,22 @@ export default function PlayerProfile(): JSX.Element {
         }
     
         setAvatarUrlLocal(avatarUrl);
-        // update stored user so other parts can pick up change
-        const raw = localStorage.getItem('user');
-        if (raw) {
-          const stored = JSON.parse(raw);
-          stored.avatarUrl = avatarUrl;
-          localStorage.setItem('user', JSON.stringify(stored));
-          window.dispatchEvent(new CustomEvent('userUpdated', { detail: stored }));
+        // Update the user context with the new avatar URL
+        if (user) {
+          const updatedUser = { ...user, avatarUrl: avatarUrl };
+          setUser(updatedUser); // This will update both state and localStorage automatically
         }
-        setIsOpen(false);
       } catch (err) {
         console.error('Error updating avatar:', err);
       } finally {
         setUploadingAvatar(false);
       }
     };
-    ///////////////// WORK IN PROGRESS //////////////////
-
     useEffect(() => {
         if (user?.userID) {
             fetchBasicStats();
         } else {
             setBasicStats(null);
-            // setShowBasicStats(false);
         }
     }, [user?.userID]);
     
@@ -329,10 +322,13 @@ export default function PlayerProfile(): JSX.Element {
               </div>
               <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
                 <img
-                  onClick={() => setIsOpen(!isOpen)}
+                  onClick={() => {
+                    console.log('Avatar clicked, current isOpen:', isOpen);
+                    setIsOpen(!isOpen);
+                  }}
                   src={user.avatarUrl}
                   alt="Avatar"
-                  className="avatar m-auto shadow-no-blur"
+                  className="avatar m-auto shadow-no-blur cursor-pointer"
                   style={{ borderColor: "#7a63fe" }}
                 />
                 {/* update the local strage here*/}

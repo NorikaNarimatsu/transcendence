@@ -9,6 +9,8 @@ interface AvatarSelectionProps {
 }
 
 export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelectionProps ) {
+    console.log('AvatarSelection rendered with open:', open);
+    
     if (!open)
         return null
 

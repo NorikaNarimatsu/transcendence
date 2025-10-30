@@ -141,7 +141,7 @@ import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 				<button 
 					type="button"
 					onClick={() => navigate(-1)}
-					className="text-blue-deep underline mb-4">
+					className="text-blue-deep font-dotgothic underline mb-4">
 					← Wrong email? Go back 
 				</button>
 
