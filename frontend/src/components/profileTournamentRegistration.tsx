@@ -3,6 +3,8 @@ import type { User } from '../pages/user/UserContext'; // maybe delete?
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
 import { useTournament } from '../pages/tournament/tournamentContext';
 
+import { useLanguage } from '../contexts/LanguageContext';
+
 interface TournamentRegistrationProps {
     open: boolean;
     onClose: () => void;
@@ -61,13 +63,16 @@ export function TournamentRegistration({
 
     if (!open) return null;
 
+    const { lang, t } = useLanguage();
+    const translation = t[lang];
+
     return (
             <div className="bg-pink-light p-6 rounded-lg w-[370px] max-h-[95vh] flex flex-col items-center overflow-y-auto shadow-xl border-2 border-blue-deep" style={{ boxSizing: 'border-box' }}>
                 <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center w-full" style={{ marginTop: 0, paddingTop: 0, lineHeight: '2.2rem' }}>
-                    Registration
+                    {translation.pages.profile.registration}
                 </h3>
                 <label className="font-pixelify text-blue-deep mb-2 w-full text-left">
-                    Number of players (3-8):
+                    {translation.pages.profile.numberOfPlayers}
                 </label>
                 <input
                     type="number"
@@ -82,7 +87,7 @@ export function TournamentRegistration({
                     style={{ fontSize: '1.3rem' }}
                 />
                 <div className="mb-4 w-full">
-                    <span className="font-pixelify text-blue-deep mb-2 block">Select Participants:</span>
+                    <span className="font-pixelify text-blue-deep mb-2 block">{translation.pages.profile.selectParticipants}</span>
                     <div className="flex flex-wrap gap-2 mt-2 overflow-y-auto" style={{ maxHeight: '110px' }}>
                         {allUsers.map(player => (
                             <button
@@ -107,7 +112,7 @@ export function TournamentRegistration({
                     </div>
                 </div>
                 <div className="mb-4 w-full">
-                    <span className="font-pixelify text-blue-deep mb-2 block">Selected:</span>
+                    <span className="font-pixelify text-blue-deep mb-2 block">{translation.pages.profile.selected}</span>
                     <div className="flex flex-wrap gap-2 mt-2">
                         {selectedParticipants.map(selectedPlayer => (
                             <span key={selectedPlayer.userID} className="flex items-center gap-1 bg-pink-light px-2 py-1 rounded font-pixelify text-blue-deep" style={{ fontSize: '1.1rem' }}>
@@ -155,7 +160,7 @@ export function TournamentRegistration({
                             opacity: selectedParticipants.length === tournamentPlayers - 1 ? 1 : 0.5
                         }}
                     >
-                        Start
+                        {translation.common.start}
                     </button>
                     <button
                         onClick={onClose}
@@ -165,7 +170,7 @@ export function TournamentRegistration({
                             minHeight: '40px'
                         }}
                     >
-                        Cancel
+                        {translation.common.cancel}
                     </button>
                 </div>
             </div>

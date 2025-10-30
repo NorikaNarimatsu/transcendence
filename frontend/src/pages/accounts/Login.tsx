@@ -9,10 +9,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../user/UserContext'; 
 
+import { useLanguage } from '../../contexts/LanguageContext';
+
 export default function LoginPage(){
   const location = useLocation();
   const navigate = useNavigate();
   const { setUser } = useUser();
+
+  const { lang, t } = useLanguage();
+  const translation = t[lang];
 
   const email = location.state?.email || "";
   const [name, setName] = useState("");
@@ -232,12 +237,10 @@ export default function LoginPage(){
                   LOG IN
                 </h1>
                 <h2 className="text-xl text-blue-deep font-dotgothic mb-[2px]">
-                  Hello {name ? sanitizeInput.escapeHtml(name) : "User"}!
+                  {translation.pages.login.hello} {name ? sanitizeInput.escapeHtml(name) : 'User'}!
                 </h2>
-                <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">
-                  Welcome back :)
-                </h2>
-
+                <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">{translation.pages.login.welcomeBack}</h2>
+                
                 {/* Password input with clickable eye */}
                 <div className="relative mb-4">
                   <img
@@ -262,9 +265,9 @@ export default function LoginPage(){
               {/* Continue button */}
               <ButtonPurple type="submit">
                 <span className="flex items-center justify-end gap-2">
-                  Continue
-                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto" />
-                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto" />
+                  {translation.common.continue}
+                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
+                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
                 </span>
               </ButtonPurple>
             </form>

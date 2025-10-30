@@ -14,6 +14,7 @@ import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import { FriendsManager } from '../components/FriendsManager';
 
 import TwoFactorSettings from '../components/2FSettings';
+import { useLanguage } from '../contexts/LanguageContext';
 
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
@@ -60,6 +61,9 @@ export default function PlayerProfile(): JSX.Element {
     const navigate = useNavigate();
     const { user, logout, setUser } = useUser();
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
+
+    const { lang, setLang, t } = useLanguage();
+    const translation = t[lang];
 
     useEffect(() => {
         setSelectedPlayer(null);
@@ -258,38 +262,46 @@ export default function PlayerProfile(): JSX.Element {
         switch(category) {
             case 'Games':
                 return [
-                    { name: 'Play Pong', action: () => setSelectedCategory('Pong') },
-                    { name: 'Play Snake', action: () => setSelectedCategory('Snake') }
+                    { name: translation.pages.profile.playPong, action: () => setSelectedCategory('Pong') },
+                    { name: translation.pages.profile.playSnake, action: () => setSelectedCategory('Snake') }
                 ];
             case 'Pong':
                 return [
-                    { name: 'Single', action: () => navigate('./pongGame?mode=single') },
-                    { name: '2 Players', action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => { setTournamentGameType('pong'); setShowTournamentRegistration(true); } }
+                    { name: translation.pages.profile.single, action: () => navigate('./pongGame?mode=single') },
+                    { name: translation.pages.profile.twoPlayers, action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
+                    { name: translation.pages.profile.tournament, action: () => setShowTournamentRegistration(true) }
                 ];
             case 'Snake':
                 return [
-                    { name: 'Single', action: () => navigate('./snakeGame?mode=single') },
-                    { name: '2 Players', action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => { setTournamentGameType('snake'); setShowTournamentRegistration(true); } }
+                    { name: translation.pages.profile.single, action: () => navigate('./snakeGame?mode=single') },
+                    { name: translation.pages.profile.twoPlayers, action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
+                    { name: translation.pages.profile.tournament, action: () => { setTournamentGameType('snake'); setShowTournamentRegistration(true); } }
                 ];
             case 'Friends':
                 return [
-                    { name: 'See Friends', action: () => friendsManagerRef.current?.handleSeeFriends() },
-                    { name: 'Add Friend', action: () => friendsManagerRef.current?.handleAddFriendsClick() }
+                    { name: translation.pages.profile.seeFriends, action: () => friendsManagerRef.current?.handleSeeFriends() },
+                    { name: translation.pages.profile.addFriends, action: () => friendsManagerRef.current?.handleAddFriendsClick() }
                 ];
             case 'Dashboard':
                 return [
-                    { name: 'Go to Dashboard', action: () => navigate('/dashboard') },
+                    { name: translation.pages.profile.goToDashboard, action: () => navigate('/dashboard') },
+                    // { name: 'Basic Stats', action: () => fetchBasicStats() }
                 ];
             case 'Settings':
                 return [
-                    { name: 'Delete Account', action: () => setShowDeleteConfirmation(true) },
-                    { name: 'Update data', action: () => console.log('Updating account data') },
-					{ name: 'Download data', action: () => downloadUserData() },
-					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
-                    { name: 'Edit 2FA', action: () => setShow2FASettings(true) },
-                    { name: 'Language', action: () => console.log('Updating Language Setting') }, //TODO.
+                    { name: translation.pages.profile.deleteAccount, action: () => setShowDeleteConfirmation(true) },
+                    { name: translation.pages.profile.updateData, action: () => console.log('Updating account data') },
+					{ name: translation.pages.profile.downloadData, action: () => downloadUserData() },
+					{ name: translation.common.privacyPolicy, action: () => setShowPrivacyModal(true) },
+                    { name: translation.pages.profile.edit2FA, action: () => setShow2FASettings(true) },
+                    { name: translation.pages.profile.language, action: () => setSelectedCategory('Language') },
+                ];
+            case 'Language':
+                return [
+                    { name: translation.pages.profile.english, action: () => setLang("en") },
+                    { name: translation.pages.profile.portuguese, action: () => setLang("pt") },
+                    { name: translation.pages.profile.polish, action: () => setLang("pl") },
+                    { name: translation.pages.profile.japanese, action: () => setLang("jp") },
                 ];
             default:
                 return [];
@@ -310,7 +322,7 @@ export default function PlayerProfile(): JSX.Element {
       <main className="min-h-screen flex flex-col">
         <header className="h-40 bg-blue-deep flex">
           <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">
-            What should we play today?
+            {translation.pages.profile.questionHeader}
           </div>
         </header>
         <section className="flex-1 bg-pink-grid flex items-center justify-center">
@@ -318,7 +330,7 @@ export default function PlayerProfile(): JSX.Element {
             {/* LEFT SIDE: Player Card */}
             <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
               <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">
-                PLAYER INFO
+                {translation.pages.profile.playerInfo}
               </div>
               <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
                 <img
@@ -353,22 +365,22 @@ export default function PlayerProfile(): JSX.Element {
               <CategoryButtons
                 buttons={[
                   {
-                    name: "Games",
+                    name: translation.pages.profile.games,
                     icon: arrow_icon,
                     onClick: () => setSelectedCategory("Games"),
                   },
                   {
-                    name: "Friends",
+                    name: translation.pages.profile.friends,
                     icon: arrow_icon,
                     onClick: () => setSelectedCategory("Friends"),
                   },
                   {
-                    name: "Dashboard",
+                    name: translation.pages.profile.dashboard,
                     icon: arrow_icon,
                     onClick: () => setSelectedCategory("Dashboard"),
                   },
                   {
-                    name: "Settings",
+                    name: translation.pages.profile.settings,
                     icon: arrow_icon,
                     className:
                       "button-pp-blue-settings shadow-no-blur flex items-center justify-between",

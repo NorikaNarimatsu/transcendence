@@ -5,6 +5,7 @@ import ButtonPink from '../../components/ButtonDarkPink';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 import type { SelectedPlayer } from '../user/PlayerContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useTournament } from '../tournament/tournamentContext';
 
 import { SnakeGameEngine, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
@@ -17,6 +18,7 @@ import gear_icon from '../../assets/icons/Settings.png'
 //Import Game Instructions + Settings + Stats
 import GameInstructions from '../../components/GameInstructionsSnakeGame';
 import GameSettings from '../../components/SettingsGames';
+import { Translation } from 'react-i18next';
 
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();
@@ -39,6 +41,9 @@ export default function SnakeGame(): JSX.Element {
     const handleBackToProfile = () => {
         navigate('/playerProfile');
     };
+
+    const { lang, t } = useLanguage();
+    const translation = t[lang];
 
     const [view, setView] = useState<"game"|"instructions"|"settings">('instructions');
     const [backgroundColor, setBackgroundColor] = useState<string>('bg-pink-light');
@@ -406,7 +411,7 @@ useEffect(() => {
                         >
                             <div className="text-center">
                                 <p className="text-white text-4xl font-pixelify mb-6">
-                                    Game Over!
+                                    {translation.pages.snakeGame.gameOver}!
                                 </p>
                                 {engine.isMultiplayer ? (
                                     <div className="text-white text-2xl font-pixelify mb-4">
@@ -420,15 +425,15 @@ useEffect(() => {
                                 </div>
                             ) : (
                                 <div className="text-white text-2xl font-pixelify mb-4">
-                                    <div>Final Score: {engine.snake1.score}/10 foods</div>
+                                    <div>{translation.pages.snakeGame.finalScore}: {engine.snake1.score}/10</div>
                                     {engine.snake1.score >= 10 && (
-                                        <div className="text-lg text-400 mt-2">🎉 Goal Achieved! You WIN!</div>
+                                        <div className="text-lg text-400 mt-2">🎉 {translation.pages.snakeGame.goalachieved}</div>
                                     )}
                                 </div>
                             )}
                                 <div className="flex flex-col gap-4">
                                     <p className="text-white text-xl font-pixelify opacity-75">
-                                        Press SPACE to play again
+                                        {translation.pages.snakeGame.pressSpaceToPlayAgain}
                                     </p>
                                 </div>
                             </div>
