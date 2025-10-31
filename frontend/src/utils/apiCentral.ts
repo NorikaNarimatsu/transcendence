@@ -73,7 +73,7 @@ async function apiRequestBlob( endpoint: string, method: string, body?: any): Pr
 		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
 			method,
 			headers,
-			body: body? JSON.stringify(body) : undefined,
+			body: body ? JSON.stringify(body) : undefined,
 		});
 
 		return await handleBlobResponse(response);

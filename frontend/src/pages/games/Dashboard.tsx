@@ -5,6 +5,8 @@ import Button from '../../components/ButtonDarkPink';
 import home_icon from '../../assets/icons/Home.png';
 import apiCentral from '../../utils/apiCentral';
 
+import { useLanguage } from '../../contexts/LanguageContext';
+
 interface MatchData {
     matchID: number;
     matchType: string;
@@ -44,6 +46,9 @@ interface Achievement {
 export default function Dashboard(): JSX.Element {
     const { user, logout } = useUser();
     const navigate = useNavigate();
+
+    const { lang, t } = useLanguage();
+    const translation = t[lang];
     
     const [matches, setMatches] = useState<MatchData[]>([]);
     const [stats, setStats] = useState<UserStats | null>(null);
@@ -104,8 +109,8 @@ export default function Dashboard(): JSX.Element {
         return [
             {
                 id: 'first_win',
-                name: 'First Victory',
-                description: 'Win your first game',
+                name: translation.pages.dashboard.firstVictory,
+                description: translation.pages.dashboard.winYourFirstGame,
                 icon: '🏆',
                 unlocked: wins >= 1,
                 progress: Math.min(wins, 1),
@@ -113,8 +118,8 @@ export default function Dashboard(): JSX.Element {
             },
             {
                 id: 'ten_wins',
-                name: 'Rising Star',
-                description: 'Win 10 games',
+                name: translation.pages.dashboard.risingStar,
+                description: translation.pages.dashboard.winTenGames,
                 icon: '⭐️',
                 unlocked: wins >= 10,
                 progress: Math.min(wins, 10),
@@ -122,8 +127,8 @@ export default function Dashboard(): JSX.Element {
             },
             {
                 id: 'hundred_wins',
-                name: 'Champion',
-                description: 'Win 100 games',
+                name: translation.pages.dashboard.champion,
+                description: translation.pages.dashboard.winOnehundredGames,
                 icon: '👑',
                 unlocked: wins >= 100,
                 progress: Math.min(wins, 100),
@@ -131,8 +136,8 @@ export default function Dashboard(): JSX.Element {
             },
             {
                 id: 'perfect_game',
-                name: 'Perfect Game',
-                description: 'Win a match 3-0',
+                name: translation.pages.dashboard.perfectGame,
+                description: translation.pages.dashboard.winAMatchThreeZero,
                 icon: '💎',
                 unlocked: matchAnalysis.perfectGames > 0,
                 progress: Math.min(matchAnalysis.perfectGames, 1),
@@ -140,8 +145,8 @@ export default function Dashboard(): JSX.Element {
             },
             {
                 id: 'consistency_king',
-                name: 'Consistency King',
-                description: 'Win 5 games in a row',
+                name: translation.pages.dashboard.consistencyKing,
+                description: translation.pages.dashboard.winFiveGamesInARow,
                 icon: '🔥',
                 unlocked: matchAnalysis.maxStreak >= 5,
                 progress: Math.min(matchAnalysis.maxStreak, 5),
@@ -149,8 +154,8 @@ export default function Dashboard(): JSX.Element {
             },
             {
                 id: 'active_player',
-                name: 'Active Player',
-                description: 'Play 25 matches',
+                name: translation.pages.dashboard.activePlayer,
+                description: translation.pages.dashboard.playTwentyFiveMatches,
                 icon: '🎮',
                 unlocked: totalMatches >= 25,
                 progress: Math.min(totalMatches, 25),
@@ -207,12 +212,12 @@ export default function Dashboard(): JSX.Element {
                 </header>
                 <section className="flex-1 bg-pink-grid flex items-center justify-center">
                     <div className="bg-pink-dark p-8 rounded-lg">
-                        <p className="text-white font-pixelify text-2xl mb-4">Please log in to view dashboard</p>
+                        <p className="text-white font-pixelify text-2xl mb-4">{translation.pages.dashboard.pleaseLogInToViewDashboard}</p>
                         <button
                             onClick={() => navigate('/playerProfile')} 
                             className="bg-purple-600 hover:bg-purple-700 text-white font-pixelify px-6 py-3 rounded-lg"
                         >
-                            Go to Profile
+                            {translation.pages.dashboard.goToProfile}
                         </button>
                     </div>
                 </section>
@@ -224,7 +229,7 @@ export default function Dashboard(): JSX.Element {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-pink-grid">
-                <p className="text-white font-pixelify text-3xl">Loading Dashboard...</p>
+                <p className="text-white font-pixelify text-3xl">{translation.pages.dashboard.loadingDashboard}...</p>
             </div>
         );
     }
@@ -263,7 +268,7 @@ export default function Dashboard(): JSX.Element {
                                     : 'bg-pink-dark text-purple-300 hover:text-white'
                             }`}
                         >
-                            Overview
+                            {translation.pages.dashboard.overview}
                         </button>
                         <button
                             onClick={() => setActiveTab('matches')}
@@ -273,7 +278,7 @@ export default function Dashboard(): JSX.Element {
                                     : 'bg-pink-dark text-purple-300 hover:text-white'
                             }`}
                         >
-                            Matches
+                            {translation.pages.dashboard.matches}
                         </button>
                         <button
                             onClick={() => setActiveTab('achievements')}
@@ -283,7 +288,7 @@ export default function Dashboard(): JSX.Element {
                                     : 'bg-pink-dark text-purple-300 hover:text-white'
                             }`}
                         >
-                            Achievements ({unlockedAchievements.length})
+                            {translation.pages.dashboard.achievements} ({unlockedAchievements.length})
                         </button>
                     </div>
 
@@ -302,7 +307,7 @@ export default function Dashboard(): JSX.Element {
                                         <div>
                                             <div className="font-pixelify text-blue-deep text-3xl">{user.name}</div>
                                             <div className="font-dotgothic text-blue-deep text-lg">
-                                                Level {level} • {xp} XP
+                                                {translation.pages.dashboard.level} {level} • {xp} XP
                                             </div>
                                         </div>
                                     </div>
@@ -310,7 +315,7 @@ export default function Dashboard(): JSX.Element {
                                     {/* XP Progress Bar */}
                                     <div className="mb-6">
                                         <div className="flex justify-between text-sm font-dotgothic text-blue-deep mb-2">
-                                            <span>Level {level}</span>
+                                            <span>{translation.pages.dashboard.level} {level}</span>
                                             <span>{xp}/{xpForNextLevel} XP</span>
                                         </div>
                                         <div className="w-full bg-pink-dark rounded-full h-3">
@@ -324,7 +329,7 @@ export default function Dashboard(): JSX.Element {
                                     {/* Win/Loss Visual Bars - Single Line */}
                                     <div className="mb-6">
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="font-dotgothic text-blue-deep font-bold">Win/Loss Ratio</span>
+                                            <span className="font-dotgothic text-blue-deep font-bold">{translation.pages.dashboard.winLossRatio}</span>
                                             <div className="flex gap-4">
                                                 <span className="font-pixelify text-blue-deep text-xl font-bold">{wins}W</span>
                                                 <span className="font-pixelify text-blue-deep text-xl font-bold">{losses}L</span>
@@ -341,8 +346,8 @@ export default function Dashboard(): JSX.Element {
                                             ></div>
                                         </div>
                                         <div className="flex justify-between text-xs font-dotgothic text-gray-500 mt-1 font-semibold">
-                                            <span>{totalMatches > 0 ? `${((wins / totalMatches) * 100).toFixed(1)}%` : '0%'} Wins</span>
-                                            <span>{totalMatches > 0 ? `${((losses / totalMatches) * 100).toFixed(1)}%` : '0%'} Losses</span>
+                                            <span>{totalMatches > 0 ? `${((wins / totalMatches) * 100).toFixed(1)}%` : '0%'} {translation.pages.dashboard.wins}</span>
+                                            <span>{totalMatches > 0 ? `${((losses / totalMatches) * 100).toFixed(1)}%` : '0%'} {translation.pages.dashboard.losses}</span>
                                         </div>
                                     </div>
 
@@ -350,26 +355,26 @@ export default function Dashboard(): JSX.Element {
                                     <div className="grid grid-cols-4 gap-4 mt-6">
                                         <div className="text-center">
                                             <div className="font-pixelify text-blue-deep text-2xl">{totalMatches}</div>
-                                            <div className="font-dotgothic text-blue-deep text-sm">Total Games</div>
+                                            <div className="font-dotgothic text-blue-deep text-sm">{translation.pages.dashboard.totalGames}</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="font-pixelify text-blue-deep text-2xl">{winRate}%</div>
-                                            <div className="font-dotgothic text-blue-deep text-sm">Win Rate</div>
+                                            <div className="font-dotgothic text-blue-deep text-sm">{translation.pages.dashboard.winRate}</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="font-pixelify text-blue-deep text-2xl">{matchAnalysis.currentStreak}</div>
-                                            <div className="font-dotgothic text-blue-deep text-sm">Current Streak</div>
+                                            <div className="font-dotgothic text-blue-deep text-sm">{translation.pages.dashboard.currentStreak}</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="font-pixelify text-blue-deep text-2xl">{matchAnalysis.perfectGames}</div>
-                                            <div className="font-dotgothic text-blue-deep text-sm">Perfect Games</div>
+                                            <div className="font-dotgothic text-blue-deep text-sm">{translation.pages.dashboard.perfectGames}</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Recent Achievements */}
                                 <div className="bg-pink-light p-4 rounded-lg">
-                                    <h3 className="font-pixelify text-blue-deep text-xl mb-4">Recent Achievements</h3>
+                                    <h3 className="font-pixelify text-blue-deep text-xl mb-4">{translation.pages.dashboard.recentAchievements}</h3>
                                     <div className="flex gap-3 overflow-x-auto">
                                         {unlockedAchievements.slice(-4).map((achievement) => (
                                             <div key={achievement.id} className="flex-shrink-0 bg-pink-dark p-3 rounded-lg text-center min-w-[100px]">
@@ -378,7 +383,7 @@ export default function Dashboard(): JSX.Element {
                                             </div>
                                         ))}
                                         {unlockedAchievements.length === 0 && (
-                                            <div className="text-purple-300 font-dotgothic">No achievements unlocked yet</div>
+                                            <div className="text-purple-300 font-dotgothic">{translation.pages.dashboard.noAchievementsUnlockedYet}</div>
                                         )}
                                     </div>
                                 </div>
@@ -388,9 +393,9 @@ export default function Dashboard(): JSX.Element {
                         {activeTab === 'matches' && (
                             <div>
                                 <div className="flex justify-between items-center mb-6">
-                                    <h2 className="font-pixelify text-white text-2xl">Match History</h2>
+                                    <h2 className="font-pixelify text-white text-2xl">{translation.pages.dashboard.matchHistory}</h2>
                                     <p className="font-dotgothic text-blue-deep">
-                                        {matches.length} total matches
+                                        {matches.length} {translation.pages.dashboard.totalMatches}
                                     </p>
                                 </div>
                                 
@@ -446,13 +451,13 @@ export default function Dashboard(): JSX.Element {
                                     </div>
                                 ) : (
                                     <div className="text-center py-12">
-                                        <p className="font-pixelify text-purple-300 text-2xl mb-4">No matches found</p>
-                                        <p className="font-dotgothic text-white mb-6">Start playing to see your match history!</p>
+                                        <p className="font-pixelify text-purple-300 text-2xl mb-4">{translation.pages.dashboard.noMatchesFound}</p>
+                                        <p className="font-dotgothic text-white mb-6">{translation.pages.dashboard.startPlayingToSeeYourMatchHistory}</p>
                                         <button
                                             onClick={() => navigate('/playerProfile')}
                                             className="bg-purple-600 hover:bg-purple-700 text-white font-pixelify px-6 py-3 rounded-lg"
                                         >
-                                            Play Games
+                                            {translation.pages.dashboard.playGames}
                                         </button>
                                     </div>
                                 )}
@@ -462,7 +467,7 @@ export default function Dashboard(): JSX.Element {
                         {activeTab === 'achievements' && (
                             <div>
                                 <h2 className="font-pixelify text-white text-2xl mb-6">
-                                    Achievements ({unlockedAchievements.length}/{achievements.length})
+                                    {translation.pages.dashboard.achievements} ({unlockedAchievements.length}/{achievements.length})
                                 </h2>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -493,7 +498,7 @@ export default function Dashboard(): JSX.Element {
                                                     {achievement.target && achievement.progress !== undefined && (
                                                         <div className="mt-2">
                                                             <div className="flex justify-between text-xs font-dotgothic text-purple-300 mb-1">
-                                                                <span>Progress</span>
+                                                                <span>{translation.pages.dashboard.progress}</span>
                                                                 <span>{achievement.progress}/{achievement.target}</span>
                                                             </div>
                                                             <div className="w-full bg-pink-dark rounded-full h-2">

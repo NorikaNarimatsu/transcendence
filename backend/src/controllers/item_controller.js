@@ -81,6 +81,10 @@ export const validatePasswordbyEmail = async (request, response) => {
 			return response.code(401).send({ message: "Invalid password" });
 		}
 
+		// Update lastLoginAt immediately when password verification succeeds
+		const updateLastLogin = db.prepare("UPDATE users SET lastLoginAt = datetime('now') WHERE userID = ?");
+		updateLastLogin.run(user.userID);
+
 		if (user['2FA']) {
 			db.prepare('DELETE FROM two_factor_auth WHERE userID = ? AND used = 0').run(user.userID);
 			const verificationCode = emailUtils.generateAuthCode();
@@ -394,7 +398,7 @@ export const getUserFriendsByUserID = async (request, reply) => {
         
         // Get friends where this user is user1ID (one-sided friendship)
         const friends = db.prepare(`
-            SELECT u.userID, u.name, u.avatarUrl
+            SELECT u.userID, u.name, u.avatarUrl, u.lastLoginAt
             FROM friends f
             JOIN users u ON f.user2ID = u.userID
             WHERE f.user1ID = ?
@@ -406,7 +410,8 @@ export const getUserFriendsByUserID = async (request, reply) => {
         const formattedFriends = friends.map(friend => ({
             userID: friend.userID,
             name: friend.name,
-            avatarUrl: friend.avatarUrl
+            avatarUrl: friend.avatarUrl,
+            lastLoginedAt: friend.lastLoginAt
         }));
         
         return reply.code(200).send(formattedFriends);
@@ -496,6 +501,139 @@ export function updateAvatarUrl(request, response) {
     }
 }
 
+export const updateUserName = async (request, response) => {
+    try {
+        const { userID, name } = request.body;
+
+        if (!userID || !name) {
+            return response.code(400).send({ message: "userID and name are required" });
+        }
+
+        const sanitizedUserID = parseInt(userID);
+        if (isNaN(sanitizedUserID)) {
+            return response.code(400).send({ message: "Invalid userID" });
+        }
+
+        // Check if user exists
+        const existingUser = db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(sanitizedUserID);
+        if (!existingUser) {
+            return response.code(404).send({ message: "User not found" });
+        }
+
+        // Validate and check for conflicts
+        let sanitizedName;
+        try {
+            sanitizedName = sanitizeInput.sanitizeUsername(name);
+        } catch (error) {
+            return response.code(400).send({ message: error.message || "Invalid name" });
+        }
+        if (sanitizedName.length < 2 || sanitizedName.length > 7) {
+            return response.code(400).send({ message: "Name must be between 2 and 7 characters" });
+        }
+        if (sanitizedName !== existingUser.name) {
+            const nameExists = db.prepare("SELECT userID FROM users WHERE name = ? AND userID != ?").get(sanitizedName, sanitizedUserID);
+            if (nameExists) {
+                return response.code(409).send({ message: "This name is already used", conflictType: "name" });
+            }
+        } else {
+            return response.code(400).send({ message: "New nickname must be different from the current nickname" });
+        }
+
+        // Update name
+        const result = db.prepare("UPDATE users SET name = ? WHERE userID = ?").run(sanitizedName, sanitizedUserID);
+
+        if (result.changes === 0) {
+            return response.code(500).send({ message: "Failed to update nickname" });
+        }
+
+        return response.code(200).send({
+            message: "Nickname updated successfully",
+            userID: sanitizedUserID,
+            name: sanitizedName
+        });
+
+    } catch (error) {
+        request.log.error("updateUserName error:", error);
+        return response.code(500).send({ message: "Internal server error" });
+    }
+};
+
+export const updateUserEmail = async (request, response) => {
+    try {
+        const { userID, email } = request.body;
+
+        if (!userID || !email) {
+            return response.code(400).send({ message: "userID and email are required" });
+        }
+
+        const sanitizedUserID = parseInt(userID);
+        if (isNaN(sanitizedUserID)) {
+            return response.code(400).send({ message: "Invalid userID" });
+        }
+
+        // Check if user exists
+        const existingUser = db.prepare("SELECT userID, email FROM users WHERE userID = ?").get(sanitizedUserID);
+        if (!existingUser) {
+            return response.code(404).send({ message: "User not found" });
+        }
+
+        // Validate and check for conflicts
+        let sanitizedEmail;
+        try {
+            sanitizedEmail = sanitizeInput.sanitizeEmail(email);
+        } catch (error) {
+            return response.code(400).send({ message: error.message || "Invalid email" });
+        }
+        if (sanitizedEmail !== existingUser.email) {
+            const emailExists = db.prepare("SELECT userID FROM users WHERE email = ? AND userID != ?").get(sanitizedEmail, sanitizedUserID);
+            if (emailExists) {
+                return response.code(409).send({ message: "This email is already used", conflictType: "email" });
+            }
+        } else {
+            return response.code(400).send({ message: "New email must be different from the current email" });
+        }
+
+        // Update email
+        const result = db.prepare("UPDATE users SET email = ? WHERE userID = ?").run(sanitizedEmail, sanitizedUserID);
+
+        if (result.changes === 0) {
+            return response.code(500).send({ message: "Failed to update email" });
+        }
+
+        return response.code(200).send({
+            message: "Email updated successfully",
+            userID: sanitizedUserID,
+            email: sanitizedEmail
+        });
+
+    } catch (error) {
+        request.log.error("updateUserEmail error:", error);
+        return response.code(500).send({ message: "Internal server error" });
+    }
+};
+
+export const getUserEmailById = async (request, reply) => {
+    try {
+        const { userID } = request.params;
+        if (!userID) {
+            return reply.code(400).send({ message: "UserID is required" });
+        }
+
+        const sanitizedUserID = parseInt(userID);
+        if (isNaN(sanitizedUserID)) {
+            return response.code(400).send({ message: "Invalid userID" });
+        }
+        const user = db.prepare("SELECT email FROM users WHERE userID = ?").get(sanitizedUserID);
+        if (!user) {
+            return reply.code(404).send({ message: "User not found" });
+        }
+        return reply.code(200).send({ email: user.email });
+    } catch (error) {
+        console.error('getUserEmailById error:', error);
+        return reply.code(500).send({ message: "Internal server error" });
+    }
+};
+
 ////////////////////////////// CONTROLLER //////////////////////////////
 
 const itemController = {
@@ -511,12 +649,15 @@ const itemController = {
     getUserInfoByEmail,
     getUserById,
     getUsersExceptUserID,
+    getUserEmailById,
     updateAvatarUrl,
+    updateUserEmail,
+    updateUserName,
     
     // Friends management
     addFriendByUserID,
     getUserFriendsByUserID
-  };
+};
 
 export default itemController;
 

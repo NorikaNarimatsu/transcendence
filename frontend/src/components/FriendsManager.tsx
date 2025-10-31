@@ -1,7 +1,9 @@
 import { useState, forwardRef, useImperativeHandle } from 'react';
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
-import type { User } from '../pages/user/UserContext'; 
 import apiCentral from '../utils/apiCentral';
+import type { User } from '../pages/user/UserContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { tr } from 'zod/locales';
 
 interface FriendsManagerProps {
     user: User;
@@ -24,6 +26,9 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
         // UPDATED: Success popup state - store friend object instead of message
         const [showSuccessPopup, setShowSuccessPopup] = useState(false);
         const [addedFriend, setAddedFriend] = useState<SelectedPlayer | null>(null);
+
+        const { lang, t } = useLanguage();
+        const translation = t[lang];
 
         const handleSeeFriends = async () => {
             setShowFriendsList(true);
@@ -115,7 +120,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                     <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-40">
                         <div className="bg-pink-light p-8 rounded-lg shadow-no-blur-60 border-4 border-blue-deep">
                             <div className="text-center">
-                                <h3 className="font-pixelify text-blue-deep text-2xl mb-4">Success!</h3>
+                                <h3 className="font-pixelify text-blue-deep text-2xl mb-4">{translation.common.success}!</h3>
                                 
                                 {/* NEW: Friend's Avatar and Name */}
                                 <div className="flex items-center justify-center gap-3 mb-6">
@@ -127,7 +132,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                                         />
                                     )}
                                     <p className="font-dotgothic text-blue-deep text-lg">
-                                        <span className="font-pixelify">{addedFriend.name}</span> added to friends!
+                                        <span className="font-pixelify">{addedFriend.name}</span> {translation.pages.profile.addedToFriends}!
                                     </p>
                                 </div>
                                 
@@ -138,7 +143,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                                     }}
                                     className="px-6 py-3 bg-blue-deep text-white font-pixelify rounded hover:bg-blue-medium transition-colors shadow-no-blur-30"
                                 >
-                                    Awesome!
+                                    {translation.pages.profile.awesome}
                                 </button>
                             </div>
                         </div>
@@ -149,14 +154,14 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                 {showAddFriends && (
                     <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-30">
                         <div className="bg-pink-light p-6 rounded-lg max-h-[400px] overflow-y-auto w-[300px]">
-                            <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">Add Friend</h3>
+                            <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">{translation.pages.profile.addFriends}</h3>
                             
                             {loading ? (
-                                <p className="text-blue-deep font-dotgothic text-center">Loading...</p>
+                                <p className="text-blue-deep font-dotgothic text-center">{translation.common.loading}</p>
                             ) : (
                                 <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
                                     {availableUsers.length === 0 ? (
-                                        <p className="text-blue-deep font-dotgothic text-center">No users available to add!</p>
+                                        <p className="text-blue-deep font-dotgothic text-center">{translation.pages.profile.noUsersAvailableToAdd}</p>
                                     ) : (
                                         availableUsers.map((user) => (
                                             <button
@@ -182,7 +187,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                                 onClick={() => setShowAddFriends(false)}
                                 className="w-full px-4 py-2 bg-gray-500 text-white font-pixelify rounded hover:bg-gray-600 transition-colors mt-4"
                             >
-                                Cancel
+                                {translation.common.cancel}
                             </button>
                         </div>
                     </div>
@@ -192,14 +197,14 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                 {showFriendsList && (
                     <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-30">
                         <div className="bg-pink-light p-6 rounded-lg max-h-[400px] overflow-y-auto w-[300px]">
-                            <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">My Friends</h3>
+                            <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">{translation.pages.profile.myFriends}</h3>
                             
                             {loading ? (
-                                <p className="text-blue-deep font-pixelify text-center">Loading...</p>
+                                <p className="text-blue-deep font-pixelify text-center">{translation.common.loading}</p>
                             ) : (
                                 <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
                                     {friends.length === 0 ? (
-                                        <p className="text-blue-deep font-pixelify text-center">No friends yet ...</p>
+                                        <p className="text-blue-deep font-pixelify text-center">{translation.pages.profile.noFriendsYet}</p>
                                     ) : (
                                         friends.map((friend) => (
                                             <div
@@ -213,7 +218,19 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                                                         className="w-6 h-6 rounded-full object-cover"
                                                     />
                                                 )}
-                                                {friend.name}
+                                                <div className="flex flex-col">
+                                                    <span className="font-pixelify text-blue-deep">{friend.name}</span>
+                                                    {friend.lastLoginedAt && (
+                                                        <span className="font-dotgothic text-xs text-blue-medium opacity-75">
+                                                            Last seen: {new Date(friend.lastLoginedAt).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         ))
                                     )}
@@ -224,7 +241,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                                 onClick={() => setShowFriendsList(false)}
                                 className="w-full px-4 py-2 bg-gray-500 text-white font-pixelify rounded hover:bg-gray-600 transition-colors mt-4"
                             >
-                                Close
+                                {translation.common.close}
                             </button>
                         </div>
                     </div>

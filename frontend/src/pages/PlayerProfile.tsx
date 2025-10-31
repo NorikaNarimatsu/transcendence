@@ -14,7 +14,9 @@ import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import { FriendsManager } from '../components/FriendsManager';
 
 import TwoFactorSettings from '../components/2FSettings';
+import { useLanguage } from '../contexts/LanguageContext';
 
+import { UpdateUserData } from '../components/profileDataUpdate';
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
 import { useSelectedPlayer } from './user/PlayerContext';
@@ -24,16 +26,18 @@ import Button from '../components/ButtonDarkPink';
 import apiCentral from '../utils/apiCentral';
 
 export default function PlayerProfile(): JSX.Element {
+    // UI State
     const [isOpen, setIsOpen] = useState(false);
-
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+    // Game States
     const [showPlayerSelection, setShowPlayerSelection] = useState(false);
     const [playerSelectionGame, setPlayerSelectionGame] = useState<string | null>(null);
-    
     const [showPasswordVerification, setShowPasswordVerification] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
+    // Tournament States
     const [showTournamentRegistration, setShowTournamentRegistration] = useState(false);
     const [tournamentPlayers, setTournamentPlayers] = useState(3);
     const [selectedTournamentParticipants, setSelectedTournamentParticipants] = useState<SelectedPlayer[]>([]);
@@ -42,26 +46,31 @@ export default function PlayerProfile(): JSX.Element {
     const [tournamentVerifyError, setTournamentVerifyError] = useState('');
     const [tournamentGameType, setTournamentGameType] = useState<'pong' | 'snake'>('pong');
 
+    // Modal States
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+    const [show2FASettings, setShow2FASettings] = useState(false);
+    const [showUpdateData, setShowUpdateData] = useState(false);
+    const [updateType, setUpdateType] = useState<'email' | 'name'>('email');
+
+    // Data States
     const [users, setUsers] = useState<SelectedPlayer[]>([]);
     const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
 
     const friendsManagerRef = useRef<any>(null);
-
-    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 	
 	const [basicStats, setBasicStats] = useState<{
 		wins: number;
 		losses: number;
 		totalMatches: number;
 	} | null>(null);
-	// const [setShowBasicStats] = useState(false);
-
-	const [show2FASettings, setShow2FASettings] = useState(false);
 
     const navigate = useNavigate();
-    const { user, logout } = useUser();
+    const { user, logout, setUser } = useUser();
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
+
+    const { lang, setLang, t } = useLanguage();
+    const translation = t[lang];
 
     useEffect(() => {
         setSelectedPlayer(null);
@@ -197,29 +206,22 @@ export default function PlayerProfile(): JSX.Element {
         }
     
         setAvatarUrlLocal(avatarUrl);
-        // update stored user so other parts can pick up change
-        const raw = localStorage.getItem('user');
-        if (raw) {
-          const stored = JSON.parse(raw);
-          stored.avatarUrl = avatarUrl;
-          localStorage.setItem('user', JSON.stringify(stored));
-          window.dispatchEvent(new CustomEvent('userUpdated', { detail: stored }));
+        // Update the user context with the new avatar URL
+        if (user) {
+          const updatedUser = { ...user, avatarUrl: avatarUrl };
+          setUser(updatedUser); // This will update both state and localStorage automatically
         }
-        setIsOpen(false);
       } catch (err) {
         console.error('Error updating avatar:', err);
       } finally {
         setUploadingAvatar(false);
       }
     };
-    ///////////////// WORK IN PROGRESS //////////////////
-
     useEffect(() => {
         if (user?.userID) {
             fetchBasicStats();
         } else {
             setBasicStats(null);
-            // setShowBasicStats(false);
         }
     }, [user?.userID]);
     
@@ -259,38 +261,54 @@ export default function PlayerProfile(): JSX.Element {
         switch(category) {
             case 'Games':
                 return [
-                    { name: 'Play Pong', action: () => setSelectedCategory('Pong') },
-                    { name: 'Play Snake', action: () => setSelectedCategory('Snake') }
+                    { name: translation.pages.profile.playPong, action: () => setSelectedCategory('Pong') },
+                    { name: translation.pages.profile.playSnake, action: () => setSelectedCategory('Snake') }
                 ];
             case 'Pong':
                 return [
-                    { name: 'Single', action: () => navigate('./pongGame?mode=single') },
-                    { name: '2 Players', action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => { setTournamentGameType('pong'); setShowTournamentRegistration(true); } }
+                    { name: translation.pages.profile.single, action: () => navigate('./pongGame?mode=single') },
+                    { name: translation.pages.profile.twoPlayers, action: () => { setPlayerSelectionGame('Pong'); setShowPlayerSelection(true); setSelectedCategory(null); } },
+                    { name: translation.pages.profile.tournament, action: () => setShowTournamentRegistration(true) }
                 ];
             case 'Snake':
                 return [
-                    { name: 'Single', action: () => navigate('./snakeGame?mode=single') },
-                    { name: '2 Players', action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
-                    { name: 'Tournaments', action: () => { setTournamentGameType('snake'); setShowTournamentRegistration(true); } }
+                    { name: translation.pages.profile.single, action: () => navigate('./snakeGame?mode=single') },
+                    { name: translation.pages.profile.twoPlayers, action: () => { setPlayerSelectionGame('Snake'); setShowPlayerSelection(true); setSelectedCategory(null); } },
+                    { name: translation.pages.profile.tournament, action: () => { setTournamentGameType('snake'); setShowTournamentRegistration(true); } }
                 ];
             case 'Friends':
                 return [
-                    { name: 'See Friends', action: () => friendsManagerRef.current?.handleSeeFriends() },
-                    { name: 'Add Friend', action: () => friendsManagerRef.current?.handleAddFriendsClick() }
+                    { name: translation.pages.profile.seeFriends, action: () => friendsManagerRef.current?.handleSeeFriends() },
+                    { name: translation.pages.profile.addFriends, action: () => friendsManagerRef.current?.handleAddFriendsClick() }
                 ];
             case 'Dashboard':
                 return [
-                    { name: 'Go to Dashboard', action: () => navigate('/dashboard') },
+                    { name: translation.pages.profile.goToDashboard, action: () => navigate('/dashboard') },
                 ];
             case 'Settings':
                 return [
-                    { name: 'Delete Account', action: () => setShowDeleteConfirmation(true) },
-                    { name: 'Update data', action: () => console.log('Updating account data') },
-					{ name: 'Download data', action: () => downloadUserData() },
-					{ name: 'Privacy Policy', action: () => setShowPrivacyModal(true) },
-                    { name: 'Edit 2FA', action: () => setShow2FASettings(true) },
-                    { name: 'Language', action: () => console.log('Updating Language Setting') }, //TODO.
+                    { name: translation.pages.profile.deleteAccount, action: () => setShowDeleteConfirmation(true) },
+                    { name: translation.pages.profile.updateData, action: () => setSelectedCategory('UpdateData') },
+                    { name: translation.pages.profile.downloadData, action: () => downloadUserData() },
+                    { name: translation.common.privacyPolicy, action: () => setShowPrivacyModal(true) },
+                    { name: translation.pages.profile.edit2FA, action: () => setShow2FASettings(true) },
+                    { name: translation.pages.profile.language, action: () => setSelectedCategory('Language') },
+                ];
+            case 'Language':
+                return [
+                    { name: translation.pages.profile.english, action: () => setLang("en") },
+                    { name: translation.pages.profile.portuguese, action: () => setLang("pt") },
+                    { name: translation.pages.profile.polish, action: () => setLang("pl") },
+                ];
+            case 'UpdateData':
+                return [
+                    { name: 'Update Email', action: () => { setUpdateType('email'); setShowUpdateData(true); } },
+                    { name: 'Update Nickname', action: () => { setUpdateType('name'); setShowUpdateData(true); } },
+                ];
+            case 'UpdateData':
+                return [
+                    { name: 'Update Email', action: () => { setUpdateType('email'); setShowUpdateData(true); } },
+                    { name: 'Update Nickname', action: () => { setUpdateType('name'); setShowUpdateData(true); } },
                 ];
             default:
                 return [];
@@ -311,7 +329,7 @@ export default function PlayerProfile(): JSX.Element {
       <main className="min-h-screen flex flex-col">
         <header className="h-40 bg-blue-deep flex">
           <div className="font-pixelify text-white text-opacity-25 text-7xl m-auto">
-            What should we play today?
+            {translation.pages.profile.questionHeader}
           </div>
         </header>
         <section className="flex-1 bg-pink-grid flex items-center justify-center">
@@ -319,17 +337,20 @@ export default function PlayerProfile(): JSX.Element {
             {/* LEFT SIDE: Player Card */}
             <div className="shadow-no-blur-50-purple-bigger bg-pink-light w-[350px] h-[500px] flex flex-col justify-between py-6">
               <div className="font-pixelify text-white text-5xl text-center text-shadow mb-6">
-                PLAYER INFO
+                {translation.pages.profile.playerInfo}
               </div>
               <div className="bg-pink-dark mx-[25px] h-[125px] border-purple flex flex-row justify-center items-center px-4">
                 <img
-                  onClick={() => setIsOpen(!isOpen)}
+                  onClick={() => {
+                    console.log('Avatar clicked, current isOpen:', isOpen);
+                    setIsOpen(!isOpen);
+                  }}
                   src={user.avatarUrl}
                   alt="Avatar"
-                  className="avatar m-auto shadow-no-blur"
+                  className="avatar m-auto shadow-no-blur cursor-pointer"
                   style={{ borderColor: "#7a63fe" }}
                 />
-                {/* update the local strage here*/}
+                {/* update the local storage here*/}
                 <AvatarSelection
                   open={isOpen}
                   onClose={() => setIsOpen(false)}
@@ -341,32 +362,32 @@ export default function PlayerProfile(): JSX.Element {
                     {user.name}
                   </div>
                   <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">
-                    Wins: {basicStats?.wins ?? user.wins ?? 0}
+                    {translation.pages.profile.wins}: {basicStats?.wins ?? user.wins ?? 0}
                   </div>
                   <div className="font-dotgothic font-bold text-white text-base text-border-blue">
-                    Losses: {basicStats?.losses ?? user.losses ?? 0}
+                    {translation.pages.profile.losses}: {basicStats?.losses ?? user.losses ?? 0}
                   </div>
                 </div>
               </div>
               <CategoryButtons
                 buttons={[
                   {
-                    name: "Games",
+                    name: translation.pages.profile.games,
                     icon: arrow_icon,
                     onClick: () => setSelectedCategory("Games"),
                   },
                   {
-                    name: "Friends",
+                    name: translation.pages.profile.friends,
                     icon: arrow_icon,
                     onClick: () => setSelectedCategory("Friends"),
                   },
                   {
-                    name: "Dashboard",
+                    name: translation.pages.profile.dashboard,
                     icon: arrow_icon,
-                    onClick: () => setSelectedCategory("Dashboard"),
+                    onClick: () => navigate('/dashboard'),
                   },
                   {
-                    name: "Settings",
+                    name: translation.pages.profile.settings,
                     icon: arrow_icon,
                     className:
                       "button-pp-blue-settings shadow-no-blur flex items-center justify-between",
@@ -392,6 +413,13 @@ export default function PlayerProfile(): JSX.Element {
                 onClose={() => setShow2FASettings(false)}
               />
             )}
+            {/* Update User Data Modal */}
+            <UpdateUserData
+                open={showUpdateData}
+                onClose={() => setShowUpdateData(false)}
+                updateType={updateType}
+            />
+
             {/* RIGHT SIDE: Content Box */}
             <div
               className="w-[350px] h-[500px] overflow-hidden bg-cover bg-center relative border-img"
@@ -468,7 +496,7 @@ export default function PlayerProfile(): JSX.Element {
                         (button, index) => (
                           <button
                             key={button.name}
-                            className="button-pp-purple shadow-no-blur-60"
+                            className="button-pp-purple shadow-no-blur-60 !text-lg"
                             onClick={button.action}
                           >
                             {button.name}

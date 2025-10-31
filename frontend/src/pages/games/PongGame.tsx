@@ -19,6 +19,7 @@ import GameInstructions from '../../components/GameInstructionsPongGame';
 import GameSettings from '../../components/SettingsGames';
 
 import type { SelectedPlayer } from '../user/PlayerContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 import apiCentral from '../../utils/apiCentral';
 
@@ -55,6 +56,9 @@ export default function PongGame(): JSX.Element {
     const handleBackToProfile = () => {
         navigate('/playerProfile');
     };
+
+    const { lang, t } = useLanguage();
+    const translation = t[lang];
 
     const [view, setView] = useState<"game"|"instructions"|"settings">('instructions')
     const [backgroundColor, setBackgroundColor] = useState<string>('bg-pink-dark');
@@ -298,11 +302,11 @@ export default function PongGame(): JSX.Element {
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
               <div className="text-center">
                 <p className="text-white text-4xl font-pixelify mb-6">
-                  {gameState.winner} Wins!
+                  {gameState.winner} {translation.pages.pongGame.wins}!
                 </p>
                 <div className="flex flex-col gap-4">
                   <p className="text-white text-xl font-pixelify opacity-75">
-                    Press SPACE to play again
+                    {translation.pages.pongGame.pressSpaceToPlayAgain}
                   </p>
                 </div>
               </div>
