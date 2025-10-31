@@ -11,7 +11,7 @@ export default function App(): JSX.Element{
   const { lang, t, setLang } = useLanguage();
   const translation = t[lang];
     
-  const handleLanguageChange = (newLang: "en" | "pt" | "pl" | "jp") => {
+  const handleLanguageChange = (newLang: "en" | "pt" | "pl") => {
     setLang(newLang);
   };
   
@@ -57,13 +57,12 @@ export default function App(): JSX.Element{
       <footer className="h-40 bg-blue-deep flex justify-center items-center">
           <select
             value={lang}
-            onChange={(e) => handleLanguageChange(e.target.value as "en" | "pt")}
+            onChange={(e) => handleLanguageChange(e.target.value as "en" | "pt" | "pl")}
             className="appearance-none bg-pink-light text-blue-deep font-dotgothic px-4 py-2 pr-8 rounded border-2 border-blue-deep focus:outline-none focus:ring-2 focus:ring-pink-dark cursor-pointer"
             >
             <option value="en">🇬🇧 English</option>
             <option value="pt">🇵🇹 Portuguese</option>
             <option value="pl">🇵🇱 Polish</option>
-            <option value="jp">🇯🇵 Japanese</option>
           </select>
       </footer>
     </main>

@@ -52,7 +52,6 @@
             "english": "English",
             "portuguese": "Portuguese",
             "polish": "Polish",
-            "japanese": "Japanese",
             "selectPlayer2": "Select Player 2",
             "playAsAGuest": "Play as Guest",
             "registration": "Registration",
@@ -63,7 +62,9 @@
             "awesome": "Awesome!",
             "addedToFriends": "Added to Friends",
             "myFriends": "My Friends",
-            "noFriendsYet": "No friends yet..."  
+            "noFriendsYet": "No friends yet...",
+            "chooseYourAvatar": "Choose your avatar",
+            "uploadYourAvatar": "Upload your avatar"
         },
         "dashboard": {
             "pleaseLogInToViewDashboard": "Please log in to view dashboard",
@@ -125,7 +126,6 @@
             "defaultPink": "Default Pink",
             "english": "English",
             "portuguese": "Portuguese",
-            "japanese": "Japanese",
             "polish": "Polish"
         },
         "pongGame": {

@@ -31,7 +31,7 @@
             "questionHeader": "O que vamos jogar hoje?",
             "playerInfo": "INFO JOGADOR",
             "wins": "Vitorias",
-            "losses": "Perdidas",
+            "losses": "Derrotas",
             "games": "Jogos",
             "friends": "Amigos",
             "dashboard": "Dashboard",
@@ -52,7 +52,6 @@
             "english": "Ingles",
             "portuguese": "Portugues",
             "polish": "Polaco",
-            "japanese": "Japones",
             "selectPlayer2": "Selectione o jogador 2",
             "playAsAGuest": "Jogar como convidado",
             "registration": "Registro",
@@ -63,7 +62,9 @@
             "awesome": "Incrivel!",
             "addedToFriends": "Adicionado aos amigos",
             "myFriends": "Os meus amigos",
-            "noFriendsYet": "Ainda nao tens amigos..."
+            "noFriendsYet": "Ainda nao tens amigos...",
+            "chooseYourAvatar": "Escolhe o teu avatar",
+            "uploadYourAvatar": "Upload o teu avatar"
         },
         "dashboard": {
             "pleaseLogInToViewDashboard": "Por favor faca log in para visualizar a Dashboard",
@@ -125,7 +126,6 @@
             "defaultPink": "Rosa Padrao",
             "english": "Ingles",
             "portuguese": "Portugues",
-            "japanese": "Japones",
             "polish": "Polaco"
         },
         "pongGame": {

@@ -51,7 +51,6 @@ export default function SettingsPongGame({ onClose, onBackgroundChange, currentB
                     <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4 opacity-80'>
                          <button className={buttonClasses} onClick={() => setLang("en")}>{translation.pages.gameSettings.english}</button>
                          <button className={buttonClasses} onClick={() => setLang("pt")}>{translation.pages.gameSettings.portuguese}</button>
-                         <button className={buttonClasses} onClick={() => setLang("jp")}>{translation.pages.gameSettings.japanese}</button>
                          <button className={buttonClasses} onClick={() => setLang("pl")}>{translation.pages.gameSettings.polish}</button>
                      </div>
                 );

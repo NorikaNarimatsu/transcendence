@@ -282,17 +282,12 @@ export default function PlayerProfile(): JSX.Element {
                     { name: translation.pages.profile.seeFriends, action: () => friendsManagerRef.current?.handleSeeFriends() },
                     { name: translation.pages.profile.addFriends, action: () => friendsManagerRef.current?.handleAddFriendsClick() }
                 ];
-            case 'Dashboard':
-                return [
-                    { name: translation.pages.profile.goToDashboard, action: () => navigate('/dashboard') },
-                    // { name: 'Basic Stats', action: () => fetchBasicStats() }
-                ];
             case 'Settings':
                 return [
                     { name: translation.pages.profile.deleteAccount, action: () => setShowDeleteConfirmation(true) },
                     { name: translation.pages.profile.updateData, action: () => console.log('Updating account data') },
-					{ name: translation.pages.profile.downloadData, action: () => downloadUserData() },
-					{ name: translation.common.privacyPolicy, action: () => setShowPrivacyModal(true) },
+					          { name: translation.pages.profile.downloadData, action: () => downloadUserData() },
+					          { name: translation.common.privacyPolicy, action: () => setShowPrivacyModal(true) },
                     { name: translation.pages.profile.edit2FA, action: () => setShow2FASettings(true) },
                     { name: translation.pages.profile.language, action: () => setSelectedCategory('Language') },
                 ];
@@ -301,7 +296,6 @@ export default function PlayerProfile(): JSX.Element {
                     { name: translation.pages.profile.english, action: () => setLang("en") },
                     { name: translation.pages.profile.portuguese, action: () => setLang("pt") },
                     { name: translation.pages.profile.polish, action: () => setLang("pl") },
-                    { name: translation.pages.profile.japanese, action: () => setLang("jp") },
                 ];
             default:
                 return [];
@@ -343,7 +337,7 @@ export default function PlayerProfile(): JSX.Element {
                   className="avatar m-auto shadow-no-blur cursor-pointer"
                   style={{ borderColor: "#7a63fe" }}
                 />
-                {/* update the local strage here*/}
+                {/* update the local storage here*/}
                 <AvatarSelection
                   open={isOpen}
                   onClose={() => setIsOpen(false)}
@@ -355,10 +349,10 @@ export default function PlayerProfile(): JSX.Element {
                     {user.name}
                   </div>
                   <div className="font-dotgothic font-bold text-white text-base text-border-blue -mt-1">
-                    Wins: {basicStats?.wins ?? user.wins ?? 0}
+                    {translation.pages.profile.wins}: {basicStats?.wins ?? user.wins ?? 0}
                   </div>
                   <div className="font-dotgothic font-bold text-white text-base text-border-blue">
-                    Losses: {basicStats?.losses ?? user.losses ?? 0}
+                    {translation.pages.profile.losses}: {basicStats?.losses ?? user.losses ?? 0}
                   </div>
                 </div>
               </div>
@@ -377,7 +371,7 @@ export default function PlayerProfile(): JSX.Element {
                   {
                     name: translation.pages.profile.dashboard,
                     icon: arrow_icon,
-                    onClick: () => setSelectedCategory("Dashboard"),
+                    onClick: () => navigate('/dashboard'),
                   },
                   {
                     name: translation.pages.profile.settings,
@@ -482,7 +476,7 @@ export default function PlayerProfile(): JSX.Element {
                         (button, index) => (
                           <button
                             key={button.name}
-                            className="button-pp-purple shadow-no-blur-60"
+                            className="button-pp-purple shadow-no-blur-60 !text-lg"
                             onClick={button.action}
                           >
                             {button.name}

@@ -3,10 +3,8 @@ import { createContext } from 'react'
 import en from '../locales/en.json'
 import pt from '../locales/pt.json'
 import pl from '../locales/pl.json'
-import jp from '../locales/jp.json'
 
-
-type Language = 'en' | 'pt' | 'pl' | 'jp';
+type Language = 'en' | 'pt' | 'pl' ;
 
 interface TranslationContextType {
     lang: Language;
@@ -15,7 +13,6 @@ interface TranslationContextType {
         en: typeof en;
         pt: typeof pt;
         pl: typeof pl;
-        jp: typeof jp;
     }
 }
 
@@ -23,7 +20,7 @@ const TranslationContext = createContext<TranslationContextType | undefined>(und
 
 export default function TranslationProvider({ children }: {children: ReactNode}) {
     
-    const t = { en, pt, pl, jp };
+    const t = { en, pt, pl };
     const [lang, setLang] = useState<Language>('en');
 
     return (
