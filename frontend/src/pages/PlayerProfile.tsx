@@ -16,6 +16,7 @@ import { FriendsManager } from '../components/FriendsManager';
 import TwoFactorSettings from '../components/2FSettings';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { UpdateUserData } from '../components/profileDataUpdate';
 import { useUser} from './user/UserContext';
 import type { SelectedPlayer } from  './user/PlayerContext';
 import { useSelectedPlayer } from './user/PlayerContext';
@@ -23,16 +24,18 @@ import { DeleteAccount } from './user/DeleteUser';
 import Button from '../components/ButtonDarkPink';
 
 export default function PlayerProfile(): JSX.Element {
+    // UI State
     const [isOpen, setIsOpen] = useState(false);
-
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+    // Game States
     const [showPlayerSelection, setShowPlayerSelection] = useState(false);
     const [playerSelectionGame, setPlayerSelectionGame] = useState<string | null>(null);
-    
     const [showPasswordVerification, setShowPasswordVerification] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
+    // Tournament States
     const [showTournamentRegistration, setShowTournamentRegistration] = useState(false);
     const [tournamentPlayers, setTournamentPlayers] = useState(3);
     const [selectedTournamentParticipants, setSelectedTournamentParticipants] = useState<SelectedPlayer[]>([]);
@@ -41,22 +44,24 @@ export default function PlayerProfile(): JSX.Element {
     const [tournamentVerifyError, setTournamentVerifyError] = useState('');
     const [tournamentGameType, setTournamentGameType] = useState<'pong' | 'snake'>('pong');
 
+    // Modal States
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+    const [show2FASettings, setShow2FASettings] = useState(false);
+    const [showUpdateData, setShowUpdateData] = useState(false);
+    const [updateType, setUpdateType] = useState<'email' | 'name'>('email');
+
+    // Data States
     const [users, setUsers] = useState<SelectedPlayer[]>([]);
     const [allUsers, setAllUsers] = useState<SelectedPlayer[]>([]);
 
     const friendsManagerRef = useRef<any>(null);
-
-    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 	
 	const [basicStats, setBasicStats] = useState<{
 		wins: number;
 		losses: number;
 		totalMatches: number;
 	} | null>(null);
-	// const [setShowBasicStats] = useState(false);
-
-	const [show2FASettings, setShow2FASettings] = useState(false);
 
     const navigate = useNavigate();
     const { user, logout, setUser } = useUser();
@@ -285,14 +290,13 @@ export default function PlayerProfile(): JSX.Element {
             case 'Dashboard':
                 return [
                     { name: translation.pages.profile.goToDashboard, action: () => navigate('/dashboard') },
-                    // { name: 'Basic Stats', action: () => fetchBasicStats() }
                 ];
             case 'Settings':
                 return [
                     { name: translation.pages.profile.deleteAccount, action: () => setShowDeleteConfirmation(true) },
-                    { name: translation.pages.profile.updateData, action: () => console.log('Updating account data') },
-					{ name: translation.pages.profile.downloadData, action: () => downloadUserData() },
-					{ name: translation.common.privacyPolicy, action: () => setShowPrivacyModal(true) },
+                    { name: translation.pages.profile.updateData, action: () => setSelectedCategory('UpdateData') },
+                    { name: translation.pages.profile.downloadData, action: () => downloadUserData() },
+                    { name: translation.common.privacyPolicy, action: () => setShowPrivacyModal(true) },
                     { name: translation.pages.profile.edit2FA, action: () => setShow2FASettings(true) },
                     { name: translation.pages.profile.language, action: () => setSelectedCategory('Language') },
                 ];
@@ -302,6 +306,11 @@ export default function PlayerProfile(): JSX.Element {
                     { name: translation.pages.profile.portuguese, action: () => setLang("pt") },
                     { name: translation.pages.profile.polish, action: () => setLang("pl") },
                     { name: translation.pages.profile.japanese, action: () => setLang("jp") },
+                ];
+            case 'UpdateData':
+                return [
+                    { name: 'Update Email', action: () => { setUpdateType('email'); setShowUpdateData(true); } },
+                    { name: 'Update Nickname', action: () => { setUpdateType('name'); setShowUpdateData(true); } },
                 ];
             default:
                 return [];
@@ -406,6 +415,13 @@ export default function PlayerProfile(): JSX.Element {
                 onClose={() => setShow2FASettings(false)}
               />
             )}
+            {/* Update User Data Modal */}
+            <UpdateUserData
+                open={showUpdateData}
+                onClose={() => setShowUpdateData(false)}
+                updateType={updateType}
+            />
+
             {/* RIGHT SIDE: Content Box */}
             <div
               className="w-[350px] h-[500px] overflow-hidden bg-cover bg-center relative border-img"
