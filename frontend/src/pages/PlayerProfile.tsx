@@ -21,6 +21,8 @@ import { useSelectedPlayer } from './user/PlayerContext';
 import { DeleteAccount } from './user/DeleteUser';
 import Button from '../components/ButtonDarkPink';
 
+import apiCentral from '../utils/apiCentral';
+
 export default function PlayerProfile(): JSX.Element {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -163,10 +165,9 @@ export default function PlayerProfile(): JSX.Element {
     const fetchBasicStats = async () => {
         if (!user?.userID) return;
         try {
-            const response = await fetch(`https://localhost:8443/user/${user.userID}/stats`); 
-            if (response.ok) {
-                const data = await response.json();
-                setBasicStats(data.overall);
+            const response = await apiCentral.get(`/user/${user.userID}/stats`);
+            if (response.data) {
+                setBasicStats(response.data.overall);
             } else {
                 console.error('Failed to fetch stats');
             }
@@ -188,15 +189,10 @@ export default function PlayerProfile(): JSX.Element {
       if (!user?.userID) return;
       setUploadingAvatar(true);
       try {
-        const res = await fetch('https://localhost:8443/user/updateAvatar', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userID: user.userID, avatarUrl })
-        });
+        const res = await apiCentral.put('/user/updateAvatar', { userID: user.userID, avatarUrl })
         console.log('SENDING THIS URL:', avatarUrl);
-        if (!res.ok) {
-          const text = await res.text();
-          console.error('Failed to update avatar:', res.status, text);
+        if (!res.data) {
+          console.error('Failed to update avatar:', res.error);
           return;
         }
     
@@ -234,23 +230,21 @@ export default function PlayerProfile(): JSX.Element {
 		}
 
 		try {
-			const response = await fetch ('https://localhost:8443/api/user/export-data', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ userID: user.userID })
+			const response = await apiCentral.postBlob('/api/user/export-data', {
+				userID: user.userID
 			});
+
+			if (!response) {
+				return;
+			}
 
 			if (response.ok) {
 				const blob = await response.blob();
 				const url = window.URL.createObjectURL(blob);
 				const a = document.createElement('a');
 				a.href = url;
-				a.download = `user_data_${user.name}_${new Date().toISOString().split('T')[0]}.json`;
-				// document.body.appendChild(a);
+				a.download = `transcendence_${user.name}_${new Date().toISOString().split('T')[0]}.json`;
 				a.click();
-				// document.body.removeChild(a);
 				window.URL.revokeObjectURL(url);
 			} else {
 				const errorText = await response.text();

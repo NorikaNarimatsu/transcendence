@@ -18,6 +18,8 @@ import gear_icon from '../../assets/icons/Settings.png'
 import GameInstructions from '../../components/GameInstructionsSnakeGame';
 import GameSettings from '../../components/SettingsGames';
 
+import apiCentral from '../../utils/apiCentral';
+
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();
     const navigate = useNavigate();
@@ -145,16 +147,10 @@ export default function SnakeGame(): JSX.Element {
             console.log('Actual player1:', player1);
             console.log('Actual player2:', player2);
 
-            const response = await fetch('https://localhost:8443/match', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(matchData)
-            });
+            const response = await apiCentral.post('/match', matchData);
 
-            if (response.ok) {
-                const result = await response.json();
+            if (response.data) {
+                const result = response.data;
                 console.log('Match saved successfully:', result);
                 console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
                 if (result.duration) {
@@ -162,12 +158,11 @@ export default function SnakeGame(): JSX.Element {
                 }
 
                 // Navigate back to bracket after tournament match
-                if (mode === 'tournament' && response.ok) {
+                if (mode === 'tournament' && response.data) {
                     navigate('/tournament/bracket');
                 }
             } else {
-                const error = await response.json();
-                console.error('Failed to save match:', error);
+                console.error('Failed to save match:', response.error);
             }
         } catch (error) {
             console.error('Error sending match result:', error);

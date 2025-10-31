@@ -1,4 +1,4 @@
-// import helmet from "@fastify/helmet";
+import helmet from "@fastify/helmet";
 import Fastify from "fastify";
 import FastifyJWT from "@fastify/jwt";
 import cors from '@fastify/cors';
@@ -41,7 +41,8 @@ await app.register(cors, {
     'https://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true // allow cookies to be sent to gosia -> not needed?
+//   credentials: true, // allow cookies to be sent to gosia -> not needed?
+  exposedHeaders: ['Renewed-Token']
 });
 
 await app.register(FastifyJWT, {
@@ -49,7 +50,21 @@ await app.register(FastifyJWT, {
 });
 
 // // Register security headers
-// await app.register(helmet, { contentSecurityPolicy: { useDefaults: true } });
+await app.register(helmet, { contentSecurityPolicy: {
+	directives: {
+		defaultSrc: ["'self'"],
+		styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+		scriptSrc: ["'self'"],
+		imgSrc: ["'self'", "data:"], //may need to be changed for uploaded images
+		connectSrc: ["'self'", "https://localhost:8443"],
+		fontSrc: ["https://fonts.gstatic.com"],
+		objectSrc: ["'none'"],
+		mediaSrc: ["'none'"],
+		frameSrc: ["'none'"],
+	},
+},
+crossOriginEmbedderPolicy: false,
+});
 
 // Health check endpoint
 app.get("/health", {

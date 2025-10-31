@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
+import apiCentral from '../../utils/apiCentral';
 
 interface DeleteAccountProps {
     open: boolean;
@@ -38,19 +39,16 @@ export function DeleteAccount({ open, onClose}: DeleteAccountProps) {
                 return;
             }
 
-            const anonymizeResponse = await fetch('https://localhost:8443/api/user/anonymize', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: user.userID }),
+            const anonymizeResponse = await apiCentral.post('/api/user/anonymize', {
+                 userID: user.userID
             });
 
-            if (anonymizeResponse.ok) {
+            if (anonymizeResponse.data) {
                 alert('Account has been deleted successfully. You will be logged out.');
                 logout();
                 navigate('/signup');
             } else {
-                const errorData = await anonymizeResponse.json();
-                setDeleteError(errorData.error || 'Failed to delete account');
+                setDeleteError(anonymizeResponse.error || 'Failed to delete account');
             }
         } catch (error) {
             console.error('Delete account error:', error); // ADDED: Debug log

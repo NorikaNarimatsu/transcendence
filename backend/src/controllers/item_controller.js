@@ -76,7 +76,6 @@ export const validatePasswordbyEmail = async (request, response) => {
 			.get(sanitiziedEmail);
 		if (!user) return response.code(401).send({ message: "User not found" });
 
-		//TODO for Gosia - should I also validate here password? in case of frontend bypass
 		const isPasswordMatch = await comparePassword(password, user.password);
 		if (!isPasswordMatch) {
 			return response.code(401).send({ message: "Invalid password" });
