@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../user/UserContext';
 import Button from '../../components/ButtonDarkPink';
 import home_icon from '../../assets/icons/Home.png';
+import apiCentral from '../../utils/apiCentral';
 
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -180,17 +181,15 @@ export default function Dashboard(): JSX.Element {
                 setError(null);
 
                 // Fetch matches
-                const matchesResponse = await fetch(`https://localhost:8443/user/${user.userID}/matches`);
-                if (matchesResponse.ok) {
-                    const matchesData = await matchesResponse.json();
-                    setMatches(matchesData);
+                const matchesResponse = await apiCentral.get(`/user/${user.userID}/matches`);
+                if (matchesResponse.data) {
+                    setMatches(matchesResponse.data);
                 }
 
                 // Fetch stats
-                const statsResponse = await fetch(`https://localhost:8443/user/${user.userID}/stats`);
-                if (statsResponse.ok) {
-                    const statsData = await statsResponse.json();
-                    setStats(statsData);
+                const statsResponse = await apiCentral.get(`/user/${user.userID}/stats`);
+                if (statsResponse.data) {
+                    setStats(statsResponse.data);
                 }
 
             } catch (err) {

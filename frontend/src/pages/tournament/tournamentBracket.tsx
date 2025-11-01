@@ -5,6 +5,7 @@ import type { TournamentMatch } from './tournamentContext';
 import type { SelectedPlayer } from '../user/PlayerContext';
 import Button from '../../components/ButtonDarkPink';
 import home_icon from '../../assets/icons/Home.png';
+import apiCentral from '../../utils/apiCentral';
 
 interface MatchResult {
     matchID: number;
@@ -49,15 +50,13 @@ export default function Bracket() {
             
             try {
                 setLoading(true);
-                const response = await fetch(`https://localhost:8443/tournament/${tournamentData.tournamentBracketID}/matches`);
+                const response = await apiCentral.get(`/tournament/${tournamentData.tournamentBracketID}/matches`);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Response ok and Tournament matches from DB:', data.matches);
-                    setTournamentMatches(data.matches || []);
+                if (response.data) {
+                    console.log('Response ok and Tournament matches from DB:', response.data.matches);
+                    setTournamentMatches(response.data.matches || []);
                 } else {
-                    const errorText = await response.text();
-                    console.error('Failed to fetch tournament matches:', response.status, errorText);
+                    console.error('Failed to fetch tournament matches:', response.error);
                     setTournamentMatches([]);
                 }
             } catch (error) {

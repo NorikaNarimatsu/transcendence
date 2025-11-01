@@ -21,6 +21,8 @@ import GameSettings from '../../components/SettingsGames';
 import type { SelectedPlayer } from '../user/PlayerContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+import apiCentral from '../../utils/apiCentral';
+
 export default function PongGame(): JSX.Element {
     const { user } = useUser();
     const location = useLocation();
@@ -138,16 +140,10 @@ export default function PongGame(): JSX.Element {
           console.log('=== SENDING MATCH RESULT ===');
           console.log('Match Data:', matchData);
 
-          const response = await fetch('https://localhost:8443/match', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(matchData)
-          });
+          const response = await apiCentral.post('/match', matchData);
 
-          if (response.ok) {
-              const result = await response.json();
+          if (response.data) {
+              const result = response.data;
               console.log('Match saved successfully:', result);
               console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
               if (result.duration) {
@@ -158,8 +154,7 @@ export default function PongGame(): JSX.Element {
                     navigate('/tournament/bracket');
                 }
           } else {
-              const error = await response.json();
-              console.error('Failed to save match:', error);
+              console.error('Failed to save match:', response.error);
           }
       } catch (error) {
           console.error('Error sending match result:', error);

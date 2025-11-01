@@ -57,6 +57,7 @@ export function UserProvider({ children }: { children: ReactNode}) {
     const logout = () => {
         setUser(null);
         localStorage.removeItem('currentUser');
+		localStorage.removeItem('authToken');
     };
 
     if (loading) {

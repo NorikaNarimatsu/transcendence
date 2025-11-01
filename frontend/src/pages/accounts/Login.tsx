@@ -7,7 +7,9 @@ import SafeError from '../../components/SafeError';
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '../user/UserContext'; 
+import { useUser } from '../user/UserContext';
+
+import apiCentral from '../../utils/apiCentral';
 
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -190,35 +192,26 @@ export default function LoginPage(){
     setError("");
 
     try {
-      const response = await fetch("https://localhost:8443/2fa/verify-code", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userID: userID,
-          code: verificationCode,
-        }),
-      });
 
-      const data = await response.json();
+		if (temporaryToken) {
+			localStorage.setItem("authToken", temporaryToken);
+		}
+		const response = await apiCentral.post("2fa/verify-code", { userID: userID, code: verificationCode });
 
-      if (response.ok) {
-        localStorage.setItem("authToken", data.token);
-		// console.log('2FA verification success, data: ', data);
-		// console.log('2FA verification success, data.user: ', data.user);
-        setUser(data.user);
-		// console.log('2FA verification success, data.user.userID: ', data.user.userID);
+      if (response.data) {
+
+		if (response.data.token) {
+			localStorage.setItem("authToken", response.data.token);
+		}
 		const userWithCorrectID = {
-			userID: data.user.userID,
-			name: data.user.name,
-			avatarUrl: data.user.avatarUrl
+			userID: response.data.user.userID,
+			name: response.data.user.name,
+			avatarUrl: response.data.user.avatarUrl
 		};
-		// console.log('Setting user with correct ID: ', userWithCorrectID);
 		setUser(userWithCorrectID);
         navigate("/playerProfile");
       } else {
-        setError(data.message || "Incorrect 2FA code");
+        setError(response.error || "Incorrect 2FA code");
       }
     } catch (err) {
       setError("Failed to verify 2FA code");

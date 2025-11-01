@@ -2,203 +2,351 @@ import { db} from '../server.js';
 import { emailUtils } from '../utils/emailUtils.js';
 import { comparePassword } from '../utils/passwordUtils.js';
 import bcrypt from 'bcrypt';
+import { checkPassword } from '../utils/passwordValidationUtils.js';
+import { sanitizeInput } from '../utils/sanitizeInput.js';
 
 const twoFactorController = {
-	enable2FA: async (request, response) => {
-		try {
-			const { userID } = request.body;
-			const user = db.prepare('SELECT userID, email, name, "2FA" FROM users WHERE userID = ?').get(userID);
+  enable2FA: async (request, response) => {
+    try {
+      const { userID } = request.body;
+      const sanitizedUserID = parseInt(userID);
+      if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
+        return response.code(400).send({ error: "Invalid userID" });
+      }
 
-			if (!user) {
-				return response.code(404).send({ error: 'User not found' });
-			}
+      const user = db
+        .prepare(
+          'SELECT userID, email, name, "2FA" FROM users WHERE userID = ?'
+        )
+        .get(sanitizedUserID);
 
-			if (user['2FA']) {
-				return response.code(400).send({ error: '2FA already enabled' });
-			}
+      if (!request.user) {
+        return response.code(401).send({ error: "Unauthorized" });
+      }
 
-			db.prepare('UPDATE users SET "2FA" = 1 WHERE userID = ?').run(userID);
+      if (request.user.userID !== sanitizedUserID) {
+        return response
+          .code(403)
+          .send({
+            error: "Forbidden - you can only change the setting for yourself",
+          });
+      }
 
-			return response.send({
-				success: true,
-				message: '2FA enabled successfully',
-				user: { ...user, has2FA: true }
-			});
-		} catch (error) {
-			return response.code(500).send({ error: 'Server error' });
-		}
-	},
-	
-	disable2FA: async (request, response) => {
-		try {
-			const { userID, password } = request.body;
+      if (!user) {
+        return response.code(404).send({ error: "User not found" });
+      }
 
-			const user = db.prepare('SELECT userID, email, name, password, "2FA" FROM users WHERE userID = ?').get(userID);
+      if (user["2FA"]) {
+        return response.code(400).send({ error: "2FA already enabled" });
+      }
 
-			if (!user || !user['2FA']) {
-				return response.code(400).send({ error: '2FA not enabled' });
-			}
+      db.prepare('UPDATE users SET "2FA" = 1 WHERE userID = ?').run(
+        sanitizedUserID
+      );
 
-			const isPasswordValid = await comparePassword(password, user.password);
-			if (!isPasswordValid) {
-				return response.code(401).send({ error: 'Invalid password' });
-			}
+      return response.send({
+        success: true,
+        message: "2FA enabled successfully",
+        user: {
+          userID: user.userID,
+          email: sanitizeInput.sanitizeEmail(user.email),
+          name: sanitizeInput.sanitizeUsername(user.name),
+          has2FA: true,
+        },
+      });
+    } catch (error) {
+      return response.code(500).send({ error: "Server error" });
+    }
+  },
 
-			db.prepare('UPDATE users SET "2FA" = 0 WHERE userID = ?').run(userID);
-			db.prepare('DELETE FROM two_factor_auth WHERE userID = ? AND used = 0').run(userID);
+  disable2FA: async (request, response) => {
+    try {
+      const { userID, password } = request.body;
+      const sanitizedUserID = parseInt(userID);
+      if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
+        return response.code(400).send({ error: "Invalid userID" });
+      }
 
-			return response.send({
-				success: true,
-				message: '2FA disabled successfully',
-				user: { ...user, has2FA: false }
-			});
-		} catch (error) {
-			return response.code(500).send({ error: 'Server error' });
-		}
-	},
+	//   TODO for Gosia -> uncomment the check once the password requirements are back
+    //   const passwordCheck = checkPassword(password);
+    //   if (!passwordCheck.valid) {
+    //     return response.code(400).send({ error: passwordCheck.error });
+    //   }
+      if (!request.user) {
+        return response.code(401).send({ error: "Unauthorized" });
+      }
+      if (request.user.userID !== sanitizedUserID) {
+        return response.code(403).send({
+          error: "Forbidden - you can only change the setting for yourself",
+        });
+      }
 
-	sendVerificationCode: async (request, response) => {
-		try {
-			const { userID } = request.body;
+      const user = db
+        .prepare(
+          'SELECT userID, email, name, password, "2FA" FROM users WHERE userID = ?'
+        )
+        .get(sanitizedUserID);
 
-			const user = db.prepare('SELECT userID, email, name, "2FA" FROM users WHERE userID = ?').get(userID);
+      if (!user || !user["2FA"]) {
+        return response.code(400).send({ error: "2FA not enabled" });
+      }
 
-			if (!user || !user['2FA']) {
-				return response.code(400).send({ error: '2FA not enabled' });
-			}
+      const isPasswordValid = await comparePassword(password, user.password);
+      if (!isPasswordValid) {
+        return response.code(401).send({ error: "Invalid password" });
+      }
 
-			
-			db.prepare('DELETE FROM two_factor_auth WHERE userID = ? AND used = 0').run(userID);
-			
-			const code = emailUtils.generateAuthCode();
-			const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min
+      db.prepare('UPDATE users SET "2FA" = 0 WHERE userID = ?').run(
+        sanitizedUserID
+      );
+      db.prepare(
+        "DELETE FROM two_factor_auth WHERE userID = ? AND used = 0"
+      ).run(sanitizedUserID);
 
-			const saltRounds = 12;
-			const hashedCode = await bcrypt.hash(code, saltRounds);
-			
-			
-			db.prepare(`
+      return response.send({
+        success: true,
+        message: "2FA disabled successfully",
+        user: {
+          userID: user.userID,
+          email: sanitizeInput.sanitizeEmail(user.email),
+          name: sanitizeInput.sanitizeUsername(user.name),
+          has2FA: false,
+        },
+      });
+    } catch (error) {
+      return response.code(500).send({ error: "Server error" });
+    }
+  },
+
+  sendVerificationCode: async (request, response) => {
+    try {
+      const { userID } = request.body;
+      const sanitizedUserID = parseInt(userID);
+      if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
+        return response.code(400).send({ error: "Invalid userID" });
+      }
+
+      if (!request.user) {
+        return response.code(401).send({ error: "Unauthorized" });
+      }
+
+      if (request.user.userID !== sanitizedUserID) {
+        return response.code(403).send({
+          error: "Forbidden - you can only change the setting for yourself",
+        });
+      }
+
+      const user = db
+        .prepare(
+          'SELECT userID, email, name, "2FA" FROM users WHERE userID = ?'
+        )
+        .get(sanitizedUserID);
+
+      if (!user || !user["2FA"]) {
+        return response.code(400).send({ error: "2FA not enabled" });
+      }
+
+      const maxCodesInTenMin = 3;
+
+      const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      const recentCodesCount = db
+        .prepare(
+          `
+				SELECT COUNT(*) as count FROM two_factor_auth
+				WHERE userID = ? AND createdAt >= ?
+				`
+        )
+        .get(sanitizedUserID, tenMinAgo).count;
+
+      if (recentCodesCount >= maxCodesInTenMin) {
+        return response
+          .header("Retry-After", String(10 * 60))
+          .code(429)
+          .send({
+            error:
+              "You have reached the limit of codes sent per 10 minutes. Please try again later.",
+          });
+      }
+
+      db.prepare(
+        "DELETE FROM two_factor_auth WHERE userID = ? AND used = 0"
+      ).run(sanitizedUserID);
+
+      const code = emailUtils.generateAuthCode();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min
+
+      const saltRounds = 12;
+      const hashedCode = await bcrypt.hash(code, saltRounds);
+
+      db.prepare(
+        `
 				INSERT INTO two_factor_auth (userID, code, expiresAt, attempts)
 				VALUES (?, ?, ?, ?)
-			`).run(userID, hashedCode, expiresAt, 0);
+			`
+      ).run(sanitizedUserID, hashedCode, expiresAt, 0);
 
-			const emailSent = await emailUtils.sendAuthCodeEmail(user.email, user.name, code);
+      const emailSent = await emailUtils.sendAuthCodeEmail(
+        user.email,
+        user.name,
+        code
+      );
 
-			if (!emailSent) {
-				return response.code(500).send({ error: 'Failed to send verification email' });
-			}
+      if (!emailSent) {
+        return response
+          .code(500)
+          .send({ error: "Failed to send verification email" });
+      }
 
-			return response.send({
-				success: true,
-				message: 'Verification code sent with email'
-			});
-		} catch (error) {
-			return response.code(500).send({ error: 'Server error' });
-		}
-	},
+      return response.send({
+        success: true,
+        message: "Verification code sent with email",
+      });
+    } catch (error) {
+      return response.code(500).send({ error: "Server error" });
+    }
+  },
 
-	verifyCode: async (request, response) => {
-		try {
-			const { userID, code } = request.body;
+  verifyCode: async (request, response) => {
+    try {
+      const { userID, code } = request.body;
+      const sanitizedUserID = parseInt(userID);
+      if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
+        return response.code(400).send({ error: "Invalid userID" });
+      }
 
-			const codeRecord = db.prepare(`
-				SELECT * FROM two_factor_auth
-				WHERE userID = ? AND used = 0
-				ORDER BY createdAt DESC LIMIT 1
-			`).get(userID);
-			
-			if (!codeRecord) {
-				return response.code(400).send({ error: 'Invalid code' });
-			}
+      if (!request.user) {
+        return response.code(401).send({ error: "Unauthorized" });
+      }
 
-			if (new Date() > new Date(codeRecord.expiresAt)) {
-				return response.code(400).send({ error: 'Code expired' });
-			}
+      if (request.user.userID !== sanitizedUserID) {
+        return response.code(403).send({
+          error: "Forbidden - you can only change the setting for yourself",
+        });
+      }
 
-			const maxAttempts = 5;
-			const currentAttempts = codeRecord.attempts ?? 0;
-			if (currentAttempts >= maxAttempts) {
-				return response.code(429).send({ error: 'Code verification attempts exceeded', attemptsLeft: 0 });
-			}
+      if (!code || typeof code !== "string" || code.length !== 6 || !/^\d{6}$/.test(code)) {
+        return response.code(400).send({ error: "Invalid code format" });
+      }
 
-			const isCodeValid = await bcrypt.compare(code, codeRecord.code);
-			if (!isCodeValid) {
+      const codeRecord = db.prepare(`
+		SELECT * FROM two_factor_auth
+		WHERE userID = ? AND used = 0
+		ORDER BY createdAt DESC LIMIT 1
+	`).get(sanitizedUserID);
 
-				db.prepare('UPDATE two_factor_auth SET attempts = attempts + 1 WHERE codeID = ?').run(codeRecord.codeID);
-				const attemptsLeft = maxAttempts - (currentAttempts + 1);
-				return response.code(400).send({ error: 'Invalid code', attemptsLeft });
-			}
+      if (!codeRecord) {
+        return response.code(400).send({ error: "Invalid code" });
+      }
 
-			db.prepare('UPDATE two_factor_auth SET used = 1 WHERE codeID = ?').run(codeRecord.codeID);
+      if (new Date() > new Date(codeRecord.expiresAt)) {
+        return response.code(400).send({ error: "Code expired" });
+      }
 
-			const user = db.prepare('SELECT userID, email, name, avatarUrl FROM users WHERE userID = ?').get(userID);
-			// console.log('Raw user from database: ', JSON.stringify(user, null, 2));
-			// console.log('userkeys: ', Object.keys(user));
+      const maxAttempts = 5;
+      const currentAttempts = codeRecord.attempts ?? 0;
+      if (currentAttempts >= maxAttempts) {
+        return response
+          .code(429)
+          .send({
+            error: "Code verification attempts exceeded",
+            attemptsLeft: 0,
+          });
+      }
 
-			const fullToken = request.server.jwt.sign({
-				userID: user.userID,
-				email: user.email,
-				name: user.name,
-				has2FA: true,
-				verified2FA: true,
-				iat: Math.floor(Date.now() / 1000),
-				exp: Math.floor(Date.now() / 1000) + (3 * 60 * 60), // 3 hrs
-				lastActivity: Math.floor(Date.now() / 1000)
-			}, { expiresIn: '3h' });
+      const isCodeValid = await bcrypt.compare(code, codeRecord.code);
+      if (!isCodeValid) {
+        db.prepare(
+          "UPDATE two_factor_auth SET attempts = attempts + 1 WHERE codeID = ?"
+        ).run(codeRecord.codeID);
+        const attemptsLeft = maxAttempts - (currentAttempts + 1);
+        return response.code(400).send({ error: "Invalid code", attemptsLeft });
+      }
 
-			const userResponse = {};
-			userResponse['userID'] = user.userID;
-			userResponse['email'] = user.email;
-			userResponse['name'] = user.name;
-			userResponse['avatarUrl'] = user.avatarUrl;
-			userResponse['has2FA'] = true;
-			userResponse['verified2FA'] = true;
+      db.prepare("UPDATE two_factor_auth SET used = 1 WHERE codeID = ?").run(
+        codeRecord.codeID
+      );
 
-			// return response.send({
-			const responseData = {
-				success: true,
-				message: 'Code verified successfully',
-				token: fullToken,
-				// user: {
-				// 	userId: user.userID,
-				// 	email: user.email,
-				// 	name: user.name,
-				// 	avatarUrl: user.avatarUrl,
-				// 	has2FA: true,
-				// 	verified2FA: true
-				// }
-				user: userResponse
-			};
-			// console.log('verifyCode response data before send: ', JSON.stringify(responseData, null, 2));
-			return response.send(responseData);
-			// });
-		} catch (error) {
-			console.error('2FA verification error: ', error);
-			return response.code(500).send({ error: 'Server error' });
-		}
-	},
+      const user = db
+        .prepare(
+          "SELECT userID, email, name, avatarUrl FROM users WHERE userID = ?"
+        )
+        .get(sanitizedUserID);
 
-	get2FAstatus: async (request, response) => {
-		try {
-			const userID = request.query.userID;
+      const fullToken = request.server.jwt.sign(
+        {
+          userID: user.userID,
+          email: sanitizeInput.sanitizeEmail(user.email),
+          name: sanitizeInput.sanitizeUsername(user.name),
+          has2FA: true,
+          verified2FA: true,
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + 3 * 60 * 60, // 3 hrs
+          lastActivity: Math.floor(Date.now() / 1000),
+        },
+        { expiresIn: "3h" }
+      );
 
-			const user = db.prepare('SELECT userID, email, name, "2FA" FROM users WHERE userID = ?').get(userID);
+      const userResponse = {};
+      userResponse["userID"] = user.userID;
+      userResponse["email"] = sanitizeInput.sanitizeEmail(user.email);
+      userResponse["name"] = sanitizeInput.sanitizeUsername(user.name);
+      userResponse["avatarUrl"] = user.avatarUrl;
+      userResponse["has2FA"] = true;
+      userResponse["verified2FA"] = true;
 
-			if (!user) {
-				return response.code(404).send({ error: 'User not found' });
-			}
+      const responseData = {
+        success: true,
+        message: "Code verified successfully",
+        token: fullToken,
+        user: userResponse,
+      };
+      return response.send(responseData);
+    } catch (error) {
+      request.log.error({ err: error }, "2FA verification failed");
+      return response.code(500).send({ error: "Server error" });
+    }
+  },
 
-			return response.send({
-				userID: user.userID,
-				email: user.email,
-				name: user.name,
-				has2FA: !!user['2FA'],
-				code: user['2FA'] ? 'enabled' : 'disabled'
-			});
-		} catch (error) {
-			return response.code(500).send({ error: 'Server error'});
-		}
-	}
+  get2FAstatus: async (request, response) => {
+    try {
+      const userID = request.query.userID;
+	  const sanitizedUserID = parseInt(userID);
+
+	  if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
+		return response.code(400).send({ error: "Invalid userID" });
+	  }
+
+	  if (!request.user) {
+		return response.code(401).send({ error: "Unauthorized" });
+	  }
+
+	  if (request.user.userID !== sanitizedUserID) {
+		return response.code(403).send({
+		  error: "Forbidden - you can only access the setting for yourself",
+		});
+	  }
+
+      const user = db
+        .prepare(
+          'SELECT userID, email, name, "2FA" FROM users WHERE userID = ?'
+        )
+        .get(sanitizedUserID);
+
+      if (!user) {
+        return response.code(404).send({ error: "User not found" });
+      }
+
+      return response.send({
+        userID: user.userID,
+        email: sanitizeInput.sanitizeEmail(user.email),
+        name: sanitizeInput.sanitizeUsername(user.name),
+        has2FA: !!user["2FA"],
+        code: user["2FA"] ? "enabled" : "disabled",
+      });
+    } catch (error) {
+      return response.code(500).send({ error: "Server error" });
+    }
+  },
 };
 
 export default twoFactorController;

@@ -1,5 +1,6 @@
 import { useState, forwardRef, useImperativeHandle } from 'react';
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
+import apiCentral from '../utils/apiCentral';
 import type { User } from '../pages/user/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { tr } from 'zod/locales';
@@ -34,10 +35,9 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
             setLoading(true);
             
             try {
-                const response = await fetch(`https://localhost:8443/friends/userID/${user.userID}`);
-                if (response.ok) {
-                    const friendsData = await response.json();
-                    setFriends(friendsData);
+                const response = await apiCentral.get(`/friends/userID/${user.userID}`);
+                if (response.data) {
+                    setFriends(response.data);
                 } else {
                     setFriends([]);
                 }
@@ -65,9 +65,9 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                 const allUsers = await usersResponse.json();
                 
                 // Get current friends to filter out
-                const friendsResponse = await fetch(`https://localhost:8443/friends/userID/${user.userID}`);
-                if (friendsResponse.ok) {
-                    const currentFriends = await friendsResponse.json();
+                const friendsResponse = await apiCentral.get(`/friends/userID/${user.userID}`);
+                if (friendsResponse.data) {
+                    const currentFriends = friendsResponse.data;
                     const friendIds = currentFriends.map((friend: SelectedPlayer) => friend.userID);
                     
                     // Filter out existing friends
@@ -88,24 +88,19 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
 
         const handleAddFriend = async (friend: SelectedPlayer) => {
             try {
-                const response = await fetch('https://localhost:8443/friends/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user1ID: user.userID,
-                        user2ID: friend.userID
-                    }),
+                const response = await apiCentral.post('/friends/add', {
+                    user1ID: user.userID,
+                    user2ID: friend.userID
                 });
 
-                if (response.ok) {
+                if (response.data) {
                     // UPDATED: Store friend object and remove timeout
                     setAddedFriend(friend);
                     setShowSuccessPopup(true);
                     setShowAddFriends(false);
                     // REMOVED: No more auto-hide timeout
                 } else {
-                    const errorData = await response.json();
-                    alert(errorData.message || 'Failed to add friend');
+                    alert(response.error || 'Failed to add friend');
                 }
             } catch (error) {
                 console.error('Failed to add friend:', error);

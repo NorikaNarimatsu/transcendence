@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import type { User } from '../pages/user/UserContext'; // maybe delete?
 import type { SelectedPlayer } from '../pages/user/PlayerContext';
 import { useTournament } from '../pages/tournament/tournamentContext';
+import apiCentral from '../utils/apiCentral';
 
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -35,24 +36,16 @@ export function TournamentRegistration({
 
     const createTournamentBracket = async (participantIDs: number[]) => {
         try {
-            const response = await fetch('https://localhost:8443/tournament/bracket', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    participants: participantIDs,
-                    creatorID: user.userID
-                })
+            const response = await apiCentral.post('/tournament/bracket', {
+				participants: participantIDs,
+				creatorID: user.userID
             });
 
-            if (response.ok) {
-                const result = await response.json();
-                console.log('Tournament bracket created:', result);
-                return result.tournamentBracketID;
+            if (response.data) {
+                console.log('Tournament bracket created:', response.data);
+                return response.data.tournamentBracketID;
             } else {
-                const error = await response.json();
-                console.error('Failed to create tournament bracket:', error);
+                console.error('Failed to create tournament bracket:', response.error);
                 return null;
             }
         } catch (error) {

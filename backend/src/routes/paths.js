@@ -2,6 +2,7 @@ import itemController from '../controllers/item_controller.js'
 import userController from '../controllers/user_controller.js';
 import gameController from '../controllers/game_controller.js';
 import twoFactorController from '../controllers/2fa_controller.js';
+import { authenticateToken } from '../utils/authForToken.js';
 
 export default async function itemRoutes(fastify, options) {
     // User validation
@@ -16,28 +17,31 @@ export default async function itemRoutes(fastify, options) {
     fastify.get('/getUserInfoByEmail/:email', itemController.getUserInfoByEmail);
     fastify.get('/getUserById/:userID', itemController.getUserById);
     fastify.get('/users/except/:userID', itemController.getUsersExceptUserID);
-    fastify.put('/user/updateAvatar', itemController.updateAvatarUrl); // new avatar route
+    fastify.get('/getUserEmailById/:userID', itemController.getUserEmailById);
+    fastify.put('/user/updateAvatar', { preHandler: [authenticateToken] }, itemController.updateAvatarUrl); // new avatar route
+    fastify.put('/user/updateName', { preHandler: [authenticateToken] }, itemController.updateUserName);
+    fastify.put('/user/updateEmail', { preHandler: [authenticateToken] }, itemController.updateUserEmail);
 
     // Friends management (using userID)
-    fastify.post('/friends/add', itemController.addFriendByUserID);
-    fastify.get('/friends/userID/:userID', itemController.getUserFriendsByUserID);
-    
+    fastify.post('/friends/add', { preHandler: [authenticateToken] }, itemController.addFriendByUserID);
+    fastify.get('/friends/userID/:userID', { preHandler: [authenticateToken] }, itemController.getUserFriendsByUserID);
+
     // User profile
-    fastify.get('/api/user/profile', userController.getProfile);
-    fastify.post('/api/user/anonymize', userController.anonymizeUser);
-	fastify.post('/api/user/export-data', userController.exportUserData);
+    fastify.get('/api/user/profile', { preHandler: [authenticateToken] }, userController.getProfile);
+    fastify.post('/api/user/anonymize', { preHandler: [authenticateToken] }, userController.anonymizeUser);
+	fastify.post('/api/user/export-data', { preHandler: [authenticateToken] }, userController.exportUserData);
 
     // Game management
-    fastify.get('/user/:userID/matches', gameController.getUserMatches);
-    fastify.get('/user/:userID/stats', gameController.getUserStats);
-    fastify.post('/match', gameController.addMatch);
-    fastify.post('/tournament/bracket', gameController.createTournamentBracket);
-    fastify.get('/tournament/:tournamentBracketID/matches', gameController.getTournamentMatches);
+    fastify.get('/user/:userID/matches', { preHandler: [authenticateToken] }, gameController.getUserMatches);
+    fastify.get('/user/:userID/stats', { preHandler: [authenticateToken] }, gameController.getUserStats);
+    fastify.post('/match', { preHandler: [authenticateToken] }, gameController.addMatch);
+    fastify.post('/tournament/bracket', { preHandler: [authenticateToken] }, gameController.createTournamentBracket);
+    fastify.get('/tournament/:tournamentBracketID/matches', { preHandler: [authenticateToken] }, gameController.getTournamentMatches);
 
 	// 2FA endpoints
-	fastify.post('/2fa/enable', twoFactorController.enable2FA);
-	fastify.post('/2fa/disable', twoFactorController.disable2FA);
-	fastify.post('/2fa/send-code', twoFactorController.sendVerificationCode);
-	fastify.post('/2fa/verify-code',twoFactorController.verifyCode);
-	fastify.get('/2fa/status', twoFactorController.get2FAstatus);
+	fastify.post('/2fa/enable', { preHandler: [authenticateToken] }, twoFactorController.enable2FA);
+	fastify.post('/2fa/disable', { preHandler: [authenticateToken] }, twoFactorController.disable2FA);
+	fastify.post('/2fa/send-code', { preHandler: [authenticateToken] }, twoFactorController.sendVerificationCode);
+	fastify.post('/2fa/verify-code', { preHandler: [authenticateToken] }, twoFactorController.verifyCode);
+	fastify.get("/2fa/status", { preHandler: [authenticateToken] }, twoFactorController.get2FAstatus);
 }

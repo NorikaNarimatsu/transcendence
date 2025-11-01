@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { set } from 'zod';
+import apiCentral from '../utils/apiCentral';
 
 interface TwoFactorSettingsProps {
-	user: { userID: number; name: string; }
+	user: { userID: number; }
 	onClose: () => void;
 }
 
@@ -17,22 +18,18 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 	const [password, setPassword] = useState('');
 
 	useEffect(() => {
-		// console.log('TwoFactorSettings - user prop: ', user);
-		// console.log('TwoFactorSettings - user.userID: ', user.userID);
 		fetch2FAStatus();
 	}, []);
 
 	const fetch2FAStatus = async () => {
 		try {
 			setLoading(true);
-			const response = await fetch(`https://localhost:8443/2fa/status?userID=${user.userID}`);
+			const response = await apiCentral.get(`/2fa/status?userID=${user.userID}`);
 
-			if (response.ok) {
-				const data = await response.json();
-				setStatus(data);
+			if (response.data) {
+				setStatus(response.data);
 			} else {
-				const errorData = await response.json();
-				setError(errorData.message || 'Failed to fetch 2FA status');
+				setError(response.error || 'Failed to fetch 2FA status');
 			}
 		} catch (err) {
 			setError('Server error while fetching 2FA status');
@@ -47,24 +44,14 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 			setError('');
 			setSuccess('');
 
-			// console.log('handleEnable2FA - user: ', user);
-			// console.log('handleEnable2FA - user.userID: ', user.userID);
+			const response = await apiCentral.post('/2fa/enable', { userID: user.userID });
 
-			const response = await fetch('https://localhost:8443/2fa/enable', {
-				method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ userID: user.userID }),
-			});
-
-			// console.log('handleEnable2FA - response status: ', response.status);
-			const data = await response.json();
-
-			if (response.ok) {
+			if (response.data) {
 				setSuccess('2FA successfully enabled');
 				setShowDisablePassword(false);
 				await fetch2FAStatus();
 			} else {
-				setError(data.message || 'Failed to enable 2FA');
+				setError(response.error || 'Failed to enable 2FA');
 			}
 		} catch (err) {
 			setError('Server error while enabling 2FA');
@@ -78,22 +65,16 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 			setActionLoading(true);
 			setError('');
 			setSuccess('');
-			
-			const response = await fetch('https://localhost:8443/2fa/disable', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ userID: user.userID, password: password }),
-			});
 
-			const data = await response.json();
+			const response = await apiCentral.post('/2fa/disable', { userID: user.userID, password: password });
 
-			if (response.ok) {
+			if (response.data) {
 				setSuccess('2FA successfully disabled');
 				setPassword('');
 				setShowDisablePassword(false);
 				await fetch2FAStatus();
 			} else {
-				setError(data.message || 'Failed to disable 2FA');
+				setError(response.error || 'Failed to disable 2FA');
 			}
 		} catch (err) {
 			setError('Server error while disabling 2FA');
@@ -101,62 +82,6 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 			setActionLoading(false);
 		}
 	};
-
-	// const handleSentVerificationCode = async () => {
-	// 	try {
-	// 		setActionLoading(true);
-	// 		setError('');
-	// 		setSuccess('');
-
-	// 		const response = await fetch('https://localhost:8443/2fa/send-code', {
-	// 			method: 'POST',
-	// 			headers: { 'Content-Type': 'application/json' },
-	// 			body: JSON.stringify({userID: user.userID  }),
-	// 		});
-
-	// 		const data = await response.json();
-
-	// 		if (response.ok) {
-	// 			setSuccess('Verification code sent successfully');
-	// 			setShowCodeInput(true);
-	// 		} else {
-	// 			setError(data.message || 'Failed to send the verification code');
-	// 		}
-
-	// 	} catch (err) {
-	// 		setError('Server error while sending the verification code');
-	// 	} finally {
-	// 		setActionLoading(false);
-	// 	}
-	// };
-
-	// const handleVerifyCode = async () => {
-	// 	try {
-	// 		setActionLoading(true);
-	// 		setError('');
-	// 		setSuccess('');
-
-	// 		const response = await fetch('https://localhost:8443/2fa/verify-code', {
-	// 			method: 'POST',
-	// 			headers: { 'Content-Type': 'application/json' },
-	// 			body: JSON.stringify({ userID: user.userID, code: verificationCode }),
-	// 		});
-
-	// 		const data = await response.json();
-
-	// 		if (response.ok) {
-	// 			setSuccess('2FA verification successful');
-	// 			setVerificationCode('');
-	// 			setShowCodeInput(false);
-	// 		} else {
-	// 			setError(data.message || 'Failed to verify the code');
-	// 		}
-	// 	} catch (err) {
-	// 		setError('Server error while verifying the code');
-	// 	} finally {
-	// 		setActionLoading(false);
-	// 	}
-	// };
 
 	if (loading) {
 		return (
@@ -180,20 +105,6 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 					<h2 className="text-2xl text-white font-pixelify font-bold text-shadow">2FA Settings</h2>
 					<button onClick={onClose} className="text-blue-deep hover:text-blue-600 text-2xl font-bold">x</button>
 				</div>
-
-				{/* ERROR
-				{error && (
-					<div className="bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg mb-4">
-						<p className="font-dotgothic text-sm">{error}</p>
-					</div>
-				)}
-
-				{/* SUCCESS */}
-				{/* {success && (
-					<div className="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg mb-4">
-						<p className="font-dotgothic text-sm">{success}</p>
-					</div>
-				)} */}
 
 				{/* CONTENT */}
 				<div className="space-y-6">
