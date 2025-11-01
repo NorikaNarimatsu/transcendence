@@ -44,7 +44,7 @@ export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelec
             return;
         }
         const imageUrl = URL.createObjectURL(file);
-        onSelect(imageUrl);
+        onSelect(imageUrl); //TODO: Save uploaded image on the backend.
     };
     
     return (
