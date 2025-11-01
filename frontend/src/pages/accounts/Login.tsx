@@ -7,12 +7,19 @@ import SafeError from '../../components/SafeError';
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '../user/UserContext'; 
+import { useUser } from '../user/UserContext';
+
+import apiCentral from '../../utils/apiCentral';
+
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function LoginPage(){
   const location = useLocation();
   const navigate = useNavigate();
   const { setUser } = useUser();
+
+  const { lang, t } = useLanguage();
+  const translation = t[lang];
 
   const email = location.state?.email || "";
   const [name, setName] = useState("");
@@ -185,35 +192,26 @@ export default function LoginPage(){
     setError("");
 
     try {
-      const response = await fetch("https://localhost:8443/2fa/verify-code", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userID: userID,
-          code: verificationCode,
-        }),
-      });
 
-      const data = await response.json();
+		if (temporaryToken) {
+			localStorage.setItem("authToken", temporaryToken);
+		}
+		const response = await apiCentral.post("2fa/verify-code", { userID: userID, code: verificationCode });
 
-      if (response.ok) {
-        localStorage.setItem("authToken", data.token);
-		// console.log('2FA verification success, data: ', data);
-		// console.log('2FA verification success, data.user: ', data.user);
-        setUser(data.user);
-		// console.log('2FA verification success, data.user.userID: ', data.user.userID);
+      if (response.data) {
+
+		if (response.data.token) {
+			localStorage.setItem("authToken", response.data.token);
+		}
 		const userWithCorrectID = {
-			userID: data.user.userID,
-			name: data.user.name,
-			avatarUrl: data.user.avatarUrl
+			userID: response.data.user.userID,
+			name: response.data.user.name,
+			avatarUrl: response.data.user.avatarUrl
 		};
-		// console.log('Setting user with correct ID: ', userWithCorrectID);
 		setUser(userWithCorrectID);
         navigate("/playerProfile");
       } else {
-        setError(data.message || "Incorrect 2FA code");
+        setError(response.error || "Incorrect 2FA code");
       }
     } catch (err) {
       setError("Failed to verify 2FA code");
@@ -232,12 +230,10 @@ export default function LoginPage(){
                   LOG IN
                 </h1>
                 <h2 className="text-xl text-blue-deep font-dotgothic mb-[2px]">
-                  Hello {name ? sanitizeInput.escapeHtml(name) : "User"}!
+                  {translation.pages.login.hello} {name ? sanitizeInput.escapeHtml(name) : 'User'}!
                 </h2>
-                <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">
-                  Welcome back :)
-                </h2>
-
+                <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">{translation.pages.login.welcomeBack}</h2>
+                
                 {/* Password input with clickable eye */}
                 <div className="relative mb-4">
                   <img
@@ -262,9 +258,9 @@ export default function LoginPage(){
               {/* Continue button */}
               <ButtonPurple type="submit">
                 <span className="flex items-center justify-end gap-2">
-                  Continue
-                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto" />
-                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto" />
+                  {translation.common.continue}
+                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
+                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
                 </span>
               </ButtonPurple>
             </form>

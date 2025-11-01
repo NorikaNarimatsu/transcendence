@@ -5,6 +5,7 @@ import ButtonPink from '../../components/decoration/ButtonDarkPink';
 import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 import type { SelectedPlayer } from '../user/PlayerContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useTournament } from '../tournament/tournamentContext';
 
 import { SnakeGameEngine, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
@@ -17,6 +18,8 @@ import gear_icon from '../../assets/icons/Settings.png'
 //Import Game Instructions + Settings + Stats
 import GameInstructions from '../../components/games/GameInstructionsSnakeGame';
 import GameSettings from '../../components/games/SettingsGames';
+
+import apiCentral from '../../utils/apiCentral';
 
 export default function SnakeGame(): JSX.Element {
     const { user } = useUser();
@@ -39,6 +42,9 @@ export default function SnakeGame(): JSX.Element {
     const handleBackToProfile = () => {
         navigate('/playerProfile');
     };
+
+    const { lang, t } = useLanguage();
+    const translation = t[lang];
 
     const [view, setView] = useState<"game"|"instructions"|"settings">('instructions');
     const [backgroundColor, setBackgroundColor] = useState<string>('bg-pink-light');
@@ -145,16 +151,10 @@ export default function SnakeGame(): JSX.Element {
             console.log('Actual player1:', player1);
             console.log('Actual player2:', player2);
 
-            const response = await fetch('https://localhost:8443/match', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(matchData)
-            });
+            const response = await apiCentral.post('/match', matchData);
 
-            if (response.ok) {
-                const result = await response.json();
+            if (response.data) {
+                const result = response.data;
                 console.log('Match saved successfully:', result);
                 console.log('Winner:', result.winner, 'Winner ID:', result.winnerID);
                 if (result.duration) {
@@ -162,12 +162,11 @@ export default function SnakeGame(): JSX.Element {
                 }
 
                 // Navigate back to bracket after tournament match
-                if (mode === 'tournament' && response.ok) {
+                if (mode === 'tournament' && response.data) {
                     navigate('/tournament/bracket');
                 }
             } else {
-                const error = await response.json();
-                console.error('Failed to save match:', error);
+                console.error('Failed to save match:', response.error);
             }
         } catch (error) {
             console.error('Error sending match result:', error);
@@ -406,7 +405,7 @@ useEffect(() => {
                         >
                             <div className="text-center">
                                 <p className="text-white text-4xl font-pixelify mb-6">
-                                    Game Over!
+                                    {translation.pages.snakeGame.gameOver}!
                                 </p>
                                 {engine.isMultiplayer ? (
                                     <div className="text-white text-2xl font-pixelify mb-4">
@@ -420,15 +419,15 @@ useEffect(() => {
                                 </div>
                             ) : (
                                 <div className="text-white text-2xl font-pixelify mb-4">
-                                    <div>Final Score: {engine.snake1.score}/10 foods</div>
+                                    <div>{translation.pages.snakeGame.finalScore}: {engine.snake1.score}/10</div>
                                     {engine.snake1.score >= 10 && (
-                                        <div className="text-lg text-400 mt-2">🎉 Goal Achieved! You WIN!</div>
+                                        <div className="text-lg text-400 mt-2">🎉 {translation.pages.snakeGame.goalachieved}</div>
                                     )}
                                 </div>
                             )}
                                 <div className="flex flex-col gap-4">
                                     <p className="text-white text-xl font-pixelify opacity-75">
-                                        Press SPACE to play again
+                                        {translation.pages.snakeGame.pressSpaceToPlayAgain}
                                     </p>
                                 </div>
                             </div>

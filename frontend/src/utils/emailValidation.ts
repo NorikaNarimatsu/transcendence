@@ -1,5 +1,5 @@
 
-
+// TODO for Gosia -> recursion? and moving regex before sanitization?
 export const sanitizeEmail = (email: string): string => {
 	return email
 		.replace(/[<>]/g, '') //remove < and >
