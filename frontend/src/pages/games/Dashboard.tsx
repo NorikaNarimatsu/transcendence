@@ -65,7 +65,8 @@ export default function Dashboard(): JSX.Element {
     const analyzeMatches = (matches: MatchData[]) => {
         const perfectGames = matches.filter(m => 
             m.isWinner && 
-            ((m.user1Score === 3 && m.user2Score === 0))
+            ((m.user1ID === user?.userID && m.user1Score === 3 && m.user2Score === 0) ||
+             (m.user2ID === user?.userID && m.user2Score === 3 && m.user1Score === 0))
         ).length;
 
         // Calculate current win streak
@@ -427,20 +428,26 @@ export default function Dashboard(): JSX.Element {
                                                                 {match.matchMode === 'single' ? 'Single Player' : '2 Players'}
                                                             </div>
                                                             <div className="font-dotgothic text-purple-300 text-sm">
-                                                                vs {match.user2Name}
+                                                                vs {match.user1ID === user?.userID ? match.user2Name : match.user1Name}
                                                             </div>
                                                         </div>
                                                     </div>
                                                     
                                                     <div className="text-right">
                                                         <div className="font-pixelify text-white text-xl mb-1">
-                                                            {match.user1Score} - {match.user2Score}
+                                                            {match.user1ID === user?.userID 
+                                                                ? `${match.user1Score} - ${match.user2Score}`
+                                                                : `${match.user2Score} - ${match.user1Score}`
+                                                            }
                                                         </div>
                                                         <div className={`font-dotgothic text-sm font-bold ${
                                                             match.isWinner ? 'text-green-400' : 'text-red-400'
                                                         }`}>
                                                             {match.isWinner ? 'WIN' : 'LOSS'}
-                                                            {match.isWinner && match.user1Score === 3 && match.user2Score === 0 && (
+                                                            {match.isWinner && (
+                                                                (match.user1ID === user?.userID && match.user1Score === 3 && match.user2Score === 0) ||
+                                                                (match.user2ID === user?.userID && match.user2Score === 3 && match.user1Score === 0)
+                                                            ) && (
                                                                 <span className="ml-2 text-yellow-400">DIAMOND PERFECT</span>
                                                             )}
                                                         </div>
