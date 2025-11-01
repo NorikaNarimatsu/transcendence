@@ -58,6 +58,7 @@ export function UserProvider({ children }: { children: ReactNode}) {
         setUser(null);
         localStorage.removeItem('currentUser');
 		localStorage.removeItem('authToken');
+        localStorage.removeItem('lang');
     };
 
     if (loading) {

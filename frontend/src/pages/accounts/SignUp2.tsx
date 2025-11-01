@@ -118,7 +118,7 @@ export default function signupUnkownUser() {
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ name, email, password }),
+		body: JSON.stringify({ name, email, password, lang }),
 		});
 		if (response.status === 201) {
 		navigate('/login', { state: { email } });

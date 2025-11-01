@@ -15,6 +15,7 @@ import { FriendsManager } from '../components/FriendsManager';
 
 import TwoFactorSettings from '../components/2FSettings';
 import { useLanguage } from '../contexts/LanguageContext';
+import type { Language } from '../contexts/LanguageContext';
 
 import { UpdateUserData } from '../components/profileDataUpdate';
 import { useUser} from './user/UserContext';
@@ -69,8 +70,15 @@ export default function PlayerProfile(): JSX.Element {
     const { user, logout, setUser } = useUser();
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
 
-    const { lang, setLang, t } = useLanguage();
+    const { lang, setLang, t} = useLanguage();
     const translation = t[lang];
+
+    const handleChangeLanguage = (newLanguage:Language) => {
+      setLang(newLanguage);
+      if (user) {
+        localStorage.setItem('lang', JSON.stringify(newLanguage));
+      }
+    };
 
     useEffect(() => {
         setSelectedPlayer(null);
@@ -296,9 +304,9 @@ export default function PlayerProfile(): JSX.Element {
                 ];
             case 'Language':
                 return [
-                    { name: translation.pages.profile.english, action: () => setLang("en") },
-                    { name: translation.pages.profile.portuguese, action: () => setLang("pt") },
-                    { name: translation.pages.profile.polish, action: () => setLang("pl") },
+                    { name: translation.pages.profile.english, action: () => handleChangeLanguage("en") },
+                    { name: translation.pages.profile.portuguese, action: () => handleChangeLanguage("pt") },
+                    { name: translation.pages.profile.polish, action: () => handleChangeLanguage("pl") },
                 ];
             case 'UpdateData':
                 return [

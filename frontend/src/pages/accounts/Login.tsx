@@ -86,6 +86,7 @@ export default function LoginPage(){
               userID: data.user.userID,
               name: data.user.name,
               avatarUrl: data.user.avatarUrl,
+              language: lang,
             });
 			setUserID(data.user.userID);
           } else {
@@ -101,6 +102,7 @@ export default function LoginPage(){
                   userID: userData.userID,
                   name: userData.name,
                   avatarUrl: userData.avatarUrl,
+                  language: lang,
                 });
 				setUserID(userData.userID);
               }
@@ -117,6 +119,7 @@ export default function LoginPage(){
               userID: data.user.userID,
               name: data.user.name,
               avatarUrl: data.user.avatarUrl,
+              language: lang,
             });
             navigate("/playerProfile");
           } else {
@@ -131,6 +134,7 @@ export default function LoginPage(){
                 userID: userData.userID,
                 name: userData.name,
                 avatarUrl: userData.avatarUrl,
+                language: lang,
               });
               navigate("/playerProfile");
             } else {
