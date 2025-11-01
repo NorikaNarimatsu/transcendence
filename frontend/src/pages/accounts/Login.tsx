@@ -101,6 +101,7 @@ export default function LoginPage(){
                   userID: userData.userID,
                   name: userData.name,
                   avatarUrl: userData.avatarUrl,
+                  language: lang,
                 });
 				setUserID(userData.userID);
               }

@@ -4,7 +4,7 @@ import en from '../locales/en.json'
 import pt from '../locales/pt.json'
 import pl from '../locales/pl.json'
 
-type Language = 'en' | 'pt' | 'pl' ;
+export type Language = 'en' | 'pt' | 'pl' ;
 
 interface TranslationContextType {
     lang: Language;
@@ -18,11 +18,29 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
 
+function isValidLanguage(lang: string): lang is Language {
+    return ['en', 'pt', 'pl'].includes(lang);
+}
+
 export default function TranslationProvider({ children }: {children: ReactNode}) {
     
     const t = { en, pt, pl };
-    const [lang, setLang] = useState<Language>('en');
-
+     const [lang, setLang] = useState<Language>(() => {
+         // if (){
+            //     //Check database first for the user
+            // }
+        const currentLang = localStorage.getItem('lang');
+        if (currentLang) {
+            try {
+                if (currentLang && isValidLanguage(currentLang)) {
+                    return currentLang;
+                }
+            } catch (error) {
+                console.error('Error parsing user from localStorage:', error);
+            }
+        }        
+        return 'en';
+    });
     return (
         <TranslationContext.Provider value={{ lang, t, setLang }}>
             {children}

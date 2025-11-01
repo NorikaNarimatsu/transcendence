@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
+
 
 export interface User {
     userID: number;
@@ -41,12 +43,14 @@ export function UserProvider({ children }: { children: ReactNode}) {
         loadUser();
     }, []);
 
-
+    const { lang } = useLanguage();
     const updateUser = (userData: User | null) => {
     setUser(userData);
     if (userData) {
-        if (userData.userID && userData.name && userData.avatarUrl)
+        if (userData.userID && userData.name && userData.avatarUrl){
             localStorage.setItem('currentUser', JSON.stringify(userData));
+            localStorage.setItem('lang', lang);
+        }
         else
             console.warn('Invalid user data provided to setUser:', userData);
     } else {
@@ -58,6 +62,7 @@ export function UserProvider({ children }: { children: ReactNode}) {
         setUser(null);
         localStorage.removeItem('currentUser');
 		localStorage.removeItem('authToken');
+        localStorage.removeItem('lang');
     };
 
     if (loading) {
