@@ -1,3 +1,4 @@
+import { start } from 'repl';
 import { db } from '../server.js';
 import gameController from './game_controller.js';
 
@@ -184,7 +185,16 @@ const userController = {
 					losses: overallStats.totalLosses || 0,
 					winRate: `${winRate}%`
 				},
-				matchHistory: matches,
+				matchHistory: matches.map(match => ({
+					matchType: match.matchType,
+					matchMode: match.matchMode,
+					user1Name: match.user1Name,
+					user1Score: match.user1Score,
+					user2Name: match.user2Name,
+					user2Score: match.user2Score,
+					startedAt: match.startedAt,
+					endedAt: match.endedAt,
+				})),
 				friendsList: friends.map(friend => ({
 					friendsName: friend.friendName,
 				}))

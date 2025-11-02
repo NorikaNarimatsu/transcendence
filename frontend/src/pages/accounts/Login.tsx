@@ -5,7 +5,7 @@ import arrow_icon from '../../assets/icons/arrow.png'
 import { sanitizeInput } from '../../utils/sanitizeInput';
 import SafeError from '../../components/SafeError';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../user/UserContext';
 
@@ -16,12 +16,21 @@ import { useLanguage } from '../../contexts/LanguageContext';
 export default function LoginPage(){
   const location = useLocation();
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
 
   const { lang, t } = useLanguage();
   const translation = t[lang];
 
-  const email = location.state?.email || "";
+const [email] = useState(() => {
+	const authToken = localStorage.getItem('authToken');
+	const currentUser = localStorage.getItem('currentUser');
+
+	if (!currentUser && !authToken && location.state?.email) {
+		return location.state.email;
+	}
+	return "";
+});
+
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,25 +40,57 @@ export default function LoginPage(){
   const [temporaryToken, setTemporaryToken] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [userID, setUserID] = useState<any>(null);
+  const hasClearedStateRef = useRef(false);
+
+//   clean all the data if the user is not logged in anymore
+  useEffect(() => {
+	const authToken = localStorage.getItem('authToken');
+	if (!user && !authToken) {
+		setName("");
+		setPassword("");
+		setError("");
+		setShowPassword(false);
+		setShow2FAInput(false);
+		setTemporaryToken("");
+		setVerificationCode("");
+		setUserID(null);
+	} else {
+		hasClearedStateRef.current = false;
+	}
+  }, [user]);
 
   // Fetch username when component mounts
   useEffect(() => {
-    const fetchUserName = async () => {
+	const authToken = localStorage.getItem('authToken');
+	if (!user && !authToken && location.state?.email && !hasClearedStateRef.current) {
+		hasClearedStateRef.current = true;
+		navigate(location.pathname, { replace: true, state: undefined });
+	}
+  }, [user, location.pathname, navigate]);
+
+  useEffect(() => {
+	const fetchUserName = async () => {
+		const authToken = localStorage.getItem('authToken');
+		if (user || authToken) {
+			return;
+		}
+	if (!email || email.trim() === "") {
+		setName("");
+		return;
+	}
+
       try {
-        const response = await apiCentral.get(`/getUserByEmail/${encodeURIComponent(email)}`
-        );
+        const response = await apiCentral.get(`/getUserByEmail/${encodeURIComponent(email)}`);
         if (response.data) {
           setName(response.data.name);
         }
       } catch (error) {
         console.error("Failed to fetch user name:", error);
+		setName("");
       }
-    };
-
-    if (email) {
-      fetchUserName();
-    }
-  }, [email]);
+	};
+	fetchUserName();
+  }, [email, user]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -58,6 +99,11 @@ export default function LoginPage(){
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+	if (!email || email.trim() === "") {
+		setError("Email is missing");
+		return;
+	}
 
     try {
       // Step 1: Validate password
@@ -83,7 +129,6 @@ export default function LoginPage(){
                   userID: userResponse.data.userID,
                   name: userResponse.data.name,
                   avatarUrl: userResponse.data.avatarUrl,
-                  language: lang,
                 });
 				setUserID(userResponse.data.userID);
               }
