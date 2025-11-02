@@ -7,6 +7,9 @@ build
 *.crt
 *.key
 certs/
+https/
+backend/https
+frontnend/https
 # OS/editor
 *DS_Store
 *.log

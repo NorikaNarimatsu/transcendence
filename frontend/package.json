@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "generate-certs": "node scripts/generate-certs.js",
+	"predev": "npm run generate-certs",
+    "dev": "npm run predev &&vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

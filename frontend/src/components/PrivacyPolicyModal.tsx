@@ -35,7 +35,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
               <p className="mb-2">
                 This Privacy Policy explains how we collect, use, store and
                 protect your personal data when you use our Transcendence
-                platform.
+                platform
               </p>
             </section>
 
@@ -57,17 +57,17 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
                 >
                   General Data Protection Regulation (EU) 2016/679
                 </a>{" "}
-                ("GDPR") and applicable data protection laws.
+                ("GDPR") and applicable data protection laws
               </p>
               <p>
                 <strong>Data Controller:</strong> SNEG Transcendence Project
                 Team, Codam <br />
                 For all data protection matters, you can contact us at{" "}
                 <a
-                  href="mailto:support@transcendence.test"
+                  href="mailto:sneg.transcendence@gmail.com"
                   className="text-purple-dame underline font-bold hover:text-purple-700 transition-colors"
                 >
-                  support@transcendence.test
+                  sneg.transcendence@gmail.com
                 </a>
               </p>
             </section>
@@ -107,7 +107,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
                 it with third parties, unless required by law or with your
                 explicit consent (Art. 6(1)(a) GDPR). We do not transfer your
                 data outside the European Economic Area (EEA) (articles 13(1)(e)
-                and 44-46 GDPR).
+                and 44-46 GDPR)
               </p>
             </section>
 
@@ -198,9 +198,9 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
                 </table>
               </div>
               <p className="mt-3">
-                We may use local storage or cookies to maintain your session and
-                preferences. These are functional only and do not track your
-                behaviour across other sites.
+                We may use local storage to maintain your session and
+                preferences. This is functional only and does not track your
+                behaviour across other sites
               </p>
             </section>
 
@@ -213,7 +213,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
                 Our services are not directed to children under 18 years old. We
                 do not knowingly collect personal data from minors. If you
                 believe a minor has provided us with personal data, please
-                contact us immediately so we can delete it.
+                contact us immediately so we can delete it
               </p>
             </section>
 
@@ -224,7 +224,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
               </h2>
               <p className="mt-2">
                 Your personal data will be retained only for as long as
-                necessary to fulfil the purposes for which it was collected.
+                necessary to fulfil the purposes for which it was collected
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Data is stored while your account remains active</li>
@@ -235,7 +235,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
               </ul>
               <p className="mt-2">
                 This is in accordance with Article 5(1)(e) GDPR - data must not
-                be kept longer than necessary for the purposes of processing.
+                be kept longer than necessary for the purposes of processing
               </p>
             </section>
 
@@ -321,7 +321,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
               <p className="mt-2">
                 We do not use automated decision-making or profiling that
                 produces legal or similarly significant effects on you (Article
-                22 GDPR).
+                22 GDPR)
               </p>
             </section>
 
@@ -332,12 +332,12 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
               <p className="mb-2">
                 If you have any questions, please contact our team at{" "}
                 <a
-                  href="mailto:support@transcendence.test"
+                  href="mailto:sneg.transcendence@gmail.com"
                   className="text-purple-game underline font-bold hover:text-purple-700 transition-colors"
                 >
-                  support@transcendence.test
+                  sneg.transcendence@gmail.com
                 </a>
-                We respond to legitimate requests within one month (Article
+                . We respond to legitimate requests within one month (Article
                 12(3) GDPR)
               </p>
             </section>
@@ -352,7 +352,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
                 requirements or service updates. Significant changes will be
                 communicated to you through the Transcendence application. The
                 current version of this policy is always available in your User
-                Portal.
+                Portal
               </p>
             </section>
           </div>

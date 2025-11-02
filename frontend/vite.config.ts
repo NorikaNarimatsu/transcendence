@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import { resolve } from 'path'
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
+
 
 const certPath = resolve(__dirname, 'https/cert.pem')
 const keyPath = resolve(__dirname, 'https/key.pem')
+
 
 // https://vite.dev/config/
 export default defineConfig({

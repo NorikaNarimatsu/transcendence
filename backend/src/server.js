@@ -5,6 +5,7 @@ import cors from '@fastify/cors';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 import dotenv from 'dotenv'; // NORIKA ADDED GOSIA
 import { initializeDatabase } from './database/initDatabase.js';
 
@@ -18,13 +19,32 @@ export const db = await initializeDatabase();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Debug certificate paths
-const certPath = path.join(__dirname, '../https/cert.pem');
-const keyPath = path.join(__dirname, '../https/key.pem');
-// // Log absolute paths for debugging
-// console.log('Current directory:', __dirname);
-// console.log('Certificate path:', path.resolve(certPath));
-// console.log('Key path:', path.resolve(keyPath));
+const httpsDir = path.join(__dirname, '../https');
+const certPath = path.join(httpsDir, 'cert.pem');
+const keyPath = path.join(httpsDir, 'key.pem');
+
+if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+	console.log('Backend self-signed certificates not found, generating them');
+
+	if (!fs.existsSync(httpsDir)) {
+		fs.mkdirSync(httpsDir, { recursive: true });
+		console.log('Created https directory for the backend');
+	}
+
+	try {
+		execSync(
+			`openssl req -x509 -newkey rsa:4096 -keyout ${keyPath} -out ${certPath} -days 365 -nodes -subj "/CN=localhost"`,
+			{ stdio: 'inherit' }
+		);
+		console.log('Backend certificates generated successfully');
+	} catch (error) {
+		console.error('Error generating self-signed certificates fot the backend: ', error.message);
+		process.exit(1);
+	}
+} else {
+	console.log ('Backend self-signed certificates already exist');
+}
+
 
 // Create Fastify instance
 const app = Fastify({

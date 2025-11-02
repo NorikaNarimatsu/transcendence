@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install build essentials
 RUN apt-get update && \
-    apt-get install -y python3 make g++ && \
+    apt-get install -y python3 make g++ openssl && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy package files first
@@ -18,8 +18,8 @@ RUN npm install
 COPY . .
 
 #creating self-signed certificates
-RUN mkdir -p /app/https
-RUN openssl req -x509 -newkey rsa:4096 -keyout /app/https/key.pem -out /app/https/cert.pem -days 365 -nodes -subj "/CN=localhost"
+# RUN mkdir -p /app/https
+# RUN openssl req -x509 -newkey rsa:4096 -keyout /app/https/key.pem -out /app/https/cert.pem -days 365 -nodes -subj "/CN=localhost"
 
 EXPOSE 3000
 
