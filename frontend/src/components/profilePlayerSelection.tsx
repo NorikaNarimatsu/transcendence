@@ -21,22 +21,6 @@ export function PlayerSelection({ open, users, onSelect, onCancel }: PlayerSelec
     const { lang, t } = useLanguage();
     const translation = t[lang];
 
-    // Fetch friends when component opens
-    // useEffect(() => {
-    //     if (open && user?.userID) {
-    //         fetch(`https://localhost:8443/friends/userID/${user.userID}`)
-    //             .then(res => res.ok ? res.json() : [])
-    //             .then((friendsData: SelectedPlayer[]) => {
-    //                 console.log('Friends loaded:', friendsData);
-    //                 setFriends(friendsData);
-    //             })
-    //             .catch(err => {
-    //                 console.error('Failed to fetch friends:', err);
-    //                 setFriends([]);
-    //             });
-    //     }
-    // }, [open, user?.userID]);
-
 	useEffect(() => {
 		if (open && user?.userID) {
 			apiCentral.get(`/friends/userID/${user.userID}`)

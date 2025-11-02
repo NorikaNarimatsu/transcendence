@@ -10,6 +10,7 @@ import { validatePasswordRealTime } from '../../utils/passwordValidation';
 import SafeError from '../../components/SafeError';
 import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 import { useLanguage } from '../../contexts/LanguageContext';
+import apiCentral from '../../utils/apiCentral';
 
 export default function signupUnkownUser() {
 	const location = useLocation();
@@ -57,13 +58,8 @@ export default function signupUnkownUser() {
 
 		if (value.length >= 2 && value.length <= 7 && validCharacters.test(value)) {
 			try {
-				const response = await fetch('https://localhost:8443/validateName', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ name: value }),
-				});
+				const response = await apiCentral.post('/validateName', { name: value });
+
 				if (response.status === 200) { 
 					setNameError('');
 					setNameAvailable(true);
@@ -73,8 +69,7 @@ export default function signupUnkownUser() {
 					setNameAvailable(false);
 				}
 				else if (response.status === 400) { 
-					const data = await response.json();
-					setNameError(data.message || 'Invalid nickname');
+					setNameError(response.error || 'Invalid nickname');
 					setNameAvailable(false);
 				}
 			} catch (error) {
@@ -113,13 +108,7 @@ export default function signupUnkownUser() {
 	}
 
 	try {
-		const response = await fetch('https://localhost:8443/addNewUser', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ name, email, password, lang }),
-		});
+		const response = await apiCentral.post('/addNewUser', { name, email, password, lang });
 		if (response.status === 201) {
 		navigate('/login', { state: { email } });
 		}

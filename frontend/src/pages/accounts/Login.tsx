@@ -36,12 +36,10 @@ export default function LoginPage(){
   useEffect(() => {
     const fetchUserName = async () => {
       try {
-        const response = await fetch(
-          `https://localhost:8443/getUserByEmail/${encodeURIComponent(email)}`
+        const response = await apiCentral.get(`/getUserByEmail/${encodeURIComponent(email)}`
         );
-        if (response.ok) {
-          const data = await response.json();
-          setName(data.name);
+        if (response.data) {
+          setName(response.data.name);
         }
       } catch (error) {
         console.error("Failed to fetch user name:", error);
@@ -63,47 +61,31 @@ export default function LoginPage(){
 
     try {
       // Step 1: Validate password
-      const response = await fetch(
-        "https://localhost:8443/validatePasswordbyEmail",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await apiCentral.post("/validatePasswordbyEmail", { email, password });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.data) {
         // with 2FA enabled
-        if (data.requires2FA) {
+        if (response.data.requires2FA) {
           setShow2FAInput(true);
-          setTemporaryToken(data.temporaryToken);
-          if (data.user) {
+          setTemporaryToken(response.data.temporaryToken);
+          if (response.data.user) {
             setUser({
-              userID: data.user.userID,
-              name: data.user.name,
-              avatarUrl: data.user.avatarUrl,
+              userID: response.data.user.userID,
+              name: response.data.user.name,
+              avatarUrl: response.data.user.avatarUrl,
             });
-			setUserID(data.user.userID);
+			setUserID(response.data.user.userID);
           } else {
             try {
-              const userResponse = await fetch(
-                `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(
-                  email
-                )}`
-              );
-              if (userResponse.ok) {
-                const userData = await userResponse.json();
+              const userResponse = await apiCentral.get(`/getUserInfoByEmail/${encodeURIComponent(email )}`);
+              if (userResponse.data) {
                 setUser({
-                  userID: userData.userID,
-                  name: userData.name,
-                  avatarUrl: userData.avatarUrl,
+                  userID: userResponse.data.userID,
+                  name: userResponse.data.name,
+                  avatarUrl: userResponse.data.avatarUrl,
                   language: lang,
                 });
-				setUserID(userData.userID);
+				setUserID(userResponse.data.userID);
               }
             } catch (err) {
               console.error("Failed to fetch user info for 2FA: ", err);
@@ -111,27 +93,24 @@ export default function LoginPage(){
           }
         } else {
           // without 2FA
-          if (data.token) localStorage.setItem("authToken", data.token);
+          if (response.data.token) localStorage.setItem("authToken", response.data.token);
 
-          if (data.user) {
+          if (response.data.user) {
             setUser({
-              userID: data.user.userID,
-              name: data.user.name,
-              avatarUrl: data.user.avatarUrl,
+              userID: response.data.user.userID,
+              name: response.data.user.name,
+              avatarUrl: response.data.user.avatarUrl,
             });
             navigate("/playerProfile");
           } else {
-            const userResponse = await fetch(
-              `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(
-                email
-              )}`
-            );
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
+
+            const userResponse = await apiCentral.get(`/getUserInfoByEmail/${encodeURIComponent(email)}`);
+            
+			if (userResponse.data) {
               setUser({
-                userID: userData.userID,
-                name: userData.name,
-                avatarUrl: userData.avatarUrl,
+                userID: userResponse.data.userID,
+                name: userResponse.data.name,
+                avatarUrl: userResponse.data.avatarUrl,
               });
               navigate("/playerProfile");
             } else {
@@ -139,48 +118,9 @@ export default function LoginPage(){
             }
           }
         }
-
-        // // Step 2: Get user info
-        // const userResponse = await fetch(
-        //   `https://localhost:8443/getUserInfoByEmail/${encodeURIComponent(email)}`
-        // );
-
-        // if (userResponse.ok) {
-        //   const userData = await userResponse.json();
-
-        //   // Step 3: Prepare user data
-        //   const userToStore = {
-        //     userID: userData.userID,
-        //     name: userData.name,
-        //     avatarUrl: userData.avatarUrl
-        //   };
-
-        //   // Step 4: Set user (this should trigger localStorage save)
-        //   setUser(userToStore);
-
-        //   // TODO: check it > I think this is not being use
-        //   // // Step 5: Debug localStorage after a delay
-        //   // setTimeout(() => {
-        //   //   const stored = localStorage.getItem('currentUser');
-        //   //   if (stored) {
-        //   //     try {
-        //   //       const parsed = JSON.parse(stored);
-        //   //     } catch (e) {
-        //   //       console.error("Login: Error parsing stored user:", e);
-        //   //     }
-        //   //   } else {
-        //   //     console.error("Login: NO DATA in localStorage!");
-        //   //   }
-        //   // }, 1000);
-
-        //   // Step 6: Navigate
-        //   navigate('/playerProfile');
-        // } else {
-        //   setError('Failed to get user information');
-        // }
       } else {
         // const data = await response.json();
-        setError(data.message || "Invalid password");
+        setError(response.data.message || "Invalid password");
       }
     } catch (err) {
       console.error(err);
@@ -197,7 +137,7 @@ export default function LoginPage(){
 		if (temporaryToken) {
 			localStorage.setItem("authToken", temporaryToken);
 		}
-		const response = await apiCentral.post("2fa/verify-code", { userID: userID, code: verificationCode });
+		const response = await apiCentral.post("/2fa/verify-code", { userID: userID, code: verificationCode });
 
       if (response.data) {
 

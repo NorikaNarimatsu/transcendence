@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+import apiCentral from '../../utils/apiCentral';
+
 export interface SelectedPlayer {
     userID: number;
     name: string;
@@ -32,9 +34,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         const initializeSpecialPlayers = async () => {
             try {
                 // Fetch AI Player (userID = 1)
-                const aiResponse = await fetch('https://localhost:8443/getUserById/1');
-                if (aiResponse.ok) {
-                    const aiData = await aiResponse.json();
+                const aiResponse = await apiCentral.get('/getUserById/1');
+                if (aiResponse.data) {
+                    const aiData = aiResponse.data;
                     setAiPlayer({
                         userID: aiData.userID,
                         name: aiData.name,
@@ -44,9 +46,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                 }
 
                 // Fetch Guest Player (userID = 2)
-                const guestResponse = await fetch('https://localhost:8443/getUserById/2');
-                if (guestResponse.ok) {
-                    const guestData = await guestResponse.json();
+                const guestResponse = await apiCentral.get('/getUserById/2');
+                if (guestResponse.data) {
+                    const guestData = guestResponse.data;
                     setGuestPlayer({
                         userID: guestData.userID,
                         name: guestData.name,

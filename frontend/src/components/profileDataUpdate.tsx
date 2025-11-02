@@ -31,9 +31,9 @@ export const UpdateUserData = ({ open, onClose, updateType }: UpdateUserDataProp
                 if (updateType === 'email') {
 
                     try {
-                        const res = await fetch(`https://localhost:8443/getUserEmailById/${user.userID}`);
-                        if (res.ok) {
-                            const userData = await res.json();
+                        const res = await apiCentral.get(`/getUserEmailById/${user.userID}`);
+                        if (res.data) {
+                            const userData = res.data;
                             if (!ignore) {
                                 setCurrentEmail(userData.email || '');
                                 setFormData((prev : UpdateUserDataProps) => ({
@@ -77,11 +77,7 @@ export const UpdateUserData = ({ open, onClose, updateType }: UpdateUserDataProp
         }
         if (name !== user.name) {
             try {
-                const response = await fetch('https://localhost:8443/validateName', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name })
-                });
+                const response = await apiCentral.post('/validateName', { name });
                 
                 if (response.status === 409) {
                     return "This name is already taken";
@@ -103,11 +99,7 @@ export const UpdateUserData = ({ open, onClose, updateType }: UpdateUserDataProp
         }
         if (email !== user.email) {
             try {
-                const response = await fetch('https://localhost:8443/validateEmail', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
+                const response = await apiCentral.post('/validateEmail', { email });
                 
                 if (response.status === 409) {
                     return "This email is already used";

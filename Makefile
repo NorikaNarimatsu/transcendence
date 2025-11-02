@@ -1,6 +1,10 @@
 all: up
 
-up:
+init-cert:
+	@echo "=== Generates self-signed SSL certificates ==="
+	bash ./scripts/generate-cert-script.sh
+
+up: init-cert
 	@echo "===  Creates and starts containers from images, create network, and volumes ==="
 	docker compose -f docker-compose.yml up -d --build
 
@@ -39,4 +43,4 @@ help:
 	@echo "make logs          - Follow logs for all services"
 	@echo "make ps            - Show service status and mapped ports"
 
-.PHONY: help up down stop restart  logs ps
+.PHONY: all init-cert help up down stop restart  logs ps

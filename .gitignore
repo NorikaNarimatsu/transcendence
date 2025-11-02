@@ -6,10 +6,7 @@ build
 .env
 *.crt
 *.key
-certs/
-https/
-backend/https
-frontnend/https
+ssl/
 # OS/editor
 *DS_Store
 *.log

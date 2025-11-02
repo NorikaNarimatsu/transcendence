@@ -27,13 +27,12 @@ export function DeleteAccount({ open, onClose}: DeleteAccountProps) {
         setDeleteError('');
 
         try {
-            const passwordResponse = await fetch('https://localhost:8443/validatePasswordbyUserID', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: user.userID, password: deletePassword }),
+            const passwordResponse = await apiCentral.post('/validatePasswordbyUserID', {
+                userID: user.userID,
+                password: deletePassword
             });
 
-            if (!passwordResponse.ok) {
+            if (!passwordResponse.data) {
                 setDeleteError('Incorrect password. Please try again.');
                 setIsDeleting(false);
                 return;

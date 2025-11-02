@@ -8,6 +8,7 @@ import { useUser } from "../user/UserContext";
 import { sanitizeEmail, getEmailErrorMessage } from "../../utils/emailValidation";
 import SafeError from "../../components/SafeError";
 import { useLanguage } from "../../contexts/LanguageContext";
+import apiCentral from "../../utils/apiCentral";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -45,20 +46,14 @@ export default function SignUp() {
     const sanitizedEmail = sanitizeEmail(email);
 
     try {
-      const response = await fetch("https://localhost:8443/validateEmail", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: sanitizedEmail }),
-      });
-      const data = await response.json();
-      if (response.status === 200) {
+      const response = await apiCentral.post("/validateEmail", { email: sanitizedEmail });
+
+	  if (response.status === 200) {
         navigate("/signupUnkownUser", { state: { email: sanitizedEmail } });
       } else if (response.status === 409) {
         navigate("/login", { state: { email: sanitizedEmail } });
       } else {
-        setError(data.message || "Validation failed");
+        setError(response.error || "Validation failed");
       }
     } catch (err) {
       console.error("Fetch error:", err);

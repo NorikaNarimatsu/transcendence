@@ -55,15 +55,15 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
             
             try {
                 // Get all users except current user
-                const usersResponse = await fetch(`https://localhost:8443/users/except/${user.userID}`);
-                if (!usersResponse.ok) {
+                const usersResponse = await apiCentral.get(`/users/except/${user.userID}`);
+                if (!usersResponse.data) {
                     setAvailableUsers([]);
                     setLoading(false);
                     return;
                 }
-                
-                const allUsers = await usersResponse.json();
-                
+
+                const allUsers = usersResponse.data;
+
                 // Get current friends to filter out
                 const friendsResponse = await apiCentral.get(`/friends/userID/${user.userID}`);
                 if (friendsResponse.data) {

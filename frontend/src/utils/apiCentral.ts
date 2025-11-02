@@ -1,8 +1,9 @@
-const API_BASE_URL = 'https://localhost:8443';
+const API_BASE_URL = 'https://localhost';
 
 export interface ApiResponse<T =any> {
 	data?: T;
 	error?: string;
+	status?: number;
 }
 
 async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
@@ -19,7 +20,7 @@ async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
 			window.location.href = '/signup';
 		}
 
-		return { error: 'Session expired. Please login again' };
+		return { error: 'Session expired. Please login again', status: 401 };
 	}
 
 	let data: T;
@@ -30,10 +31,10 @@ async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
 	}
 
 	if (!response.ok) {
-		return { error: (data as any).error || 'Request failed', data };
+		return { error: (data as any).error || 'Request failed', data, status: response.status };
 	}
 
-	return { data };
+	return { data, status: response.status };
 }
 
 async function handleBlobResponse(response: Response): Promise<Response | null> {
@@ -108,7 +109,7 @@ async function apiRequest<T = any>(
 		return await handleResponse<T>(response);
 	} catch (error) {
 		console.error('API request error: ', error);
-		return { error: 'Network error. Please try again later' };
+		return { error: 'Network error. Please try again later', status: 0 };
 	}
 }
 

@@ -25,6 +25,7 @@ import { DeleteAccount } from './user/DeleteUser';
 import Button from '../components/ButtonDarkPink';
 
 import apiCentral from '../utils/apiCentral';
+// import { set } from 'zod';
 
 export default function PlayerProfile(): JSX.Element {
     // UI State
@@ -85,20 +86,24 @@ export default function PlayerProfile(): JSX.Element {
     }, [setSelectedPlayer]);
 
     useEffect(() => {
-        if (user?.userID) {
-            fetch(`https://localhost:8443/users/except/${user.userID}`)
-                .then(res => res.ok ? res.text() : Promise.reject(res.status))
-                .then(text => {
-                    try {
-                        const users = JSON.parse(text);
-                        setUsers(users);
-                        setAllUsers(users);
-                    } catch (err) {
-                        console.error('JSON parse error:', err);
-                    }
-                })
-                .catch(err => console.error('Failed to fetch users:', err));
-        }
+		const fetchUsers = async () => {
+			if (user?.userID) {
+				try {
+					const response = await apiCentral.get(`/users/except/${user.userID}`);
+					
+					if (response.data) {
+						setUsers(response.data);
+						setAllUsers(response.data);
+					} else if (response.error) {
+						console.error('Failed to fetch users:', response.error);
+					}
+				} catch (error) {
+					console.error('Network error: ', error);
+				}
+			}
+		};
+
+		fetchUsers();
     }, [user?.userID]); 
 
     useEffect(() => {
@@ -129,12 +134,9 @@ export default function PlayerProfile(): JSX.Element {
 
     const handlePasswordSubmit = async () => {
         try {
-            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {  // CHANGED: Use userID endpoint
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: selectedPlayer!.userID, password }),  // CHANGED: Send userID
-            });
-            if (response.ok) {
+            const response = await apiCentral.post('/validatePasswordbyUserID', { userID: selectedPlayer!.userID, password });
+            
+			if (response.data) {
                 setSelectedPlayer(selectedPlayer);
                 if (playerSelectionGame === 'Snake') {
                     navigate('./snakeGame?mode=2players');
@@ -160,12 +162,9 @@ export default function PlayerProfile(): JSX.Element {
     const handleVerifyPassword = async () => {
         if (!tournamentVerifyingUser) return;
         try {
-            const response = await fetch('https://localhost:8443/validatePasswordbyUserID', {  // CHANGED: Use userID endpoint
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: tournamentVerifyingUser.userID, password: tournamentVerifyPassword }),  // CHANGED: Send userID
-            });
-            if (response.ok) {
+            const response = await apiCentral.post('/validatePasswordbyUserID', { userID: tournamentVerifyingUser.userID, password: tournamentVerifyPassword });
+            
+			if (response.data) {
                 setSelectedTournamentParticipants(prev => [...prev, tournamentVerifyingUser]);
                 console.log('Added to tournament:', tournamentVerifyingUser);
                 setTournamentVerifyingUser(null);
