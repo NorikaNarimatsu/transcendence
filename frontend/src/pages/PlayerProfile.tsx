@@ -14,8 +14,11 @@ import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import { FriendsManager } from '../components/FriendsManager';
 
 import TwoFactorSettings from '../components/2FSettings';
+
+//Multiple language imports:
 import { useLanguage } from '../contexts/LanguageContext';
 import type { Language } from '../contexts/LanguageContext';
+import { updateUserLanguage } from '../utils/languageApi';
 
 import { UpdateUserData } from '../components/profileDataUpdate';
 import { useUser} from './user/UserContext';
@@ -73,10 +76,24 @@ export default function PlayerProfile(): JSX.Element {
     const { lang, setLang, t} = useLanguage();
     const translation = t[lang];
 
-    const handleChangeLanguage = (newLanguage:Language) => {
+    const handleChangeLanguage = async (newLanguage:Language) => {
       setLang(newLanguage);
       if (user) {
         localStorage.setItem('lang', newLanguage);
+      }
+      try {
+        const currentUserStr = localStorage.getItem('currentUser');
+        if (currentUserStr){
+          const currentUser = JSON.parse(currentUserStr);
+          const userID = currentUser.userID;
+          if(userID){
+            const result = await updateUserLanguage(parseInt(userID), newLanguage);
+            console.log('API response:', result);
+            console.log('Language updated successfully');
+          }
+        }
+      }catch(error){
+        console.error('Error updating language:', error);
       }
     };
 

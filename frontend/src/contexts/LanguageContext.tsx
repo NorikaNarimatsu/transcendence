@@ -1,10 +1,11 @@
-import { ReactNode, useContext, useState } from 'react'
+import type { ReactNode } from 'react';
+import { useContext, useState, useEffect } from 'react'
 import { createContext } from 'react'
 import en from '../locales/en.json'
 import pt from '../locales/pt.json'
 import pl from '../locales/pl.json'
 
-export type Language = 'en' | 'pt' | 'pl' ;
+export type Language = 'en' | 'pt' | 'pl';
 
 interface TranslationContextType {
     lang: Language;
@@ -18,29 +19,57 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
 
-function isValidLanguage(lang: string): lang is Language {
+export function isValidLanguage(lang: string): lang is Language {
     return ['en', 'pt', 'pl'].includes(lang);
 }
 
 export default function TranslationProvider({ children }: {children: ReactNode}) {
     
     const t = { en, pt, pl };
-     const [lang, setLang] = useState<Language>(() => {
-         // if (){
-            //     //Check database first for the user
-            // }
+    
+    const [lang, setLang] = useState<Language>(() => {
         const currentLang = localStorage.getItem('lang');
-        if (currentLang) {
-            try {
-                if (currentLang && isValidLanguage(currentLang)) {
-                    return currentLang;
-                }
-            } catch (error) {
-                console.error('Error parsing user from localStorage:', error);
-            }
-        }        
+        console.log("Initial language from localStorage:", currentLang);
+        if (currentLang && isValidLanguage(currentLang)) {
+            return currentLang;
+        }
         return 'en';
     });
+
+    // Listen for localStorage changes and update language
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const newLang = localStorage.getItem('lang');
+            console.log("Storage changed, new language:", newLang);
+            if (newLang && isValidLanguage(newLang) && newLang !== lang) {
+                setLang(newLang);
+            }
+        };
+
+        // Listen for storage events (changes from other tabs/windows)
+        window.addEventListener('storage', handleStorageChange);
+
+        // Also check periodically for changes in same tab (fallback)
+        const interval = setInterval(() => {
+            const currentLang = localStorage.getItem('lang');
+            if (currentLang && isValidLanguage(currentLang) && currentLang !== lang) {
+                console.log("Detected language change via polling:", currentLang);
+                setLang(currentLang);
+            }
+        }, 500); // Check every 500ms
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            clearInterval(interval);
+        };
+    }, [lang]);
+
+    // Save language to localStorage when it changes
+    useEffect(() => {
+        console.log("Saving language to localStorage:", lang);
+        localStorage.setItem('lang', lang);
+    }, [lang]);
+
     return (
         <TranslationContext.Provider value={{ lang, t, setLang }}>
             {children}

@@ -30,6 +30,8 @@ export default async function itemRoutes(fastify, options) {
     fastify.get('/api/user/profile', { preHandler: [authenticateToken] }, userController.getProfile);
     fastify.post('/api/user/anonymize', { preHandler: [authenticateToken] }, userController.anonymizeUser);
 	fastify.post('/api/user/export-data', { preHandler: [authenticateToken] }, userController.exportUserData);
+    fastify.put('/api/user/language', { preHandler: [authenticateToken],}, userController.updateUserLanguage);
+    fastify.get('/api/user/language', { preHandler: [authenticateToken] }, userController.getUserLanguage);
 
     // Game management
     fastify.get('/user/:userID/matches', { preHandler: [authenticateToken] }, gameController.getUserMatches);

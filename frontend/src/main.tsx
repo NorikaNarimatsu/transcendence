@@ -33,15 +33,15 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <TranslationProvider>
-      <UserProvider>
+    <UserProvider>
+      <TranslationProvider>
           <SelectedPlayerProvider>
               <TournamentProvider>
                   <RouterProvider router={router} />
               </TournamentProvider>
           </SelectedPlayerProvider>
-      </UserProvider>
-    </TranslationProvider>
+      </TranslationProvider>
+    </UserProvider>
   </React.StrictMode>,
 )
 

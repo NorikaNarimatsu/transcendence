@@ -12,6 +12,7 @@ import { useUser } from '../user/UserContext';
 import apiCentral from '../../utils/apiCentral';
 
 import { useLanguage } from '../../contexts/LanguageContext';
+import { getUserLanguage } from '../../utils/languageApi'
 
 export default function LoginPage(){
   const location = useLocation();
@@ -87,6 +88,12 @@ export default function LoginPage(){
               name: data.user.name,
               avatarUrl: data.user.avatarUrl,
             });
+          try {
+              const dbLang = await getUserLanguage(data.user.userID);
+              localStorage.setItem('lang', dbLang);
+          }catch(error){
+              console.error('Failed to fetch language:', error);
+          }
 			setUserID(data.user.userID);
           } else {
             try {
@@ -101,8 +108,13 @@ export default function LoginPage(){
                   userID: userData.userID,
                   name: userData.name,
                   avatarUrl: userData.avatarUrl,
-                  language: lang,
                 });
+                try {
+                  const dbLang = await getUserLanguage(data.user.userID);
+                  localStorage.setItem('lang', dbLang);
+                }catch(error){
+                    console.error('Failed to fetch language:', error);
+                }
 				setUserID(userData.userID);
               }
             } catch (err) {
@@ -119,6 +131,12 @@ export default function LoginPage(){
               name: data.user.name,
               avatarUrl: data.user.avatarUrl,
             });
+            try {
+              const dbLang = await getUserLanguage(data.user.userID);
+              localStorage.setItem('lang', dbLang);
+            }catch(error){
+                console.error('Failed to fetch language:', error);
+            }
             navigate("/playerProfile");
           } else {
             const userResponse = await fetch(
@@ -133,6 +151,12 @@ export default function LoginPage(){
                 name: userData.name,
                 avatarUrl: userData.avatarUrl,
               });
+              try {
+                  const dbLang = await getUserLanguage(data.user.userID);
+                  localStorage.setItem('lang', dbLang);
+              }catch(error){
+                  console.error('Failed to fetch language:', error);
+              }
               navigate("/playerProfile");
             } else {
               setError("Failed to get user information");
@@ -210,7 +234,13 @@ export default function LoginPage(){
 			avatarUrl: response.data.user.avatarUrl
 		};
 		setUser(userWithCorrectID);
-        navigate("/playerProfile");
+    try {
+        const dbLang = await getUserLanguage(response.data.user.userID);
+        localStorage.setItem('lang', dbLang);
+    }catch(error){
+        console.error('Failed to fetch language:', error);
+    }
+          navigate("/playerProfile");
       } else {
         setError(response.error || "Incorrect 2FA code");
       }

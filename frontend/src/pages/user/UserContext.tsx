@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
+import { getUserLanguage } from '../../utils/languageApi';
 
 export interface User {
     userID: number;
@@ -21,7 +22,7 @@ export function UserProvider({ children }: { children: ReactNode}) {
     const [loading, setLoading] = useState(true);
 
         useEffect(() => {
-        const loadUser = () => {
+        const loadUser = async () => {
             try {
                 const storedUser = localStorage.getItem('currentUser');
                 if (storedUser) {
@@ -30,6 +31,12 @@ export function UserProvider({ children }: { children: ReactNode}) {
                         setUser(userData);
                     } else {
                         localStorage.removeItem('currentUser');
+                    }
+                    try {
+                        const dbLang = await getUserLanguage(userData.userID);
+                        localStorage.setItem('lang', dbLang);
+                    }catch(error){
+                        console.error('Failed to fetch language:', error);
                     }
                 }
             } catch (error) {
@@ -43,13 +50,17 @@ export function UserProvider({ children }: { children: ReactNode}) {
         loadUser();
     }, []);
 
-    const { lang } = useLanguage();
-    const updateUser = (userData: User | null) => {
+    const updateUser = async (userData: User | null) => {
     setUser(userData);
     if (userData) {
         if (userData.userID && userData.name && userData.avatarUrl){
             localStorage.setItem('currentUser', JSON.stringify(userData));
-            localStorage.setItem('lang', lang);
+            // try {
+            //     const dbLang = await getUserLanguage(userData.userID);
+            //     localStorage.setItem('lang', dbLang);
+            // }catch(error){
+            //     console.error('Failed to fetch language:', error);
+            // }
         }
         else
             console.warn('Invalid user data provided to setUser:', userData);

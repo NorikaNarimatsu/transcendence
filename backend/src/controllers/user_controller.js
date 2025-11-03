@@ -199,6 +199,68 @@ const userController = {
 			reply.status(500).send({ error: 'Failed to export user data', details: err.message });
 		}
 	},
+	updateUserLanguage: async (request, reply) => {
+		try {
+			const { userID, lang } = request.body;
+			if (!userID){
+				reply.status(400).send({ error: 'userID ir required'});
+				return;
+			}
+			if (!lang){
+				reply.status(400).send({ error: 'lang is required'});
+				return;
+			}
+			const validLanguages = ['en', 'pt', 'pl'];
+			if(!validLanguages.includes(lang)){
+				reply.status(400).send({ error: 'Invalid language. Must be one of: en, pt or pl.'});
+				return;
+			}
+			const result = db.prepare(`
+				UPDATE users
+				SET lang = ?
+				WHERE userID = ?
+			`).run(lang, userID);
+			if (result.changes === 0){
+				reply.status(404).send({ error: 'User not found'});
+				return;
+			}
+			reply.send({
+				success: true,
+				message: 'Language updated successfully',
+				lang
+			});
+		} catch (err) {
+			console.error('Language update error:', err);
+			reply.status(500).send({
+				error: 'Failed to update language',
+				details: err.message
+			});
+		}
+	},
+	getUserLanguage: async (request, reply) => {
+		try{
+			const { userID } = request.query;
+			if (!userID){
+				reply.status(400).send({ error: 'userID is required'});
+				return;
+			}
+			const row = db.prepare('SELECT lang FROM users WHERE userID = ?').get(userID);
+			if(!row){
+				reply.status(400).send({ error: 'User not found' });
+				return;
+			}
+			reply.send({
+				success: true,
+				lang: row.lang
+			});
+		} catch(err){
+			console.error('Get Language error:', err);
+			reply.status(500).send({
+				error: 'Failed to get user language',
+				details: err.message
+			});
+		}
+	},
 };
 
 export default userController;
