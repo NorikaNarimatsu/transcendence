@@ -15,6 +15,7 @@ interface TranslationContextType {
         pt: typeof pt;
         pl: typeof pl;
     }
+    clearLang: () => void;
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
@@ -35,6 +36,11 @@ export default function TranslationProvider({ children }: {children: ReactNode})
         }
         return 'en';
     });
+
+    const clearLang = () => {
+        setLang('en');
+        try { localStorage.removeItem('lang'); } catch {}
+    };
 
     // Listen for localStorage changes and update language
     useEffect(() => {
@@ -71,7 +77,7 @@ export default function TranslationProvider({ children }: {children: ReactNode})
     }, [lang]);
 
     return (
-        <TranslationContext.Provider value={{ lang, t, setLang }}>
+        <TranslationContext.Provider value={{ lang, t, setLang, clearLang }}>
             {children}
         </TranslationContext.Provider>
     )

@@ -73,7 +73,7 @@ export default function PlayerProfile(): JSX.Element {
     const { user, logout, setUser } = useUser();
     const { selectedPlayer, setSelectedPlayer } = useSelectedPlayer();
 
-    const { lang, setLang, t} = useLanguage();
+    const { lang, setLang, t, clearLang } = useLanguage();
     const translation = t[lang];
 
     const handleChangeLanguage = async (newLanguage:Language) => {
@@ -125,6 +125,7 @@ export default function PlayerProfile(): JSX.Element {
     }, [user, navigate]);
 
     const handleLogout = () => {
+        clearLang();
         logout();
         navigate('/signup');
     };
