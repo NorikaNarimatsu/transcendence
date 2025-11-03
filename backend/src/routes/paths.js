@@ -8,7 +8,14 @@ export default async function itemRoutes(fastify, options) {
     // User validation
     fastify.post('/validateName', itemController.validateName);
     fastify.post('/validateEmail', itemController.validateEmail);
-    fastify.post('/validatePasswordbyEmail', itemController.validatePasswordbyEmail);
+    fastify.post('/validatePasswordbyEmail', {
+		config: {
+			rateLimit: {
+				max: 5,
+				timeWindow: '15 minutes'
+			}
+		}
+	}, itemController.validatePasswordbyEmail);
     fastify.post('/validatePasswordbyUserID', itemController.validatePasswordByUserID);
 
     // User management
@@ -41,7 +48,22 @@ export default async function itemRoutes(fastify, options) {
 	// 2FA endpoints
 	fastify.post('/2fa/enable', { preHandler: [authenticateToken] }, twoFactorController.enable2FA);
 	fastify.post('/2fa/disable', { preHandler: [authenticateToken] }, twoFactorController.disable2FA);
-	fastify.post('/2fa/send-code', { preHandler: [authenticateToken] }, twoFactorController.sendVerificationCode);
-	fastify.post('/2fa/verify-code', { preHandler: [authenticateToken] }, twoFactorController.verifyCode);
+	fastify.post('/2fa/send-code', {
+		preHandler: [authenticateToken] ,
+		config: {
+			rateLimit: {
+				max: 5,
+				timeWindow: '10 minutes'
+			}
+		}
+	}, twoFactorController.sendVerificationCode);
+	fastify.post('/2fa/verify-code', { preHandler: [authenticateToken],
+		config: {
+			rateLimit: {
+				max: 10,
+				timeWindow: '15 minutes'
+			}
+		}
+	 }, twoFactorController.verifyCode);
 	fastify.get("/2fa/status", { preHandler: [authenticateToken] }, twoFactorController.get2FAstatus);
 }

@@ -1,11 +1,20 @@
 
-// TODO for Gosia -> recursion? and moving regex before sanitization?
 export const sanitizeEmail = (email: string): string => {
-	return email
+	if (typeof email !== 'string') return '';
+
+	let sanitizedEmail = email
 		.replace(/[<>]/g, '') //remove < and >
 		.replace(/javascript:/gi, '') //remove javascript (malicious URLs)
 		.replace(/on\w+\s*=/gi, '') //remove event handlers (e.g. onclick=, onerror=)
-		.trim();
+		.trim()
+		.toLowerCase()
+
+	const emailRegex = /^[a-zA-Z0-9._%+-]+[@a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+	if (!emailRegex.test(sanitizedEmail)) {
+		return '';
+	}
+
+	return sanitizedEmail;
 };
 
 export const getEmailErrorMessage = (email: string): string => {

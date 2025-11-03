@@ -4,6 +4,7 @@ import FastifyJWT from "@fastify/jwt";
 import cors from '@fastify/cors';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './database/initDatabase.js';
+import rateLimit from '@fastify/rate-limit';
 
 dotenv.config();
 
@@ -30,6 +31,13 @@ await app.register(cors, {
 await app.register(FastifyJWT, {
   secret: process.env.JWT_SECRET
 });
+
+await app.register(rateLimit, {
+	global: true,
+	max: 100,
+	timeWindow: '1 minute'
+});
+
 
 // // Register security headers
 await app.register(helmet, { contentSecurityPolicy: {

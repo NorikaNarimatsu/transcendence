@@ -275,9 +275,13 @@ const [email] = useState(() => {
 				<input
 					type="text"
 					value={verificationCode}
-					onChange={(e) =>setVerificationCode(e.target.value)}
+					onChange={(e) => {
+						const sanitizedCode = sanitizeInput.sanitizeVerificationCode(e.target.value);
+						setVerificationCode(sanitizedCode);
+					}}
 					placeholder="******"
 					maxLength={6}
+					pattern="[0-9]{6}"
 					className="w-full px-4 py-2 bg-blue-deep text-white placeholder-gray-400 font-dotgothic border-2 border-black focus:outline-none tracking-widest text-center text-2xl mb-4"
 					required
 				/>
