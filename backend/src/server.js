@@ -63,7 +63,7 @@ await app.register(cors, {
     // 'http://localhost:5173',   // HTTP fallback
     // 'http://localhost:3000',
     // 'https://localhost:3000'
-	'https://localhost:443',
+	'https://localhost:8443',
 	'https://localhost'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
