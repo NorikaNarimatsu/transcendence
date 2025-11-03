@@ -30,7 +30,7 @@ const router = createBrowserRouter([
   { path: '/login',
 	element: (
 		<LogoutRouteOnly>
-			<Login />
+				<Login />
 		</LogoutRouteOnly>
 	) },
   { path: '/signup', element: (
@@ -40,7 +40,7 @@ const router = createBrowserRouter([
 	) },
 	{ path: '/signupUnkownUser', element: (
 		<LogoutRouteOnly>
-			<SignUp2 />
+				<SignUp2 />
 		</LogoutRouteOnly>
 	) },
 	{ path: '/dashboard', element: (

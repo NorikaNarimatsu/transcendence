@@ -59,15 +59,16 @@ const [email] = useState(() => {
 	}
   }, [user]);
 
-  // Fetch username when component mounts
+//   cleans up the location state to prevent showing again user's name after logout
   useEffect(() => {
-	const authToken = localStorage.getItem('authToken');
-	if (!user && !authToken && location.state?.email && !hasClearedStateRef.current) {
-		hasClearedStateRef.current = true;
-		navigate(location.pathname, { replace: true, state: undefined });
-	}
-  }, [user, location.pathname, navigate]);
-
+	  const authToken = localStorage.getItem('authToken');
+	  if (!user && !authToken && location.state?.email && !hasClearedStateRef.current) {
+		  hasClearedStateRef.current = true;
+		  navigate(location.pathname, { replace: true, state: undefined });
+		}
+	}, [user, location.pathname, navigate]);
+	
+	// Fetch username when component mounts
   useEffect(() => {
 	const fetchUserName = async () => {
 		const authToken = localStorage.getItem('authToken');
