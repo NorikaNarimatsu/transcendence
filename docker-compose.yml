@@ -47,7 +47,6 @@ services:
       context: nginx/
     ports:
       - "8443:8443"
-      # - "80:80"
     volumes:
       - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
@@ -67,17 +66,3 @@ networks:
     name: transcendence_network
     driver: bridge
 
-
-#old frontend setting
- # frontend_app:
-  #   container_name: frontend
-  #   build:
-  #     dockerfile: frontend.Dockerfile
-  #     context: frontend/
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - transcendence_network
-  #   depends_on:
-  #     backend_app:
-  #       condition: service_healthy
