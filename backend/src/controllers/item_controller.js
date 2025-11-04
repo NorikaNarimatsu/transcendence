@@ -217,7 +217,7 @@ export const validatePasswordByUserID = async (request, response) => {
 
 export async function addNewUser(request, response) {
   try {
-    const { name, email, password, language } = request.body;
+    const { name, email, password } = request.body;
 
     const sanitizedName = sanitizeInput.sanitizeUsername(name);
     const sanitizedEmail = sanitizeInput.sanitizeEmail(email);
@@ -243,7 +243,7 @@ export async function addNewUser(request, response) {
 
     const result = db
       .prepare(
-        "INSERT INTO users (name, email, password, avatarUrl, createdAt, language) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)"
       )
       .run(
         sanitizedName,
@@ -251,7 +251,6 @@ export async function addNewUser(request, response) {
         hashedPassword,
         randomAvatarUrl,
         createdAt,
-        language
       );
     response.code(201).send({
       id: result.lastInsertRowid,
@@ -259,7 +258,6 @@ export async function addNewUser(request, response) {
       email: sanitizedEmail,
       avatarUrl: randomAvatarUrl,
       created_at: createdAt,
-      lang: language,
     });
   } catch (error) {
     request.log.error("Failed to add new user:", error);
