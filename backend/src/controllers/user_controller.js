@@ -172,7 +172,6 @@ const userController = {
 			const exportData = {
 				exportDate: new Date().toISOString(),
 				userData: {
-					userID: user.userID,
 					nickname: user.name,
 					email: user.email,
 					accountCreated: user.createdAt,

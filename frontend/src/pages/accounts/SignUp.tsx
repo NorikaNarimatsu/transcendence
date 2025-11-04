@@ -47,6 +47,7 @@ export default function SignUp() {
 
     try {
       const response = await apiCentral.post("/validateEmail", { email: sanitizedEmail });
+	  console.log("response.status in validateEmail", response.status);
 
 	  if (response.status === 200) {
         navigate("/signupUnkownUser", { state: { email: sanitizedEmail } });

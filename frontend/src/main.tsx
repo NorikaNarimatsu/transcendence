@@ -21,12 +21,10 @@ import LogoutRouteOnly from './components/LogoutRouteOnly.tsx'
 import LoginRouteOnly from './components/LoginRouteOnly.tsx'
 
 const router = createBrowserRouter([
-  { path: '/', 
-	element: (
+  { path: '/', element: (
 	<LogoutRouteOnly>
 		<App />
-	</LogoutRouteOnly>
-	)},
+	</LogoutRouteOnly> )},
   { path: '/login',
 	element: (
 		<LogoutRouteOnly>
