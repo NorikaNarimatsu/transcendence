@@ -6,32 +6,38 @@ export interface ApiResponse<T =any> {
 	status?: number;
 }
 
-async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+async function handleResponse<T>(response: Response, endpoint?: string): Promise<ApiResponse<T>> {
 	const newToken = response.headers.get('Renewed-Token');
 	if (newToken) {
 		localStorage.setItem('authToken', newToken);
-	}
-
-	if (response.status === 401) {
-		localStorage.removeItem('authToken');
-		localStorage.removeItem('currentUser');
-
-		if (window.location.pathname !== '/signup') {
-			window.location.href = '/signup';
-		}
-
-		return { error: 'Session expired. Please login again', status: 401 };
 	}
 
 	let data: T;
 	try {
 		data = await response.json();
 	} catch (error) {
-		return { error: 'Failed to parse server\'s response' };
+		return {error: 'Failed to parse server\'s response' };
 	}
 
+	if (response.status === 401) {
+		const hadToken = localStorage.getItem('authToken');
+		const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/signup' || window.location.pathname === '/signupUnknownUser';
+
+		const isPasswordValidationEndpoint = endpoint === '/validatePasswordbyEmail' || endpoint === '/validatePasswordbyUserID';
+
+		if (hadToken && !isLoginPage && !isPasswordValidationEndpoint) {
+			localStorage.removeItem('authToken');
+			localStorage.removeItem('currentUser');
+			if (window.location.pathname !== '/signup') {
+				window.location.href = '/signup';
+			}
+			return { error: 'Session expired. Please login again', status: 401 };
+		}
+		return { error: (data as any).message || 'Authentication failed', data, status: 401 };
+		}
+
 	if (!response.ok) {
-		return { error: (data as any).error || 'Request failed', data, status: response.status };
+		return { error: (data as any).message || (data as any).error || 'Request failed', data, status: response.status };
 	}
 
 	return { data, status: response.status };
@@ -106,7 +112,7 @@ async function apiRequest<T = any>(
 			body: body ? JSON.stringify(body) : undefined,
 		});
 
-		return await handleResponse<T>(response);
+		return await handleResponse<T>(response, endpoint);
 	} catch (error) {
 		console.error('API request error: ', error);
 		return { error: 'Network error. Please try again later', status: 0 };

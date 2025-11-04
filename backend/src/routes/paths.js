@@ -11,7 +11,7 @@ export default async function itemRoutes(fastify, options) {
     fastify.post('/validatePasswordbyEmail', {
 		config: {
 			rateLimit: {
-				max: 5,
+				max: 15,
 				timeWindow: '15 minutes'
 			}
 		}

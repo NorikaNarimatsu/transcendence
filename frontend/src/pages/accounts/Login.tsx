@@ -110,6 +110,11 @@ const [email] = useState(() => {
       // Step 1: Validate password
       const response = await apiCentral.post("/validatePasswordbyEmail", { email, password });
 
+	  if (response.error) {
+		setError(response.error);
+		return;
+	  }
+
       if (response.data) {
         // with 2FA enabled
         if (response.data.requires2FA) {
@@ -166,7 +171,7 @@ const [email] = useState(() => {
         }
       } else {
         // const data = await response.json();
-        setError(response.data.message || "Invalid password");
+        setError("Invalid password");
       }
     } catch (err) {
       console.error(err);

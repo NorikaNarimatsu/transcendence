@@ -10,6 +10,10 @@ export const authenticateToken = async (request, response) => {
 		await request.jwtVerify();
 		
 		const user = request.user;
+
+		if (user && user.temp === true) {
+			return;
+		}
 		
 		if (user && user.lastActivity) {
 			const lastActivity = user.lastActivity;

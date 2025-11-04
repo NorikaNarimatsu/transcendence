@@ -136,13 +136,15 @@ export default function PlayerProfile(): JSX.Element {
         try {
             const response = await apiCentral.post('/validatePasswordbyUserID', { userID: selectedPlayer!.userID, password });
             
-			if (response.data) {
-                setSelectedPlayer(selectedPlayer);
-                if (playerSelectionGame === 'Snake') {
-                    navigate('./snakeGame?mode=2players');
-                } else {
-                    navigate('./pongGame?mode=2players');
-                }
+			if (response.error || response.status !== 200) {
+				setPasswordError(response.error || 'Incorrect password. Please try again.');
+			} else if (response.data && response.data.message === 'Password is valid') {
+				setSelectedPlayer(selectedPlayer);
+				if (playerSelectionGame === 'Snake') {
+					navigate('./snakeGame?mode=2players');
+				} else {
+					navigate('./pongGame?mode=2players');
+				}
             } else {
                 setPasswordError('Incorrect password. Please try again.');
             }

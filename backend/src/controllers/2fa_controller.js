@@ -93,7 +93,7 @@ const twoFactorController = {
 
       const isPasswordValid = await comparePassword(password, user.password);
       if (!isPasswordValid) {
-        return response.code(401).send({ error: "Invalid password" });
+        return response.code(400).send({ error: "Invalid password" });
       }
 
       db.prepare('UPDATE users SET "2FA" = 0 WHERE userID = ?').run(
@@ -211,20 +211,24 @@ const twoFactorController = {
       const { userID, code } = request.body;
       const sanitizedUserID = parseInt(userID);
       if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
+		request.log?.warn?.({ userID, sanitizedUserID }, 'Invalid userID in 2FA verification');
         return response.code(400).send({ error: "Invalid userID" });
       }
 
       if (!request.user) {
+        request.log?.warn?.("No user in request for 2FA verification");
         return response.code(401).send({ error: "Unauthorized" });
       }
 
       if (request.user.userID !== sanitizedUserID) {
+		request.log?.warn?.({tokenUserID: request.user.userID,bodyUserID: sanitizedUserID,},"UserID mismatch in 2FA verification");
         return response.code(403).send({
           error: "Forbidden - you can only change the setting for yourself",
         });
       }
 
       if (!code || typeof code !== "string" || code.length !== 6 || !/^\d{6}$/.test(code)) {
+		request.log?.warn?.({ code, codeLength: code?.length, codeType: typeof code },"Invalid code format in 2FA verification");
         return response.code(400).send({ error: "Invalid code format" });
       }
 
@@ -235,6 +239,7 @@ const twoFactorController = {
 	`).get(sanitizedUserID);
 
       if (!codeRecord) {
+		request.log?.warn?.({ userID: sanitizedUserID },"No unused code found for user");
         return response.code(400).send({ error: "Invalid code" });
       }
 
@@ -259,6 +264,7 @@ const twoFactorController = {
           "UPDATE two_factor_auth SET attempts = attempts + 1 WHERE codeID = ?"
         ).run(codeRecord.codeID);
         const attemptsLeft = maxAttempts - (currentAttempts + 1);
+		request.log?.warn?.({ userID: sanitizedUserID, attemptsLeft },"Invalid code provided");
         return response.code(400).send({ error: "Invalid code", attemptsLeft });
       }
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { set } from 'zod';
+import { useState, useEffect } from 'react';
 import apiCentral from '../utils/apiCentral';
+import { set } from 'zod';
 
 interface TwoFactorSettingsProps {
 	user: { userID: number; }
@@ -14,27 +14,50 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
 	const [showDisablePassword, setShowDisablePassword] = useState(false);
-	const [verificationCode, setVerificationCode] = useState('');
 	const [password, setPassword] = useState('');
 
+	const resetFormState = () => {
+		setError('');
+		setSuccess('');
+		setPassword('');
+	}
+
+	const closeModal = () => {
+		resetFormState();
+		setShowDisablePassword(false);
+		onClose();
+	}
+
 	useEffect(() => {
-		fetch2FAStatus();
+		fetch2FAStatus(false);
 	}, []);
 
-	const fetch2FAStatus = async () => {
+	const fetch2FAStatus = async (isFormOpen: boolean) => {
 		try {
-			setLoading(true);
+
+			if (!isFormOpen) {
+				setLoading(true);
+			}
 			const response = await apiCentral.get(`/2fa/status?userID=${user.userID}`);
 
 			if (response.data) {
+				if (isFormOpen) {
+					return;
+				}
 				setStatus(response.data);
 			} else {
-				setError(response.error || 'Failed to fetch 2FA status');
+				if (!isFormOpen) {
+					setError(response.error || 'Failed to fetch 2FA status');
+				}
 			}
 		} catch (err) {
-			setError('Server error while fetching 2FA status');
+			if (!isFormOpen) {
+				setError('Server error while fetching 2FA status');
+			}
 		} finally {
-			setLoading(false);
+			if (!isFormOpen) {
+				setLoading(false);
+			}
 		}
 	};
 
@@ -49,7 +72,7 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 			if (response.data) {
 				setSuccess('2FA successfully enabled');
 				setShowDisablePassword(false);
-				await fetch2FAStatus();
+				await fetch2FAStatus(false);
 			} else {
 				setError(response.error || 'Failed to enable 2FA');
 			}
@@ -63,18 +86,17 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 	const handleDisable2FA = async () => {
 		try {
 			setActionLoading(true);
-			setError('');
 			setSuccess('');
 
 			const response = await apiCentral.post('/2fa/disable', { userID: user.userID, password: password });
 
-			if (response.data) {
-				setSuccess('2FA successfully disabled');
-				setPassword('');
-				setShowDisablePassword(false);
-				await fetch2FAStatus();
+			if (response.error || !response.data || response.status !== 200) {
+				setError(response.error || 'Invalid password');
 			} else {
-				setError(response.error || 'Failed to disable 2FA');
+				resetFormState();
+				setSuccess('2FA successfully disabled');
+				setShowDisablePassword(false);
+				await fetch2FAStatus(false);
 			}
 		} catch (err) {
 			setError('Server error while disabling 2FA');
@@ -103,11 +125,11 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 				{/* HEADER */}
 				<div className="bg-blue-deep p-4 border-b-4 border-black relative">
 					<h2 className="text-2xl text-white font-pixelify font-bold text-shadow">2FA Settings</h2>
-					<button onClick={onClose} className="text-blue-deep hover:text-blue-600 text-2xl font-bold">x</button>
+					<button onClick={closeModal} className="text-blue-deep hover:text-blue-600 text-2xl font-bold">x</button>
 				</div>
 
 				{/* CONTENT */}
-				<div className="space-y-6">
+				<div className="space-y-6 mt-4">
 					{/* Toggle 2FA */}
 					<div className="flex items-center justify-between p-4 bg-blue-deep border-2 border-black">
 						<div className="flex flex-col">
@@ -122,11 +144,12 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 							onClick={() => {
 								if (status?.has2FA) {
 									setShowDisablePassword(true);
+									resetFormState();
 								} else {
 									handleEnable2FA();
 								}
 							}}
-							disabled={actionLoading}
+							disabled={actionLoading || showDisablePassword}
 							className={`
 								relative inline-flex items-center w-16 h-8 transition-colors
 								${status?.has2FA ? 'bg-green-600' : 'bg-gray-600'}
@@ -149,16 +172,26 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 								<input 
 									type="password"
 									value={password}
-									onChange={(e) => setPassword(e.target.value)}
+									onChange={(e) => {
+										setPassword(e.target.value);
+										if (error) {
+											setError('');
+										}
+									}}
 									placeholder="********"
 									className="w-full px-3 py-2 border-2 border-black bg-white font-dotgothic"
 								/>
+								{error && (
+									<p className="mt-2 text-red-300 text-sm font-dotgothic">
+										{error}
+									</p>
+								)}
 							</div>
 							<div className="flex gap-2">
 								<button
 									onClick={() => {
 										setShowDisablePassword(false);
-										setPassword('');
+										resetFormState();
 									}}
 										disabled={actionLoading}
 										className="flex-1 px-4 py-2 bg-gray-600 text-white font-pixelify border-2 border-black"
@@ -179,7 +212,7 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
 				</div>
 				<div className="p-4 order-t-4 border-black bg-blue-deep">
 					<button
-						onClick={onClose}
+						onClick={closeModal}
 						className="w-full px-6 py-3 bg-purple-game text-white font-pixelify font-bold text-lg border-2 border-black shadow-no-blur-50 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
 						>
 							CLOSE
