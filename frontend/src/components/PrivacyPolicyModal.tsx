@@ -7,18 +7,19 @@ interface PrivacyPolicyModalProps {
 
 const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose }) => {
 	if (!isOpen) return null;
-
 	return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       onClick={onClose}
     >
       <div
-        className="bg-pink-dark border-4 border-black shadow-no-blur-70 max-w-4xl w-full max-h-[90vh] m-4 flex flex-col"
+        className="bg-pink-light p-6 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] m-4 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* SCROLLABLE CONTENT */}
+        <div className="overflow-y-auto flex-1 p-6 text-blue-deep font-dotgothic">
         {/* HEADER */}
-        <div className="bg-blue-deep p-4 border-b-4 border-black relative">
+        <div className="bg-purple-purple p-4 rounded-lg">
           <h1 className="text-3xl text-white font-pixelify font-bold text-shadow">
             PRIVACY POLICY
           </h1>
@@ -27,8 +28,6 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
           </p>
         </div>
 
-        {/* SCROLLABLE CONTENT */}
-        <div className="overflow-y-auto flex-1 p-6 text-white font-dotgothic">
           <div className="space-y-6 text-sm leading-relaxed">
             {/* INTRO */}
             <section>
@@ -41,7 +40,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 1 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 1. Who We Are
               </h2>
               <p className="mb-2">
@@ -74,7 +73,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 2 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 2. What Data We Collect
               </h2>
               <p className="mb-2">
@@ -113,7 +112,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 3 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 3. Why We Collect Your Data
               </h2>
               <p className="mb-2">
@@ -206,7 +205,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 4 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 4. Children's Privacy
               </h2>
               <p>
@@ -219,7 +218,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 5 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 5. How Long We Keep Your Data
               </h2>
               <p className="mt-2">
@@ -241,7 +240,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 6 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 6. Your Data Rights
               </h2>
               <p className="mb-2">
@@ -294,7 +293,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 7 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 7. Data Security
               </h2>
               <p className="mt-2">
@@ -315,7 +314,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 8 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 8. Automated Decision-Making
               </h2>
               <p className="mt-2">
@@ -326,7 +325,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 9. Contact and Questions
               </h2>
               <p className="mb-2">
@@ -344,7 +343,7 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             {/* SECTION 9 */}
             <section>
-              <h2 className="text-xl font-bold text-blue-light mb-2">
+              <h2 className="text-xl font-bold text-blue-deep mb-2">
                 10. Changes to This Policy
               </h2>
               <p className="mb-2">
@@ -359,10 +358,10 @@ const	PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
         </div>
 
         {/* FOOTER */}
-        <div className="p-4 border-t-4 border-black bg-blue-deep">
+        <div className="flex justify-center mt-4">
           <button
             onClick={onClose}
-            className="w-full px-6 py-3 bg-purple-game text-white font-pixelify font-bold text-lg border-2 border-black shadow-no-blur-50 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+            className="px-4 py-2 bg-gray-500 text-white rounded-lg font-dotgothic hover:bg-gray-600"
           >
             CLOSE
           </button>

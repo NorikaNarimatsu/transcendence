@@ -1,4 +1,6 @@
 import React from 'react';
+import { validatePasswordRealTimeMini } from '../utils/passwordValidation';
+import SafeError from './SafeError';
 
 interface PasswordVerificationModalProps {
     open: boolean;
@@ -21,6 +23,17 @@ export function PasswordVerification({
 }: PasswordVerificationModalProps) {
     if (!open || !user) return null;
 
+	const [passwordError, setPasswordError] = React.useState('');
+
+	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		let password = e.target.value;
+
+		onPasswordChange(password);
+
+		const errorMessage = validatePasswordRealTimeMini(password);
+		setPasswordError(errorMessage);
+	};
+
     return (
         <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-30">
             <div className="bg-pink-light p-6 rounded-lg w-[300px]">
@@ -30,20 +43,26 @@ export function PasswordVerification({
                 <input
                     type="password"
                     value={password}
-                    onChange={e => onPasswordChange(e.target.value)}
+                    onChange={handlePasswordChange}
                     placeholder="Enter password"
-                    className="w-full px-3 py-2 mb-3 border rounded font-pixelify"
-                    onKeyDown={e => e.key === 'Enter' && onVerify()}
+                    className={`w-full px-3 py-2 mb-3 border rounded font-pixelify ${passwordError ? "border-red-500" : "border-black"}`}
+                    onKeyDown={e => e.key === 'Enter' && !passwordError && onVerify()}
                 />
-                {error && (
-                    <p className="text-red-500 font-pixelify text-sm mb-3 text-center">
-                        {error}
-                    </p>
+				{passwordError && (
+					<p className="mb-3 text-red-500 font-pixelify text-sm text-center">
+						{passwordError}
+					</p>
+				)}
+                {error && !passwordError && (
+					<SafeError
+                    error={error}
+                    className="text-red-500 font-pixelify text-sm mb-3 text-center"
+                    />
                 )}
                 <div className="flex gap-2">
                     <button
                         onClick={onVerify}
-                        disabled={!password.trim()}
+                        disabled={!password.trim() || !!passwordError}
                         className="flex-1 px-4 py-2 bg-blue-light text-white font-pixelify rounded hover:bg-blue-medium transition-colors disabled:bg-gray-400"
                     >
                         Verify

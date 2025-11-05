@@ -15,20 +15,6 @@ export class sanitizeInput {
 			current = current.replace(/<[^>]*>?/gi, ""); // Remove all HTML tags
 			current = current.replace(/javascript:/gi, ""); // Remove javascript:
 			current = current.replace(/on\w+\s*=/gi, ""); // Remove event handlers, e.g. onclick=
-				// .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-				// .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
-				// .replace(/<img\b[^<]*(?:(?!<\/img>)<[^<]*)*<\/img>/gi, "")
-				// .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
-				// .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, "")
-				// .replace(/<link\b[^<]*(?:(?!<\/link>)<[^<]*)*<\/link>/gi, "")
-				// .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-				// .replace(/<meta\b[^<]*(?:(?!<\/meta>)<[^<]*)*<\/meta>/gi, "")
-				// .replace(/svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, "")
-				// .replace(/<input\b[^<]*(?:(?!<\/input>)<[^<]*)*<\/input>/gi, "")
-				// .replace(/<\s*script/gi, "&lt;script") // remove any remaining <script tags
-				// .replace(/<\s*\/\s*script\s*>/gi, "&lt;/script&gt;") // remove any remaining </script> tags
-				// .replace(/javascript:/gi, "") // Remove javascript
-				// .replace(/on\w+\s*=/gi, ""); // Remove event handlers, e.g. onclick=
 
 				iterations++;
 

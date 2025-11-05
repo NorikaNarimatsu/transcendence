@@ -4,6 +4,7 @@ import eye_icon from '../../assets/icons/eye.png'
 import arrow_icon from '../../assets/icons/arrow.png'
 import { sanitizeInput } from '../../utils/sanitizeInput';
 import SafeError from '../../components/SafeError';
+import { validatePasswordRealTimeMini } from '../../utils/passwordValidation';
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -35,12 +36,14 @@ const [email] = useState(() => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   const [show2FAInput, setShow2FAInput] = useState(false);
   const [temporaryToken, setTemporaryToken] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [userID, setUserID] = useState<any>(null);
   const hasClearedStateRef = useRef(false);
+  const [showForgottenPasswordMessage, setShowForgottenPasswordMessage] = useState(false);
 
 //   clean all the data if the user is not logged in anymore
   useEffect(() => {
@@ -222,10 +225,13 @@ const [email] = useState(() => {
                   LOG IN
                 </h1>
                 <h2 className="text-xl text-blue-deep font-dotgothic mb-[2px]">
-                  {translation.pages.login.hello} {name ? sanitizeInput.escapeHtml(name) : 'User'}!
+                  {translation.pages.login.hello}{" "}
+                  {name ? sanitizeInput.escapeHtml(name) : "User"}!
                 </h2>
-                <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">{translation.pages.login.welcomeBack}</h2>
-                
+                <h2 className="text-xl text-blue-deep font-dotgothic mb-[100px]">
+                  {translation.pages.login.welcomeBack}
+                </h2>
+
                 {/* Password input with clickable eye */}
                 <div className="relative mb-4">
                   <img
@@ -238,21 +244,51 @@ const [email] = useState(() => {
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+
+                      const errorMessage = validatePasswordRealTimeMini(e.target.value);
+                      setPasswordError(errorMessage);
+
+                      if (error) {
+                        setError("");
+                      }
+                    }}
                     placeholder="************"
                     className="w-full px-4 py-2 bg-blue-deep text-white placeholder-color font-dotgothic border-2 border-black focus:outline-none shadow-no-blur-50-reverse-no-active tracking-widest"
                     required
                   />
                 </div>
-                <SafeError error={error} className="mt-2 font-dotgothic" />
+				<button
+					type="button"
+					onClick={() => setShowForgottenPasswordMessage(!showForgottenPasswordMessage)}
+					className="text-blue-deep underline mb-4">
+						Forgotten password?
+					</button>
+					{showForgottenPasswordMessage && (
+						<p className="text-blue-deep font-dotgothic mb-4 text-sm">
+							If you forgot your password, <br />please contact our support at <a href="mailto:sneg.transcendence@gmail.com" className="underline">sneg.transcendence@gmail.com</a>
+						</p>
+					)}
+                {passwordError && (
+					<p className="mt-1 text-red-300 text-sm font-dotgothic">
+						{passwordError}
+					</p>
+                )}
+                {error && !passwordError && (
+                  <SafeError
+                    error={error}
+                    className="mt-1 text-red-300 text-sm font-dotgothic"
+                  />
+                )}
               </div>
 
               {/* Continue button */}
               <ButtonPurple type="submit">
                 <span className="flex items-center justify-end gap-2">
                   {translation.common.continue}
-                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
-                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto"/>
+                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto" />
+                  <img src={arrow_icon} alt="Arrow" className="h-4 w-auto" />
                 </span>
               </ButtonPurple>
             </form>
@@ -268,51 +304,56 @@ const [email] = useState(() => {
           </section>
         </div>
       </div>
-	  {show2FAInput && (
-		<form onSubmit={handle2FAVerification} className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-			<div className="bg-pink-dark p-8 rounded-lg shadow-lg">
-				<h2 className="text-2xl font-bold mb-4 text-blue-deep font-pixelify">
-					Enter the verification code 
-				</h2>
-				<p className="text-blue-deep font-dotgothic mb-4">
-					Check your email for the 6-digit code
-				</p>
-				<input
-					type="text"
-					value={verificationCode}
-					onChange={(e) => {
-						const sanitizedCode = sanitizeInput.sanitizeVerificationCode(e.target.value);
-						setVerificationCode(sanitizedCode);
-					}}
-					placeholder="******"
-					maxLength={6}
-					pattern="[0-9]{6}"
-					className="w-full px-4 py-2 bg-blue-deep text-white placeholder-gray-400 font-dotgothic border-2 border-black focus:outline-none tracking-widest text-center text-2xl mb-4"
-					required
-				/>
-				<SafeError error={error} className="mb-4 font-dotgothic" />
-				<div className="flex gap-4">
-					<button
-						type="submit"
-						className="flex-1 px-6 py-2 br-purple-600 text-white rounded hover:bg-purple-700 font-pixelify"
-					>
-						Verify
-					</button>
-					<button
-						type="button"
-						onClick={() => {
-							setShow2FAInput(false);
-							setError('');
-							setVerificationCode('');
-						}}
-						className="flex-1 px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 font-pixelify"
-						>
-							Cancel
-					</button>
-				</div>
-			</div>
-		</form>
-	  )}
+      {show2FAInput && (
+        <form
+          onSubmit={handle2FAVerification}
+          className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+          <div className="bg-pink-dark p-8 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold mb-4 text-blue-deep font-pixelify">
+              Enter the verification code
+            </h2>
+            <p className="text-blue-deep font-dotgothic mb-4">
+              Check your email for the 6-digit code
+            </p>
+            <input
+              type="text"
+              value={verificationCode}
+              onChange={(e) => {
+                const sanitizedCode = sanitizeInput.sanitizeVerificationCode(
+                  e.target.value
+                );
+                setVerificationCode(sanitizedCode);
+              }}
+              placeholder="******"
+              maxLength={6}
+              pattern="[0-9]{6}"
+              className="w-full px-4 py-2 bg-blue-deep text-white placeholder-gray-400 font-dotgothic border-2 border-black focus:outline-none tracking-widest text-center text-2xl mb-4"
+              required
+            />
+            <SafeError error={error} className="mb-4 font-dotgothic" />
+            <div className="flex gap-4">
+              <button
+                type="submit"
+                className="flex-1 px-6 py-2 br-purple-600 text-white rounded hover:bg-purple-700 font-pixelify"
+              >
+                Verify
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShow2FAInput(false);
+                  setError("");
+                  setVerificationCode("");
+                }}
+                className="flex-1 px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 font-pixelify"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
     </main>
   );
 }

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import apiCentral from '../../utils/apiCentral';
+import { validatePasswordRealTimeMini } from '../../utils/passwordValidation';
+import SafeError from '../../components/SafeError';
 
 interface DeleteAccountProps {
     open: boolean;
@@ -13,9 +15,22 @@ export function DeleteAccount({ open, onClose}: DeleteAccountProps) {
     const [deleteError, setDeleteError] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+	const [passwordError, setPasswordError] = useState('');
     
     const navigate = useNavigate();
     const { user, logout } = useUser();
+
+	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		let password = e.target.value;
+		setDeletePassword(password);
+
+		const errorMessage = validatePasswordRealTimeMini(password);
+		setPasswordError(errorMessage);
+
+		if (deleteError) {
+			setDeleteError('');
+		}
+	}
 
     const handleDeleteAccount = async () => {
         if (!user?.userID) {
@@ -81,7 +96,7 @@ export function DeleteAccount({ open, onClose}: DeleteAccountProps) {
                             type={showPassword ? "text" : "password"}
                             placeholder="Password"
                             value={deletePassword}
-                            onChange={(e) => setDeletePassword(e.target.value)}
+                            onChange={handlePasswordChange}
                             className="w-full p-2 pr-10 border border-purple rounded focus:outline-none focus:border-blue-deep"
                             disabled={isDeleting}
                         />
@@ -95,14 +110,22 @@ export function DeleteAccount({ open, onClose}: DeleteAccountProps) {
                         </button>
                     </div>
                 </div>
-                {deleteError && (
-                    <p className="text-red-500 text-sm mb-4 font-dotgothic">{deleteError}</p>
+				{passwordError && (
+					<p className="mb-3 text-red-500 font-dotgothic text-sm">
+						{passwordError}
+					</p>
+				)}
+                {deleteError && !passwordError && (
+                    <SafeError
+                        error={deleteError}
+                        className="text-red-500 font-dotgothic text-sm mb-3"
+                    />
                 )}
                 <div className="flex gap-3">
                     <button
                         onClick={handleDeleteAccount}
                         className="flex-1 bg-red-500 text-white py-2 px-4 rounded font-dotgothic hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={!deletePassword || isDeleting}
+                        disabled={!deletePassword || isDeleting || !!passwordError}
                     >
                         {isDeleting ? 'Deleting...' : 'Delete Account'}
                     </button>
