@@ -47,7 +47,7 @@ export function DeleteAccount({ open, onClose}: DeleteAccountProps) {
                 password: deletePassword
             });
 
-            if (!passwordResponse.data) {
+            if (passwordResponse.status !== 200 ||!passwordResponse.data) {
                 setDeleteError('Incorrect password. Please try again.');
                 setIsDeleting(false);
                 return;

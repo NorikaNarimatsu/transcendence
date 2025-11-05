@@ -187,7 +187,7 @@ export default function TwoFactorSettings({ user, onClose }: TwoFactorSettingsPr
             </button>
           </div>
           {status && status.has2FA && showDisablePassword && (
-            <div className="space-y-4 p-4 bg-purple-purple">
+            <div className="space-y-4 p-4 bg-purple-purple rounded-lg">
               <div className="mb-4">
                 <label className="block font-dotgothic text-white text-sm mb-2">
                   Enter your password to disable 2FA:
