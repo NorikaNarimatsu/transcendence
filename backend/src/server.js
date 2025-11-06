@@ -14,6 +14,7 @@ export const db = await initializeDatabase();
 // Create Fastify instance
 const app = Fastify({
   logger: true,
+  bodyLimit: 2 * 1024 * 1024, // limit for upload size (2MB)
 });
 
 console.log("Fastify server is set...");
@@ -45,7 +46,7 @@ await app.register(helmet, { contentSecurityPolicy: {
 		defaultSrc: ["'self'"],
 		styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
 		scriptSrc: ["'self'"],
-		imgSrc: ["'self'", "data:"], //may need to be changed for uploaded images
+		imgSrc: ["'self'", "data:", "https://localhost:8443/uploadAvatars"], //may need to be changed for uploaded images
 		connectSrc: ["'self'", "https://localhost"],
 		fontSrc: ["https://fonts.gstatic.com"],
 		objectSrc: ["'none'"],
