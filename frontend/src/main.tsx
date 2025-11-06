@@ -17,6 +17,7 @@ import { UserProvider } from './pages/user/UserContext'
 import { SelectedPlayerProvider } from './pages/user/PlayerContext'
 import { TournamentProvider } from './pages/tournament/tournamentContext'
 import TranslationProvider from './contexts/LanguageContext.tsx'
+import { GameSettingsProvider } from './contexts/GameSettingsContext.tsx'
 import LogoutRouteOnly from './components/LogoutRouteOnly.tsx'
 import LoginRouteOnly from './components/LoginRouteOnly.tsx'
 
@@ -79,7 +80,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <TranslationProvider>
           <SelectedPlayerProvider>
               <TournamentProvider>
+				<GameSettingsProvider>
                   <RouterProvider router={router} />
+				</GameSettingsProvider>
               </TournamentProvider>
           </SelectedPlayerProvider>
       </TranslationProvider>

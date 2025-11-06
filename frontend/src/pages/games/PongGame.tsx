@@ -17,6 +17,7 @@ import gear_icon from '../../assets/icons/Settings.png';
 //Game instructions+Settings+Stats components
 import GameInstructions from '../../components/GameInstructionsPongGame';
 import GameSettings from '../../components/SettingsGames';
+import { useGameSettings } from '../../contexts/GameSettingsContext';
 
 import type { SelectedPlayer } from '../user/PlayerContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -37,6 +38,9 @@ export default function PongGame(): JSX.Element {
 
     const { currentMatch } = useTournament();
 
+	const { gameSettings, getPongSettings } = useGameSettings();
+	const currentDifficulty = gameSettings.pong.mode;
+	const pongSettings = getPongSettings();
 
     const [gameConfig, setGameConfig] = useState<GameConfig>(calculateGameConfig());
     const [gameState, setGameState] = useState<GameState>({
@@ -99,19 +103,20 @@ export default function PongGame(): JSX.Element {
     useEffect(() => {
         const handleResize = () => {
             const newConfig = calculateGameConfig();
+			const pongSettings = getPongSettings();
             setGameConfig(newConfig);
             if (engineRef.current) {
                 engineRef.current.stop();
                 const leftPlayerName = leftPlayer?.name || 'Player 1';
                 const rightPlayerName = rightPlayer?.name || 'Player 2';
-                engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayerName, rightPlayerName);
+                engineRef.current = new PongEngine(newConfig, setGameState, mode, leftPlayerName, rightPlayerName, pongSettings);
                 engineRef.current.start();
             }
         };
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [mode, leftPlayer?.name, rightPlayer?.name]);
+    }, [mode, leftPlayer?.name, rightPlayer?.name, currentDifficulty]);
 
     const sendMatchResult = async (finalGameState: GameState) => {
       try {
@@ -174,10 +179,12 @@ export default function PongGame(): JSX.Element {
     useEffect(() => {
         const leftPlayerName = leftPlayer?.name || 'Player 1';
         const rightPlayerName = rightPlayer?.name || 'Player 2';
+		const pongSettings = getPongSettings();
 
          // SHOULD BE DELETED THESE COMENTS LATER // THIS IS FOR DEGUB
         console.log('=== PONG GAME STARTED ===');
         console.log('Game Mode:', mode);
+		console.log('Difficulty Settings:', pongSettings);
         console.log('Left Player (User):', {
             name: leftPlayer?.name,
             userID: leftPlayer?.userID,
@@ -201,7 +208,7 @@ export default function PongGame(): JSX.Element {
         console.log('========================');
         // SHOULD BE DELETED THESE COMENTS LATER
 
-        engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayerName, rightPlayerName);
+        engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayerName, rightPlayerName, pongSettings);
 
         const handleKeyDown = (e: KeyboardEvent) => {
             engineRef.current?.handleKeyDown(e.key);
@@ -221,7 +228,37 @@ export default function PongGame(): JSX.Element {
             window.removeEventListener('keyup', handleKeyUp);
             engineRef.current?.stop();
         };
-    }, [gameConfig, mode, leftPlayer?.name, rightPlayer]);
+    }, [gameConfig, mode, leftPlayer?.name, rightPlayer, currentDifficulty]);
+
+	useEffect(() => {
+        console.log('Difficulty changed:', pongSettings);
+        
+        // Only recreate if game is actively running
+        if (engineRef.current && gameState.gameStarted && !gameState.gameEnded) {
+            const leftPlayerName = leftPlayer?.name || 'Player 1';
+            const rightPlayerName = rightPlayer?.name || 'Player 2';
+            
+            console.log('Recreating engine with new difficulty...');
+            
+            // Stop current engine
+            engineRef.current.stop();
+            
+            // Create new engine with updated settings
+            engineRef.current = new PongEngine(
+                gameConfig,
+                setGameState,
+                mode,
+                leftPlayerName,
+                rightPlayerName,
+                pongSettings
+            );
+            
+            // Restart
+            engineRef.current.start();
+            
+            console.log('Engine recreated successfully');
+        }
+    }, [currentDifficulty]);
 
     useEffect(() => {
       if (gameState.gameEnded && gameState.winner) {
@@ -319,9 +356,8 @@ export default function PongGame(): JSX.Element {
 
           {!gameState.gameStarted && !gameState.gameEnded && view === "settings" && (
               <GameSettings
-                  onClose={() => setView("instructions")}
                   onBackgroundChange={setBackgroundColor}
-                  currentBackground={backgroundColor}
+				  gameType='pong'
                />
           )}
         </div>

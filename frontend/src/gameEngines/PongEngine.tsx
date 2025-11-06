@@ -22,6 +22,11 @@ export interface GameState {
     ballSpeed: number;
     winScore: number;
   }
+
+  export interface DifficultySettings {
+	ballSpeed: number;
+	paddleSpeed: number;
+  }
   
   export class PongEngine {
     private config: GameConfig;
@@ -41,15 +46,25 @@ export interface GameState {
     private leftPlayerName: string;
     private rightPlayerName: string;
 
-    constructor(config: GameConfig, onStateChange: (state: GameState) => void, mode: string = 'single', leftPlayerName: string = 'Player 1', rightPlayerName: string = 'AI') {
+	private difficultySettings: DifficultySettings;
+
+    constructor(config: GameConfig, onStateChange: (state: GameState) => void, mode: string = 'single', leftPlayerName: string = 'Player 1', rightPlayerName: string = 'AI', difficultySettings?: DifficultySettings) {
       this.config = config;
       this.onStateChange = onStateChange;
       this.mode = mode;
       this.leftPlayerName = leftPlayerName;
       this.rightPlayerName = rightPlayerName;
 
-      this.config = config;
-      this.onStateChange = onStateChange;
+	  this.difficultySettings = difficultySettings || {
+		ballSpeed: config.ballSpeed,
+		paddleSpeed: config.paddleSpeed
+	  };
+
+	  this.config.ballSpeed = this.difficultySettings.ballSpeed;
+	  this.config.paddleSpeed = this.difficultySettings.paddleSpeed;
+	  
+    //   this.config = config;
+    //   this.onStateChange = onStateChange;
       
       // Initialize positions properly centered
       this.ballPosition = { 

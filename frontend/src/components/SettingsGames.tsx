@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react'
 import bgimage from '../assets/Game.jpg'
 import LeftButton from './ButtonPurple'
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGameSettings } from '../contexts/GameSettingsContext';
 
 interface GameSettingsProps {
-    onClose: () => void;
     onBackgroundChange: (background: string) => void;
-    currentBackground: string;
+	gameType: 'pong' | 'snake';
 }
 
-export default function SettingsPongGame({ onClose, onBackgroundChange, currentBackground }: GameSettingsProps): JSX.Element {
+export default function SettingsPongGame({ onBackgroundChange, gameType }: GameSettingsProps): JSX.Element {
 
     const [selectedOption, setSelectedOption] = useState<'gameMode' | 'background' | 'language' | null>(null);
     const buttonClasses = 'button-pp-purple shadow-no-blur-60 !bg-pink-dark !text-2xl';
@@ -17,20 +17,48 @@ export default function SettingsPongGame({ onClose, onBackgroundChange, currentB
     const { lang, t, setLang} = useLanguage();
     const translation = t[lang];
 
+	const { gameSettings, setPongMode, setSnakeMode } = useGameSettings();
+
     const handleBackgroundSelect = (bgColor: string) => {
         onBackgroundChange(bgColor);
-        // setSelectedOption(null);
     };
 
-    //TODO: API Call to update the Language Selected + What does the Game Mode means? Faster snake? Faster Ball?.
+	const handleGameModeSelect = (mode: 'easy' | 'medium' | 'hard') => {
+		if(gameType === 'pong') {
+			setPongMode(mode);
+		} else {
+			setSnakeMode(mode);
+		}
+	};
+
+	const getCurrentMode = () => {
+		return gameType === 'pong' ? gameSettings.pong.mode : gameSettings.snake.mode;
+	};
+
     const renderOptions = () => {
         switch (selectedOption) {
             case 'gameMode':
+				const currentMode = getCurrentMode();
                 return (
                      <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4 opacity-80'>
-                         <button className={buttonClasses}>{translation.pages.gameSettings.easy}</button>
-                         <button className={buttonClasses}>{translation.pages.gameSettings.medium}</button>
-                         <button className={buttonClasses}>{translation.pages.gameSettings.hard}</button>
+                         <button 
+                            className={`${buttonClasses} ${currentMode === 'easy' ? '!bg-purple-purple ring-4 ring-white' : ''}`}
+                            onClick={() => handleGameModeSelect('easy')}
+                         >
+                            {translation.pages.gameSettings.easy}
+                         </button>
+                         <button 
+                            className={`${buttonClasses} ${currentMode === 'medium' ? '!bg-purple-purple ring-4 ring-white' : ''}`}
+                            onClick={() => handleGameModeSelect('medium')}
+                         >
+                            {translation.pages.gameSettings.medium}
+                         </button>
+                         <button 
+                            className={`${buttonClasses} ${currentMode === 'hard' ? '!bg-purple-purple ring-4 ring-white' : ''}`}
+                            onClick={() => handleGameModeSelect('hard')}
+                         >
+                            {translation.pages.gameSettings.hard}
+                         </button>
                      </div>
                 );
             case 'background':
