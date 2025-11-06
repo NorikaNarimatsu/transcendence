@@ -131,7 +131,7 @@ const [email] = useState(() => {
               avatarUrl: response.data.user.avatarUrl,
             });
           try {
-              const dbLang = await getUserLanguage(data.user.userID);
+              const dbLang = await getUserLanguage(response.data.user.userID);
               localStorage.setItem('lang', dbLang);
           }catch(error){
               console.error('Failed to fetch language:', error);
@@ -169,7 +169,7 @@ const [email] = useState(() => {
               avatarUrl: response.data.user.avatarUrl,
             });
             try {
-              const dbLang = await getUserLanguage(data.user.userID);
+              const dbLang = await getUserLanguage(response.data.user.userID);
               localStorage.setItem('lang', dbLang);
             }catch(error){
                 console.error('Failed to fetch language:', error);
@@ -186,7 +186,7 @@ const [email] = useState(() => {
                 avatarUrl: userResponse.data.avatarUrl,
               });
               try {
-                  const dbLang = await getUserLanguage(data.user.userID);
+                  const dbLang = await getUserLanguage(response.data.user.userID);
                   localStorage.setItem('lang', dbLang);
               }catch(error){
                   console.error('Failed to fetch language:', error);
