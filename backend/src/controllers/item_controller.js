@@ -1,22 +1,13 @@
 import { db } from "../server.js";
 import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 import { sanitizeInput } from "../utils/sanitizeInput.js";
-import twoFactorController from "./2fa_controller.js";
+import { allowedAvatars } from "../utils/avatarsList.js";
 import { emailUtils } from "../utils/emailUtils.js";
 import bcrypt from 'bcrypt';
+import { verifyTokenOwner } from "../utils/verifyTokenOwner.js";
 
 //////// Avatar Array //////
-const avatars = [
-  "/avatars/Avatar_1.png",
-  "/avatars/Avatar_2.png",
-  "/avatars/Avatar_3.png",
-  "/avatars/Avatar_4.png",
-  "/avatars/Avatar_5.png",
-  "/avatars/Avatar_6.png",
-  "/avatars/Avatar_7.png",
-  "/avatars/Avatar_8.png",
-  "/avatars/Avatar_9.png",
-];
+const avatars = allowedAvatars;
 
 
 export const validateName = async (request, response) => {
@@ -116,7 +107,7 @@ export const validatePasswordbyEmail = async (request, response) => {
 					userID: user.userID,
 					email: user.email,
 					name: user.name,
-					avatarUrl: user.avatarUrl,
+					avatarUrl: sanitizeInput.avatarPathCheck(user.avatarUrl, allowedAvatars),
 					has2FA: true,
 					verified2FA: false
 				}
@@ -142,7 +133,7 @@ export const validatePasswordbyEmail = async (request, response) => {
 					userID: user.userID,
 					email: user.email,
 					name: user.name,
-					avatarUrl: user.avatarUrl,
+					avatarUrl: sanitizeInput.avatarPathCheck(user.avatarUrl, allowedAvatars),
 					has2FA: false,
 					verified2FA: false
 				}
@@ -150,28 +141,9 @@ export const validatePasswordbyEmail = async (request, response) => {
 		}
 	} catch (error) {
 		console.error("validatePasswordByEmail error: ", error);
-		request.log.error("validatePasswordbyEmail error: ", error);
 		return response.code(500).send({ message: "Internal server error" });
 	}
 };
-
-// export const validatePasswordbyName = async (request, response) => {
-// 	try {
-// 		const { name, password } = request.body;
-
-// 		const sanitiziedName = sanitizeInput.sanitizeUsername(name);
-// 		const user = db.prepare("SELECT * FROM users WHERE name = ?").get(sanitiziedName); // use 'name'
-// 		if (!user) return response.code(401).send({ message: "User not found" });
-
-// 		//TODO for Gosia - should I also validate here password? in case of frontend bypass
-// 		const isPasswordValid = await comparePassword(password, user.password);
-
-// 		if (isPasswordValid) return response.code(200).send();
-// 		else return response.code(401).send({ message: "Invalid password" });
-// 	} catch (error) {
-// 		return response.code(500).send();
-// 	}
-// };
 
 export const validatePasswordByUserID = async (request, response) => {
     try {
@@ -300,7 +272,7 @@ export const getUserInfoByEmail = async (request, reply) => {
             return reply.code(200).send({
                 userID: user.userID,  // ADD userID to response
                 name: sanitizeInput.sanitizeUsername(user.name),
-                avatarUrl: user.avatarUrl,
+                avatarUrl: sanitizeInput.avatarPathCheck(user.avatarUrl, avatars)
             });
         }
         return reply.code(404).send({
@@ -333,10 +305,12 @@ export const getUserById = async (request, reply) => {
             return reply.code(404).send({ message: "User not found" });
         }
 
+
+
         return reply.code(200).send({
-            userID: user.userID,
-            name: user.name,
-            avatarUrl: user.avatarUrl
+          userID: user.userID,
+          name: user.name,
+          avatarUrl: sanitizeInput.avatarPathCheck(user.avatarUrl, avatars)
         });
 
     } catch (error) {
@@ -367,10 +341,10 @@ export const getUsersExceptUserID = async (request, reply) => {
             `)
             .all(sanitizedUserID);
 
-        const formattedUsers = users.map(user => ({
-            userID: user.userID,
-            name: user.name,
-            avatarUrl: user.avatarUrl
+        const formattedUsers = users.map((user) => ({
+          userID: user.userID,
+          name: sanitizeInput.sanitizeUsername(user.name),
+          avatarUrl: sanitizeInput.avatarPathCheck(user.avatarUrl, avatars),
         }));
         
         console.log('Formatted users:', formattedUsers);
@@ -409,8 +383,8 @@ export const getUserFriendsByUserID = async (request, reply) => {
         // Format response to match SelectedPlayer interface
         const formattedFriends = friends.map(friend => ({
             userID: friend.userID,
-            name: friend.name,
-            avatarUrl: friend.avatarUrl,
+            name: sanitizeInput.sanitizeUsername(friend.name),
+            avatarUrl: sanitizeInput.avatarPathCheck(friend.avatarUrl, avatars),
             lastLoginedAt: friend.lastLoginAt
         }));
         
@@ -486,16 +460,38 @@ export const addFriendByUserID = async (request, response) => {
 export function updateAvatarUrl(request, response) {
 	try {
         const { userID, avatarUrl } = request.body;
-        const result = db.prepare(
-            "UPDATE users SET avatarUrl = ? WHERE userID = ?").run(avatarUrl, userID);
-        if (result.changes === 0)
-            response.code(404).send({ error: "Item not found" });
-        return response.code(200).send({
-            message: "Avatar updated successfully",
-            avatarUrl: avatarUrl,
-        });
+
+		if (!userID || !avatarUrl) {
+			return response.code(400).send({ error: "userID and avatarUrl are required" });
+		}
+
+		const sanitizedUserID = parseInt(userID);
+		if (isNaN(sanitizedUserID)) {
+			return response.code(400).send({ error: "Invalid userID format" });
+		}
+
+		const ownerError = verifyTokenOwner(request, sanitizedUserID);
+		if (ownerError) {
+			return response.code(ownerError.code).send({ error: ownerError.error });
+		}
+
+		let sanitizedAvatarUrl;
+		try {
+			sanitizedAvatarUrl = sanitizeInput.sanitizeAvatarPath(avatarUrl, avatars);
+		} catch (error) {
+			return response.code(400).send({ error: error.message || "Invalid avatarUrl" });
+		}
+
+        const result = db
+          .prepare("UPDATE users SET avatarUrl = ? WHERE userID = ?")
+          .run(sanitizedAvatarUrl, sanitizedUserID);
+
+        if (result.changes === 0) {
+			return response.code(404).send({ error: "Item not found" });
+		}
+
+        return response.code(200).send({ message: "Avatar updated successfully", avatarUrl: sanitizedAvatarUrl, });
     } catch (error) {
-        request.log.error("update error: ", error);
         return response.code(400).send({ 
             error: error.message || "Invalid input data" });
     }
@@ -513,6 +509,11 @@ export const updateUserName = async (request, response) => {
         if (isNaN(sanitizedUserID)) {
             return response.code(400).send({ message: "Invalid userID" });
         }
+
+		const ownerError = verifyTokenOwner(request, sanitizedUserID);
+		if (ownerError) {
+			return response.code(ownerError.code).send({ error: ownerError.error });
+		}
 
         // Check if user exists
         const existingUser = db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(sanitizedUserID);
@@ -570,6 +571,11 @@ export const updateUserEmail = async (request, response) => {
         if (isNaN(sanitizedUserID)) {
             return response.code(400).send({ message: "Invalid userID" });
         }
+
+		const ownerError = verifyTokenOwner(request, sanitizedUserID);
+		if (ownerError) {
+			return response.code(ownerError.code).send({ error: ownerError.error });
+		}
 
         // Check if user exists
         const existingUser = db.prepare("SELECT userID, email FROM users WHERE userID = ?").get(sanitizedUserID);

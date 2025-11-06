@@ -4,33 +4,29 @@ import { comparePassword } from '../utils/passwordUtils.js';
 import bcrypt from 'bcrypt';
 import { checkPassword } from '../utils/passwordValidationUtils.js';
 import { sanitizeInput } from '../utils/sanitizeInput.js';
+import { verifyTokenOwner } from '../utils/verifyTokenOwner.js';
+import { allowedAvatars } from '../utils/avatarsList.js';
 
 const twoFactorController = {
   enable2FA: async (request, response) => {
     try {
       const { userID } = request.body;
+
       const sanitizedUserID = parseInt(userID);
-      if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
-        return response.code(400).send({ error: "Invalid userID" });
-      }
+	  if (isNaN(sanitizedUserID)) {
+		return response.code(400).send({ message: "Invalid userID" });
+	  }
+
+	  const ownerError = verifyTokenOwner(request, sanitizedUserID);
+	  if (ownerError) {
+		return response.code(ownerError.code).send({ error: ownerError.error });
+	  }
 
       const user = db
         .prepare(
           'SELECT userID, email, name, "2FA" FROM users WHERE userID = ?'
         )
         .get(sanitizedUserID);
-
-      if (!request.user) {
-        return response.code(401).send({ error: "Unauthorized" });
-      }
-
-      if (request.user.userID !== sanitizedUserID) {
-        return response
-          .code(403)
-          .send({
-            error: "Forbidden - you can only change the setting for yourself",
-          });
-      }
 
       if (!user) {
         return response.code(404).send({ error: "User not found" });
@@ -63,23 +59,20 @@ const twoFactorController = {
     try {
       const { userID, password } = request.body;
       const sanitizedUserID = parseInt(userID);
-      if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
-        return response.code(400).send({ error: "Invalid userID" });
-      }
+	  if (isNaN(sanitizedUserID)) {
+		return response.code(400).send({ message: "Invalid userID" });
+	  }
+
+	  const ownerError = verifyTokenOwner(request, sanitizedUserID);
+	  if (ownerError) {
+		return response.code(ownerError.code).send({ error: ownerError.error });
+	  }
 
 	//   TODO for Gosia -> uncomment the check once the password requirements are back
     //   const passwordCheck = checkPassword(password);
     //   if (!passwordCheck.valid) {
     //     return response.code(400).send({ error: passwordCheck.error });
     //   }
-      if (!request.user) {
-        return response.code(401).send({ error: "Unauthorized" });
-      }
-      if (request.user.userID !== sanitizedUserID) {
-        return response.code(403).send({
-          error: "Forbidden - you can only change the setting for yourself",
-        });
-      }
 
       const user = db
         .prepare(
@@ -125,16 +118,10 @@ const twoFactorController = {
       if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
         return response.code(400).send({ error: "Invalid userID" });
       }
-
-      if (!request.user) {
-        return response.code(401).send({ error: "Unauthorized" });
-      }
-
-      if (request.user.userID !== sanitizedUserID) {
-        return response.code(403).send({
-          error: "Forbidden - you can only change the setting for yourself",
-        });
-      }
+	  const ownerError = verifyTokenOwner(request, sanitizedUserID);
+	  if (ownerError) {
+		return response.code(ownerError.code).send({ error: ownerError.error });
+	  }
 
       const user = db
         .prepare(
@@ -211,24 +198,15 @@ const twoFactorController = {
       const { userID, code } = request.body;
       const sanitizedUserID = parseInt(userID);
       if (isNaN(sanitizedUserID) || sanitizedUserID <= 0) {
-		request.log?.warn?.({ userID, sanitizedUserID }, 'Invalid userID in 2FA verification');
         return response.code(400).send({ error: "Invalid userID" });
       }
 
-      if (!request.user) {
-        request.log?.warn?.("No user in request for 2FA verification");
-        return response.code(401).send({ error: "Unauthorized" });
-      }
-
-      if (request.user.userID !== sanitizedUserID) {
-		request.log?.warn?.({tokenUserID: request.user.userID,bodyUserID: sanitizedUserID,},"UserID mismatch in 2FA verification");
-        return response.code(403).send({
-          error: "Forbidden - you can only change the setting for yourself",
-        });
-      }
+      const ownerError = verifyTokenOwner(request, sanitizedUserID);
+	  if (ownerError) {
+		return response.code(ownerError.code).send({ error: ownerError.error });
+	  }
 
       if (!code || typeof code !== "string" || code.length !== 6 || !/^\d{6}$/.test(code)) {
-		request.log?.warn?.({ code, codeLength: code?.length, codeType: typeof code },"Invalid code format in 2FA verification");
         return response.code(400).send({ error: "Invalid code format" });
       }
 
@@ -239,7 +217,6 @@ const twoFactorController = {
 	`).get(sanitizedUserID);
 
       if (!codeRecord) {
-		request.log?.warn?.({ userID: sanitizedUserID },"No unused code found for user");
         return response.code(400).send({ error: "Invalid code" });
       }
 
@@ -264,7 +241,6 @@ const twoFactorController = {
           "UPDATE two_factor_auth SET attempts = attempts + 1 WHERE codeID = ?"
         ).run(codeRecord.codeID);
         const attemptsLeft = maxAttempts - (currentAttempts + 1);
-		request.log?.warn?.({ userID: sanitizedUserID, attemptsLeft },"Invalid code provided");
         return response.code(400).send({ error: "Invalid code", attemptsLeft });
       }
 
@@ -296,7 +272,7 @@ const twoFactorController = {
       userResponse["userID"] = user.userID;
       userResponse["email"] = sanitizeInput.sanitizeEmail(user.email);
       userResponse["name"] = sanitizeInput.sanitizeUsername(user.name);
-      userResponse["avatarUrl"] = user.avatarUrl;
+      userResponse["avatarUrl"] = sanitizeInput.avatarPathCheck(user.avatarUrl, allowedAvatars);
       userResponse["has2FA"] = true;
       userResponse["verified2FA"] = true;
 
@@ -308,7 +284,6 @@ const twoFactorController = {
       };
       return response.send(responseData);
     } catch (error) {
-      request.log.error({ err: error }, "2FA verification failed");
       return response.code(500).send({ error: "Server error" });
     }
   },
@@ -322,14 +297,9 @@ const twoFactorController = {
 		return response.code(400).send({ error: "Invalid userID" });
 	  }
 
-	  if (!request.user) {
-		return response.code(401).send({ error: "Unauthorized" });
-	  }
-
-	  if (request.user.userID !== sanitizedUserID) {
-		return response.code(403).send({
-		  error: "Forbidden - you can only access the setting for yourself",
-		});
+	  const ownerError = verifyTokenOwner(request, sanitizedUserID);
+	  if (ownerError) {
+		return response.code(ownerError.code).send({ error: ownerError.error });
 	  }
 
       const user = db

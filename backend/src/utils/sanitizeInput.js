@@ -1,3 +1,5 @@
+import { allowedAvatars } from './avatarsList.js';
+
 
 export class sanitizeInput {
 
@@ -74,16 +76,36 @@ export class sanitizeInput {
 		return sanitized;
 	}
 
-	// static sanitizeText(input, maxLength = 500) {
-	// 	if (typeof input !== 'string') {
-	// 		return '';
-	// 	}
-	// 	let sanitized = this.sanitizeHtmlStrict(input);
-	// 	sanitized = this.escapeHtml(sanitized);
+	static sanitizeAvatarPath(avatarUrl, allowedAvatars) {
 
-	// 	if (sanitized.length > maxLength) {
-	// 		sanitized = sanitized.substring(0, maxLength);
-	// 	}
-	// 	return sanitized.trim();
-	// }
+		if (typeof avatarUrl !== "string") {
+			throw new Error("Avatar URL must be a string");
+		}
+
+		const trimmed = avatarUrl.trim();
+
+		if (trimmed.includes("..")) {
+			throw new Error("Avatar URL is invalid");
+		}
+
+		if (!trimmed || trimmed.length > 50 || !allowedAvatars.includes(trimmed)) {
+			throw new Error("Avatar URL is invalid");
+		}
+
+		return trimmed;
+	}
+
+	static avatarPathCheck(avatarUrl, allowedAvatars) {
+
+		const defaultAvatar = '/avatars/Avatar_1.png';
+		if (!avatarUrl || typeof avatarUrl !== "string") {
+			return defaultAvatar;
+		}
+
+		try {
+			return this.sanitizeAvatarPath(avatarUrl, allowedAvatars);
+		} catch (error) {
+			return defaultAvatar;
+		}
+	}
 }

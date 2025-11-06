@@ -1,6 +1,9 @@
 import { start } from 'repl';
 import { db } from '../server.js';
 import gameController from './game_controller.js';
+import { verifyTokenOwner } from '../utils/verifyTokenOwner.js';
+import { sanitizeInput } from '../utils/sanitizeInput.js';
+import { allowedAvatars } from '../utils/avatarsList.js';
 
 const userAnon = {
     anonymizeUserData: (userId) => {
@@ -59,7 +62,7 @@ const userController = {
             } else {
                 reply.send({
                     name: row.name,
-                    avatarUrl: row.avatarUrl,
+                    avatarUrl: sanitizeInput.avatarPathCheck(row.avatarUrl, allowedAvatars)
                 });
             }
         } catch (err) {
@@ -76,13 +79,17 @@ const userController = {
                 return;
             }
 
-            // const sanitizedUserID = parseInt(userID);
-            // if (isNaN(sanitizedUserID)) {
-            //     reply.status(400).send({ error: 'Invalid userID format' });
-            //     return;
-            // }
+            const sanitizedUserID = parseInt(userID);
+            if (isNaN(sanitizedUserID)) {
+              return response.code(400).send({ message: "Invalid userID" });
+            }
 
-            const result = await userAnon.performAnonymization(userID);
+            const ownerError = verifyTokenOwner(request, sanitizedUserID);
+            if (ownerError) {
+                return response.code(ownerError.code).send({ error: ownerError.error });
+            }
+
+            const result = await userAnon.performAnonymization(sanitizedUserID);
             reply.send(result);
 
         } catch (err) {
@@ -103,7 +110,17 @@ const userController = {
 				reply.status(400).send({ error: 'userID is required' });
 				return;
 			}
-			
+
+			const sanitizedUserID = parseInt(userID);
+			if (isNaN(sanitizedUserID)) {
+				return response.code(400).send({ message: "Invalid userID" });
+			}
+
+			const ownerError = verifyTokenOwner(request, sanitizedUserID);
+			if (ownerError) {
+				return response.code(ownerError.code).send({ error: ownerError.error });
+			}
+					
 			// getting user's basic info
 			const user = db.prepare(`
 				SELECT userID, name, email, createdAt, lastLoginAt, lang
@@ -214,6 +231,15 @@ const userController = {
 			if (!userID){
 				reply.status(400).send({ error: 'userID ir required'});
 				return;
+			}
+			const sanitizedUserID = parseInt(userID);
+			if (isNaN(sanitizedUserID)) {
+				return response.code(400).send({ message: "Invalid userID" });
+			}
+
+			const ownerError = verifyTokenOwner(request, sanitizedUserID);
+			if (ownerError) {
+				return response.code(ownerError.code).send({ error: ownerError.error });
 			}
 			if (!lang){
 				reply.status(400).send({ error: 'lang is required'});

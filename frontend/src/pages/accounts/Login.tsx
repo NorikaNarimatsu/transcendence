@@ -130,12 +130,12 @@ const [email] = useState(() => {
               name: response.data.user.name,
               avatarUrl: response.data.user.avatarUrl,
             });
-          try {
-              const dbLang = await getUserLanguage(response.data.user.userID);
-              localStorage.setItem('lang', dbLang);
-          }catch(error){
-              console.error('Failed to fetch language:', error);
-          }
+        //   try {
+        //       const dbLang = await getUserLanguage(response.data.user.userID);
+        //       localStorage.setItem('lang', dbLang);
+        //   }catch(error){
+        //       console.error('Failed to fetch language:', error);
+        //   }
 			setUserID(response.data.user.userID);
           } else {
             try {
