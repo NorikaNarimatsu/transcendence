@@ -1,7 +1,11 @@
 import { Snake, type Position, type SnakeGameConfig } from './SnakeConfig';
 
-export const SNAKE_VELOCITY = 200;
+// export const SNAKE_VELOCITY = 200;
 export const WINNING_SCORE = 10; // First to eat 10 times WIN
+
+export interface SnakeDifficultySettings {
+	snakeSpeed: number;
+}
 
 export function getRandomPosition(config: SnakeGameConfig): Position {
     return {
@@ -21,9 +25,11 @@ export class SnakeGameEngine {
     public startedAt: string | null;
     public endedAt: string | null;
     private config: SnakeGameConfig;
+	public snakeSpeed: number;
 
-    constructor(config: SnakeGameConfig, isMultiplayer: boolean = false, player1Name: string = 'Player 1', player2Name: string = 'Guest') {
+    constructor(config: SnakeGameConfig, isMultiplayer: boolean = false, player1Name: string = 'Player 1', player2Name: string = 'Guest', difficultySettings?: SnakeDifficultySettings) {
         this.config = config;
+		this.snakeSpeed = difficultySettings?.snakeSpeed || 100;
 
         // Snake 1 starts on the left side, upper position
         this.snake1 = new Snake(

@@ -7,8 +7,9 @@ import { useSelectedPlayer } from '../user/PlayerContext';
 import type { SelectedPlayer } from '../user/PlayerContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTournament } from '../tournament/tournamentContext';
+import { useGameSettings } from '../../contexts/GameSettingsContext';
 
-import { SnakeGameEngine, SNAKE_VELOCITY } from '../../gameEngines/SnakeEngine';
+import { SnakeGameEngine } from '../../gameEngines/SnakeEngine';
 import { calculateSnakeGameConfig, type SnakeGameConfig } from '../../gameEngines/SnakeConfig';
 
 //Icons import
@@ -34,9 +35,13 @@ export default function SnakeGame(): JSX.Element {
     const { selectedPlayer, guestPlayer } = useSelectedPlayer();
     const { currentMatch } = useTournament();
 
+	const { gameSettings, getSnakeSettings } = useGameSettings();
+	const currentDifficulty = gameSettings.snake.mode;
+
     // Game engine reference
     const [gameConfig, setGameConfig] = useState<SnakeGameConfig>(calculateSnakeGameConfig());
     const gameEngineRef = useRef<SnakeGameEngine | null>(null);
+	const gameLoopIntervalRef = useRef<number | null>(null); //
     const [, forceUpdate] = useState({});
 
      // Handle going back to profile
@@ -76,6 +81,7 @@ export default function SnakeGame(): JSX.Element {
         const isMultiplayer = mode === '2players' || mode === 'tournament'; // Add tournament
         const player1Name = player1?.name || 'Player 1';
         const player2Name = player2?.name || 'Guest';
+		const snakeSettings = getSnakeSettings();
 
         console.log('=== SNAKE GAME STARTED ===');
         console.log('Game Mode:', mode);
@@ -103,8 +109,8 @@ export default function SnakeGame(): JSX.Element {
         });
         console.log('========================');
 
-        gameEngineRef.current = new SnakeGameEngine(gameConfig, isMultiplayer, player1Name, player2Name);
-    }, [gameConfig, mode, player1.name, player2?.name]); // Fix: Use stable references
+        gameEngineRef.current = new SnakeGameEngine(gameConfig, isMultiplayer, player1Name, player2Name, snakeSettings);
+    }, [gameConfig, mode, player1.name, player2?.name, currentDifficulty]); // Fix: Use stable references
 
     useEffect(() => {
         const handleResize = () => {
@@ -123,14 +129,14 @@ export default function SnakeGame(): JSX.Element {
         try {
             let winnerID: number;
 
-                const winner = engine.getWinner();
-                if (winner === 'player1') {
-                    winnerID = player1?.userID;
-                } else if (winner === 'player2') {
-                    winnerID = player2?.userID || 2;
-                }
-                else
-                    winnerID = 0;
+			const winner = engine.getWinner();
+			if (winner === 'player1') {
+				winnerID = player1?.userID;
+			} else if (winner === 'player2') {
+				winnerID = player2?.userID || 2;
+			}
+			else
+				winnerID = 0;
 
             const matchData = {
                 matchType: 'snake',
@@ -187,13 +193,29 @@ export default function SnakeGame(): JSX.Element {
     useEffect(() => {
         if (!gameEngineRef.current) return;
 
-        const interval = setInterval(() => {
-            gameEngineRef.current!.update();
-            forceUpdate({});
-        }, SNAKE_VELOCITY);
+		if (gameLoopIntervalRef.current){
+			clearInterval(gameLoopIntervalRef.current);
+		}
 
-        return () => clearInterval(interval);
-    }, []);
+		const speed = gameEngineRef.current.snakeSpeed;
+		gameLoopIntervalRef.current = window.setInterval(() => {
+			gameEngineRef.current!.update();
+			forceUpdate({});
+		}, speed);
+
+		return () => {
+			if (gameLoopIntervalRef.current){
+				clearInterval(gameLoopIntervalRef.current);
+			}
+		};
+
+        // const interval = setInterval(() => {
+        //     gameEngineRef.current!.update();
+        //     forceUpdate({});
+        // });
+
+        // return () => clearInterval(interval);
+    }, [currentDifficulty]);
 
     // Keyboard input
     useEffect(() => {
@@ -392,9 +414,8 @@ useEffect(() => {
                     {view === "settings" && (
                         <div className="absolute inset-0" style={{ zIndex: 200}}>
                             <GameSettings
-                                onClose={() => setView("instructions")}
                                 onBackgroundChange={setBackgroundColor}
-                                currentBackground={backgroundColor}
+                                gameType='snake'
                             />
                         </div>
                     )}

@@ -40,9 +40,9 @@ const PONG_MODES: Record<GameMode, PongSettings> = {
 };
 
 const SNAKE_MODES: Record<GameMode, SnakeSettings> = {
-	easy: { snakeSpeed: 50 },
+	easy: { snakeSpeed: 150 },
 	medium: { snakeSpeed: 100 },
-	hard: {snakeSpeed: 150}
+	hard: {snakeSpeed: 50}
 };
 
 export function GameSettingsProvider({ children }: { children: ReactNode }) {
