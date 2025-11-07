@@ -20,6 +20,7 @@ interface MatchData {
     winnerID: number;
     winnerName: string;
     isWinner: boolean;
+    endedAt?: string | null;
 }
 
 interface UserStats {
@@ -64,8 +65,11 @@ export default function Dashboard(): JSX.Element {
     // Analyze match data for achievements and streaks
     const analyzeMatches = (matches: MatchData[]) => {
         const perfectGames = matches.filter(m => 
-            m.isWinner && 
-            ((m.user1Score === 3 && m.user2Score === 0))
+            m.isWinner && (
+                // If current user was user1 and won 3-0 OR user2 and won 3-0
+                (m.user1ID === user?.userID && m.user1Score === 3 && m.user2Score === 0) ||
+                (m.user2ID === user?.userID && m.user2Score === 3 && m.user1Score === 0)
+            )
         ).length;
 
         // Calculate current win streak
@@ -183,7 +187,36 @@ export default function Dashboard(): JSX.Element {
                 // Fetch matches
                 const matchesResponse = await apiCentral.get(`/user/${user.userID}/matches`);
                 if (matchesResponse.data) {
-                    setMatches(matchesResponse.data);
+                    // Normalize different shapes from backend and ensure we only keep matches involving this user.
+                    const raw = Array.isArray(matchesResponse.data) ? matchesResponse.data : [matchesResponse.data];
+                    const normalized = (raw as any[]).map((m) => {
+                        const user1ID = m.user1ID ?? m.user1_id ?? Number(m.user1) ?? null;
+                        const user2ID = m.user2ID ?? m.user2_id ?? (m.user2 === null ? null : Number(m.user2)) ?? null;
+                        const user1Score = Number(m.user1Score ?? m.user1_score ?? m.user1_score ?? 0);
+                        const user2Score = Number(m.user2Score ?? m.user2_score ?? m.user2_score ?? 0);
+                        const winnerID = Number(m.winnerID ?? m.winner_id ?? m.winner ?? 0);
+                        const endedAt = m.endedAt ?? m.ended_at ?? m.ended ?? null;
+    
+                        return {
+                            matchID: Number(m.matchID ?? m.match_id ?? m.id ?? 0),
+                            matchType: m.matchType ?? m.match_type ?? '',
+                            matchMode: m.matchMode ?? m.match_mode ?? '',
+                            user1ID,
+                            user1Name: m.user1Name ?? m.user1_name ?? (user1ID === user?.userID ? user.name : m.user1Name ?? ''),
+                            user2ID: user2ID === null ? null : user2ID,
+                            user2Name: m.user2Name ?? m.user2_name ?? (user2ID === user?.userID ? user.name : m.user2Name ?? (user2ID === null ? 'AI' : '')),
+                            user1Score,
+                            user2Score,
+                            winnerID,
+                            winnerName: winnerID === user?.userID ? user.name : (m.winnerName ?? m.winner_name ?? ''),
+                            isWinner: winnerID === user?.userID,
+                            endedAt
+                        } as MatchData;
+                    })
+                    // keep only matches where the current user participated (either side)
+                    .filter(m => m.user1ID === user.userID || m.user2ID === user.userID);
+
+                    setMatches(normalized);
                 }
 
                 // Fetch stats
@@ -424,7 +457,11 @@ export default function Dashboard(): JSX.Element {
                                                         </div>
                                                         <div>
                                                             <div className="font-dotgothic text-white font-bold">
-                                                                {match.matchMode === 'single' ? 'Single Player' : '2 Players'}
+                                                                {match.matchMode === 'single'
+                                                                    ? 'Single Player'
+                                                                    : match.matchMode === 'tournament'
+                                                                        ? 'Tournament'
+                                                                        : '2 Players'}
                                                             </div>
                                                             <div className="font-dotgothic text-purple-300 text-sm">
                                                                 vs {match.user2Name}
@@ -432,17 +469,18 @@ export default function Dashboard(): JSX.Element {
                                                         </div>
                                                     </div>
                                                     
+                                                    {/*here add endat*/}
                                                     <div className="text-right">
                                                         <div className="font-pixelify text-white text-xl mb-1">
                                                             {match.user1Score} - {match.user2Score}
+                                                        </div>
+                                                       <div className="font-dotgothic text-xs text-purple-300 mb-1">
+                                                            Played at: {match.endedAt ? new Date(match.endedAt).toLocaleString() : '—'}
                                                         </div>
                                                         <div className={`font-dotgothic text-sm font-bold ${
                                                             match.isWinner ? 'text-green-400' : 'text-red-400'
                                                         }`}>
                                                             {match.isWinner ? 'WIN' : 'LOSS'}
-                                                            {match.isWinner && match.user1Score === 3 && match.user2Score === 0 && (
-                                                                <span className="ml-2 text-yellow-400">DIAMOND PERFECT</span>
-                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
