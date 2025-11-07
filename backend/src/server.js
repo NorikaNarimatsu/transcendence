@@ -41,19 +41,21 @@ await app.register(rateLimit, {
 
 
 // // Register security headers
-await app.register(helmet, { contentSecurityPolicy: {
-	directives: {
-		defaultSrc: ["'self'"],
-		styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-		scriptSrc: ["'self'"],
-		imgSrc: ["'self'", "data:", "https://localhost:8443/uploadAvatars"], //may need to be changed for uploaded images
-		connectSrc: ["'self'", "https://localhost"],
-		fontSrc: ["https://fonts.gstatic.com"],
-		objectSrc: ["'none'"],
-		mediaSrc: ["'none'"],
-		frameSrc: ["'none'"],
+await app.register(helmet, {
+	frameguard: { action: 'deny' },
+	contentSecurityPolicy: {
+		directives: {
+			defaultSrc: ["'self'"],
+			styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+			scriptSrc: ["'self'"],
+			imgSrc: ["'self'", "data:", "https://localhost:8443/uploadAvatars"], //may need to be changed for uploaded images
+			connectSrc: ["'self'", "https://localhost"],
+			fontSrc: ["https://fonts.gstatic.com"],
+			objectSrc: ["'none'"],
+			mediaSrc: ["'none'"],
+			frameSrc: ["'none'"],
+		},
 	},
-},
 crossOriginEmbedderPolicy: false,
 });
 
