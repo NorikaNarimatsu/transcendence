@@ -434,7 +434,7 @@ export default function Dashboard(): JSX.Element {
                                                                         : '2 Players'}
                                                             </div>
                                                             <div className="font-dotgothic text-purple-300 text-sm">
-                                                                vs {match.user2Name}
+                                                                vs {match.user1ID === user?.userID ? (match.user2Name ?? 'AI') : (match.user1Name ?? 'AI')}
                                                             </div>
                                                         </div>
                                                     </div>
