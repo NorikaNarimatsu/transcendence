@@ -5,6 +5,7 @@ import cors from '@fastify/cors';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './database/initDatabase.js';
 import rateLimit from '@fastify/rate-limit';
+import multipart from '@fastify/multipart';
 
 dotenv.config();
 
