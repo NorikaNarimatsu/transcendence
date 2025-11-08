@@ -16,15 +16,15 @@ export default async function itemRoutes(fastify, options) {
 			}
 		}
 	}, itemController.validatePasswordbyEmail);
-    fastify.post('/validatePasswordbyUserID', itemController.validatePasswordByUserID);
+    fastify.post('/validatePasswordbyUserID', { preHandler: [authenticateToken] }, itemController.validatePasswordByUserID);
 
     // User management
     fastify.post('/addNewUser', itemController.addNewUser);
     fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
-    fastify.get('/getUserInfoByEmail/:email', itemController.getUserInfoByEmail);
-    fastify.get('/getUserById/:userID', itemController.getUserById);
-    fastify.get('/users/except/:userID', itemController.getUsersExceptUserID);
-    fastify.get('/getUserEmailById/:userID', itemController.getUserEmailById);
+    fastify.get('/getUserInfoByEmail/:email', { preHandler: [authenticateToken] }, itemController.getUserInfoByEmail);
+    fastify.get('/getUserById/:userID', { preHandler: [authenticateToken] }, itemController.getUserById);
+    fastify.get('/users/except/:userID', { preHandler: [authenticateToken] }, itemController.getUsersExceptUserID);
+    fastify.get('/getUserEmailById/:userID', { preHandler: [authenticateToken] }, itemController.getUserEmailById);
     fastify.put('/user/updateAvatar', { preHandler: [authenticateToken] }, itemController.updateAvatarUrl); // new avatar route
 	// fastify.put('/user/uploadAvatar', { preHandler: [authenticateToken],
 	// 	config: {
