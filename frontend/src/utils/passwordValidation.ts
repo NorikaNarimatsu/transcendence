@@ -3,15 +3,15 @@ import { z, ZodError} from 'zod';
 // TODO -> bring back all password rules when done with the project!
 const passwordSchema = z
   .string()
-//   .min(9, "Password must be at least 9 characters long")
-//   .max(25, "Password must be at most 25 characters long")
-//   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-//   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-//   .regex(/[0-9]/, "Password must contain at least one digit")
-//   .regex(/[@$!%*?&]/,"Password must contain at least one special character @$!%*?&")
-//   .refine((val) => !/[<>"']/.test(val), "Password cannot contain < > \" or ' characters")
-//   .refine((val) => !/on\w+\s*=/i.test(val), "Password cannot contain event handlers like onclick=")
-//   .refine((val) => !/javascript:/i.test(val), "Password cannot contain 'javascript:'");
+  .min(9, "Password must be at least 9 characters long")
+  .max(25, "Password must be at most 25 characters long")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/[0-9]/, "Password must contain at least one digit")
+  .regex(/[@$!%*?&]/,"Password must contain at least one special character @$!%*?&")
+  .refine((val) => !/[<>"']/.test(val), "Password cannot contain < > \" or ' characters")
+  .refine((val) => !/on\w+\s*=/i.test(val), "Password cannot contain event handlers like onclick=")
+  .refine((val) => !/javascript:/i.test(val), "Password cannot contain 'javascript:'");
 
 const passwordSchemaMini = z
   .string()

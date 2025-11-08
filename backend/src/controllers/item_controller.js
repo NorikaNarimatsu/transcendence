@@ -481,15 +481,13 @@ export function updateAvatarUrl(request, response) {
 			return response.code(ownerError.code).send({ error: ownerError.error });
 		}
 
-        // Validate avatar URL is from allowed list or uploaded avatars
         if (!avatarUrl.startsWith('/avatars/') && !avatarUrl.startsWith('/uploadAvatars/')) {
-            console.log("here??");
             return response.code(400).send({ error: 'Invalid avatar URL' });
         }
-		let sanitizedAvatarUrl;
 
+		let sanitizedAvatarUrl;
 		try {
-			sanitizedAvatarUrl = sanitizeInput.sanitizeAvatarPath(avatarUrl, avatars);
+			sanitizedAvatarUrl = sanitizeInput.avatarPathCheck(avatarUrl, avatars);
 		} catch (error) {
 			return response.code(400).send({ error: error.message || "Invalid avatarUrl" });
 		}
