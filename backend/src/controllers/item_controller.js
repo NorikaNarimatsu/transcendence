@@ -5,6 +5,12 @@ import { allowedAvatars } from "../utils/avatarsList.js";
 import { emailUtils } from "../utils/emailUtils.js";
 import bcrypt from 'bcrypt';
 import { verifyTokenOwner } from "../utils/verifyTokenOwner.js";
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 //////// Avatar Array //////
 const avatars = allowedAvatars;
@@ -475,7 +481,13 @@ export function updateAvatarUrl(request, response) {
 			return response.code(ownerError.code).send({ error: ownerError.error });
 		}
 
+        // Validate avatar URL is from allowed list or uploaded avatars
+        if (!avatarUrl.startsWith('/avatars/') && !avatarUrl.startsWith('/uploadAvatars/')) {
+            console.log("here??");
+            return response.code(400).send({ error: 'Invalid avatar URL' });
+        }
 		let sanitizedAvatarUrl;
+
 		try {
 			sanitizedAvatarUrl = sanitizeInput.sanitizeAvatarPath(avatarUrl, avatars);
 		} catch (error) {
@@ -496,6 +508,246 @@ export function updateAvatarUrl(request, response) {
             error: error.message || "Invalid input data" });
     }
 }
+
+export const uploadAvatar = async (request, response) => {
+    try {
+        let userIDValue;
+        let fileBuffer;
+        let fileMimetype;
+
+        // Process all parts of the multipart request
+        const parts = request.parts();
+        
+        for await (const part of parts) {
+            if (part.type === 'field') {
+                if (part.fieldname === 'userID') {
+                    userIDValue = part.value;
+                }
+            } else if (part.type === 'file') {
+                if (part.fieldname === 'avatar') {
+                    fileBuffer = await part.toBuffer();
+                    fileMimetype = part.mimetype;
+                }
+            }
+        }
+
+        // Validate we have both userID and file
+        if (!userIDValue) {
+            return response.code(400).send({ error: 'userID is required' });
+        }
+
+        if (!fileBuffer) {
+            return response.code(400).send({ error: 'No file uploaded' });
+        }
+
+        const sanitizedUserID = parseInt(userIDValue);
+
+        if(isNaN(sanitizedUserID)){
+            return response.code(400).send({ error: 'Invalid userID' });
+        }
+
+        const ownerError = verifyTokenOwner(request, sanitizedUserID);
+        if (ownerError){
+            return response.code(ownerError.code).send({ error: ownerError.error });
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if(!allowedTypes.includes(fileMimetype)){
+            return response.code(400).send({ error: 'Only JPEG and PNG images are allowed' });
+        }
+
+        const fileSizeInMB = fileBuffer.length / (1024 * 1024);
+        if (fileSizeInMB > 2){
+            return response.code(400).send({ error: 'File size must be less than 2MB' });
+        }
+
+        const uploadDir = path.join(process.cwd(), 'uploadAvatars');
+        if(!fs.existsSync(uploadDir)){
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        // const fileExtension = fileMimetype.split('/')[1];
+        
+        // // Simple naming: current and old
+        // const currentFileName = `avatar_${sanitizedUserID}_current.${fileExtension}`;
+        // const oldFileName = `avatar_${sanitizedUserID}_old.${fileExtension}`;
+        
+        // const currentFilePath = path.join(uploadDir, currentFileName);
+        // const oldFilePath = path.join(uploadDir, oldFileName);
+
+        // // Step 1: Delete the old file if it exists
+        // if (fs.existsSync(oldFilePath)) {
+        //     try {
+        //         fs.unlinkSync(oldFilePath);
+        //         console.log(`✅ Deleted old avatar: ${oldFilePath}`);
+        //     } catch (err) {
+        //         request.log.warn('Failed to delete old avatar:', err);
+        //     }
+        // }
+
+        // // Step 2: Rename current to old (if current exists)
+        // if (fs.existsSync(currentFilePath)) {
+        //     try {
+        //         fs.renameSync(currentFilePath, oldFilePath);
+        //         console.log(`✅ Renamed current to old: ${currentFilePath} -> ${oldFilePath}`);
+        //     } catch (err) {
+        //         request.log.warn('Failed to rename current to old:', err);
+        //     }
+        // }
+
+        const fileExtension = fileMimetype.split('/')[1];
+        const fileName = `avatar_${sanitizedUserID}.${fileExtension}`;
+        const filePath = path.join(uploadDir, fileName);
+
+        // Delete old avatar if it exists (any extension)
+        const files = fs.readdirSync(uploadDir);
+        const oldAvatars = files.filter(file => file.startsWith(`avatar_${sanitizedUserID}.`));
+        
+        for (const oldAvatar of oldAvatars) {
+            const oldPath = path.join(uploadDir, oldAvatar);
+            try {
+                fs.unlinkSync(oldPath);
+                console.log(`✅ Deleted old avatar: ${oldPath}`);
+            } catch (err) {
+                request.log.warn('Failed to delete old avatar:', err);
+            }
+        }
+
+        // Step 3: Save the new file as current
+        await fs.promises.writeFile(filePath, fileBuffer);
+        console.log(`✅ Saved new avatar as current: ${filePath}`);
+        const timestamp = Date.now();
+        const avatarUrl = `/uploadAvatars/${fileName}?t=${timestamp}`;
+        const result = db.prepare('UPDATE users SET avatarUrl = ? WHERE userID = ?').run(avatarUrl, sanitizedUserID);
+        if(result.changes === 0){
+            fs.unlinkSync(filePath);
+            return response.code(404).send({ error: 'User not found' });
+        }
+        
+        return response.code(200).send({
+            message: 'Avatar uploaded successfully',
+            avatarUrl: avatarUrl
+        });
+    } catch (error) {
+        request.log.error('Upload avatar error:', error);
+        return response.code(500).send({ error: 'Failed to upload avatar' });
+    }
+}
+
+// ...existing code...
+
+// export const uploadAvatar = async (request, response) => {
+//     try {
+//         let userIDValue;
+//         let fileBuffer;
+//         let fileMimetype;
+
+//         // Process all parts of the multipart request
+//         const parts = request.parts();
+        
+//         for await (const part of parts) {
+//             console.log('Processing part:', part.fieldname, 'type:', part.type);
+            
+//             if (part.type === 'field') {
+//                 // This is a form field (like userID)
+//                 if (part.fieldname === 'userID') {
+//                     userIDValue = part.value;
+//                     console.log('✅ Found userID field:', userIDValue);
+//                 }
+//             } else if (part.type === 'file') {
+//                 // This is the file
+//                 if (part.fieldname === 'avatar') {
+//                     fileBuffer = await part.toBuffer();
+//                     fileMimetype = part.mimetype;
+//                     console.log('✅ Found file:', part.filename, 'type:', fileMimetype);
+//                 }
+//             }
+//         }
+
+//         console.log('=== After processing all parts ===');
+//         console.log('userIDValue:', userIDValue);
+//         console.log('fileBuffer size:', fileBuffer?.length);
+//         console.log('fileMimetype:', fileMimetype);
+
+//         // Validate we have both userID and file
+//         if (!userIDValue) {
+//             return response.code(400).send({ error: 'userID is required' });
+//         }
+
+//         if (!fileBuffer) {
+//             return response.code(400).send({ error: 'No file uploaded' });
+//         }
+
+//         const sanitizedUserID = parseInt(userIDValue);
+//         console.log('Parsed userID:', sanitizedUserID);
+
+
+
+//         // const userIDField = data.fields.userID;
+//         // const sanitizedUserID = parseInt(userIDField?.value || userIDField);
+
+//         if(isNaN(sanitizedUserID)){
+//             return response.code(400).send({ error: 'Invalid userID' });
+//         }
+
+//         const ownerError = verifyTokenOwner(request, sanitizedUserID);
+//         if (ownerError){
+//             return response.code(ownerError.code).send({ error: ownerError.error });
+//         }
+
+//         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+//         if(!allowedTypes.includes(fileMimetype)){
+//             return response.code(400).send({ error: 'Only JPEG and PNG images are allowed' });
+//         }
+
+//         // const buffer = await data.toBuffer();
+//         const fileSizeInMB = fileBuffer.length / (1024 * 1024);
+//         if (fileSizeInMB > 2){
+//             return response.code(400).send({ error: 'File size must be less than 2MB' });
+//         }
+
+//         const uploadDir = path.join(process.cwd(), 'uploadAvatars');
+//         if(!fs.existsSync(uploadDir)){
+//             fs.mkdirSync(uploadDir, { recursive: true });
+//         }
+
+//         const fileExtension = fileMimetype.split('/')[1];
+//         const fileName = `${sanitizedUserID}_avatar.${fileExtension}`;
+//         const filePath = path.join(uploadDir, fileName);
+
+//         const oldUser = db.prepare('SELECT avatarUrl FROM users WHERE userID = ?').get(sanitizedUserID);
+//         console.log("USER ID LALALAL:", oldUser?.userID, oldUser?.avatarUrl, oldUser.avatarUrl.startsWith('/uploadAvatars/'));
+//         if(oldUser?.avatarUrl && oldUser.avatarUrl.startsWith('/uploadAvatars/')) {
+//             console.log("HELLO!");
+//             const oldFilePath = path.join(process.cwd(), oldUser.avatarUrl);
+//             console.log("OLD FILE PATH:", oldFilePath);
+//             if(fs.existsSync(oldFilePath)){
+//                 try{
+//                     fs.unlinkSync(oldFilePath);
+//                     console.log(`✅ Deleted old avatar: ${oldFilePath}`);
+//                 }catch(err){
+//                     request.log.warn('Failed to delete old avatar:', err);
+//                 }
+//             }
+//         }
+
+//         await fs.promises.writeFile(filePath, fileBuffer);
+
+//         const avatarUrl = `/uploadAvatars/${fileName}`;
+//         const result = db.prepare('UPDATE users SET avatarUrl = ? WHERE userID = ?').run(avatarUrl, sanitizedUserID);
+//         if(result.changes === 0){
+//             fs.unlinkSync(filePath);
+//             return response.code(404).send({ error: 'User not found' });
+//         }
+//         return response.code(200).send({
+//             message: 'Avatar uploaded successfully',
+//             avatarUrl: avatarUrl
+//         });
+//     } catch (error) {
+//         request.log.error('Upload avatar error:', error);
+//         return response.code(500).send({ error: 'Failed to upload avatar' });
+//     }
+// }
 
 export const updateUserName = async (request, response) => {
     try {
@@ -657,6 +909,7 @@ const itemController = {
     getUsersExceptUserID,
     getUserEmailById,
     updateAvatarUrl,
+    uploadAvatar,
     updateUserEmail,
     updateUserName,
     

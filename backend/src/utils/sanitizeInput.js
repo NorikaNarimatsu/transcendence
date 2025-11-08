@@ -102,6 +102,10 @@ export class sanitizeInput {
 			return defaultAvatar;
 		}
 
+		if(avatarUrl.startsWith('/uploadAvatars/')){
+			return avatarUrl;
+		}
+
 		try {
 			return this.sanitizeAvatarPath(avatarUrl, allowedAvatars);
 		} catch (error) {

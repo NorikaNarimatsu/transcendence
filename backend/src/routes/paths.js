@@ -26,14 +26,14 @@ export default async function itemRoutes(fastify, options) {
     fastify.get('/users/except/:userID', itemController.getUsersExceptUserID);
     fastify.get('/getUserEmailById/:userID', itemController.getUserEmailById);
     fastify.put('/user/updateAvatar', { preHandler: [authenticateToken] }, itemController.updateAvatarUrl); // new avatar route
-	// fastify.put('/user/uploadAvatar', { preHandler: [authenticateToken],
-	// 	config: {
-	// 		rateLimit: {
-	// 			max: 10,
-	// 			timeWindow: '1 hour'
-	// 		}
-	// 	}
-	//  }, itemController.uploadAvatar); //for the avatar upload
+	fastify.put('/user/uploadAvatar', { preHandler: [authenticateToken],
+		config: {
+			rateLimit: {
+				max: 10,
+				timeWindow: '1 hour'
+			}
+		}
+	 }, itemController.uploadAvatar); //for the avatar upload
     fastify.put('/user/updateName', { preHandler: [authenticateToken] }, itemController.updateUserName);
     fastify.put('/user/updateEmail', { preHandler: [authenticateToken] }, itemController.updateUserEmail);
 
