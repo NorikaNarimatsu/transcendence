@@ -16,6 +16,21 @@ const __dirname = path.dirname(__filename);
 const avatars = allowedAvatars;
 
 
+const isAllowedImgType = (buffer) => {
+	if (!buffer || buffer.length < 8) {
+		return false;
+	}
+
+	const pngSignature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+	const isPng = pngSignature.every((byte, index) => buffer[index] === byte);
+	if (isPng) {
+		return true;
+	}
+
+	const isJpeg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[buffer.length - 2] === 0xFF && buffer[buffer.length - 1] === 0xD9;
+	return isJpeg;
+}
+
 export const validateName = async (request, response) => {
 	try {
 		const { name } = request.body;
@@ -481,13 +496,33 @@ export function updateAvatarUrl(request, response) {
 			return response.code(ownerError.code).send({ error: ownerError.error });
 		}
 
-        if (!avatarUrl.startsWith('/avatars/') && !avatarUrl.startsWith('/uploadAvatars/')) {
-            return response.code(400).send({ error: 'Invalid avatar URL' });
-        }
+        // if (!avatarUrl.startsWith('/avatars/') && !avatarUrl.startsWith('/uploadAvatars/')) {
+        //     return response.code(400).send({ error: 'Invalid avatar URL' });
+        // }
 
-		let sanitizedAvatarUrl;
+		// let sanitizedAvatarUrl;
+		// try {
+		// 	sanitizedAvatarUrl = sanitizeInput.avatarPathCheck(avatarUrl, avatars);
+		// } catch (error) {
+		// 	return response.code(400).send({ error: error.message || "Invalid avatarUrl" });
+		// }
+
+		let sanitizedAvatarUrl = avatarUrl.trim();
+
 		try {
-			sanitizedAvatarUrl = sanitizeInput.avatarPathCheck(avatarUrl, avatars);
+			if (sanitizedAvatarUrl.startsWith('/uploadAvatars/')) {
+				const baseUrl = sanitizeInput.sanitizeUploadAvatarPath(sanitizedAvatarUrl);
+
+				const expectedPrefix = `/uploadAvatars/avatar_${sanitizedUserID}.`;
+				if (!baseUrl.startsWith(expectedPrefix)) {
+					return response.code(403).send({ error: "You can only use your own uploaded avatar" });
+				}
+
+				const timestamp = Date.now();
+				sanitizedAvatarUrl = `${baseUrl.split("?")[0]}?t=${timestamp}`;				
+			} else {
+				sanitizedAvatarUrl = sanitizeInput.avatarPathCheck(sanitizedAvatarUrl, avatars);
+			}
 		} catch (error) {
 			return response.code(400).send({ error: error.message || "Invalid avatarUrl" });
 		}
@@ -553,6 +588,10 @@ export const uploadAvatar = async (request, response) => {
         if(!allowedTypes.includes(fileMimetype)){
             return response.code(400).send({ error: 'Only JPEG and PNG images are allowed' });
         }
+
+		if (!isAllowedImgType(fileBuffer)) {
+			return response.code(400).send({ error: 'File content is not valid JPEG or PNG image' });
+		}
 
         const fileSizeInMB = fileBuffer.length / (1024 * 1024);
         if (fileSizeInMB > 2){

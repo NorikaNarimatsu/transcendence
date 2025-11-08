@@ -88,11 +88,43 @@ export class sanitizeInput {
 			throw new Error("Avatar URL is invalid");
 		}
 
-		if (!trimmed || trimmed.length > 50 || !allowedAvatars.includes(trimmed)) {
+		if (!trimmed || trimmed.length > 20 || !allowedAvatars.includes(trimmed)) {
 			throw new Error("Avatar URL is invalid");
 		}
 
 		return trimmed;
+	}
+
+	static sanitizeUploadAvatarPath(avatarUrl) {
+
+		// const trimmed = avatarUrl.trim();
+
+		const trimmed = avatarUrl;
+		if (!trimmed || trimmed.length > 50) {
+			throw new Error("Avatar URL is invalid");
+		}
+
+		if (trimmed.includes("..") || trimmed.includes("//")) {
+			throw new Error("Avatar URL is invalid");
+		}
+
+		const [avatarPrefix, avatarTimestamp = ""] = trimmed.split("?", 2);
+		const fileName = avatarPrefix.replace("uploadAvatars/", "");
+
+		const fileNamePattern = /^avatar_\d+\.(png|jpg|jpeg)$/i;
+		if (fileNamePattern.test(fileName)) {
+			throw new Error("Avatar URL is invalid");
+		}
+
+		if (avatarTimestamp.length > 0) {
+			const timestampPattern = /^t=\d+$/;
+			if (!timestampPattern.test(avatarTimestamp)) {
+				throw new Error("Avatar URL is invalid");
+			}
+			return `${avatarPrefix}?${avatarTimestamp}`;
+		}
+
+		return avatarPrefix;
 	}
 
 	static avatarPathCheck(avatarUrl, allowedAvatars) {
@@ -102,8 +134,8 @@ export class sanitizeInput {
 			return defaultAvatar;
 		}
 
-		if(avatarUrl.startsWith('/uploadAvatars/')){
-			return avatarUrl;
+		if (avatarUrl.startsWith('/uploadAvatars/')){
+			return this.sanitizeUploadAvatarPath(avatarUrl);
 		}
 
 		try {
