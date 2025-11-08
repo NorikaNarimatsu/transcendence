@@ -12,6 +12,7 @@ ssl/
 *.log
 .vscode
 *.pem
+upload_avatars
 
 *.db
 

@@ -1,8 +1,8 @@
 export const verifyTokenOwner = (request, resourceUserID) => {
 
-	const authenitcatedUserID = request.user?.userID;
+	const authenticatedUserID = request.user?.userID;
 
-	if (!authenitcatedUserID) {
+	if (!authenticatedUserID) {
 		return {
 			error: "Unauthorised - invalid or missing token",
 			code: 401
@@ -16,7 +16,7 @@ export const verifyTokenOwner = (request, resourceUserID) => {
 		}
 	}
 
-	const authID = parseInt(authenitcatedUserID);
+	const authID = parseInt(authenticatedUserID);
 
 	if (isNaN(authID) ) {
 		return {

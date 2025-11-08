@@ -278,6 +278,8 @@ export const getUserMatches = async (request, response) => {
                 u2.name as user2Name,
                 winner.userID as winnerID,
                 winner.name as winnerName,
+                m.startedAt,
+                m.endedAt,
                 m.tournamentBracketID,
                 m.tournamentMatchID
             FROM match m
@@ -302,7 +304,9 @@ export const getUserMatches = async (request, response) => {
             winnerName: sanitizeInput.sanitizeUsername(match.winnerName),
             isWinner: match.winnerID === sanitizedUserID,
             tournamentBracketID: match.tournamentBracketID,
-            tournamentMatchID: match.tournamentMatchID
+            tournamentMatchID: match.tournamentMatchID,
+            startedAt: match.startedAt ?? null,
+            endedAt: match.endedAt ?? null
         }));
 
         return response.code(200).send(sanitizedMatches);

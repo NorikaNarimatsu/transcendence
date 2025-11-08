@@ -20,6 +20,7 @@ interface MatchData {
     winnerID: number;
     winnerName: string;
     isWinner: boolean;
+    endedAt?: string | null;
 }
 
 interface UserStats {
@@ -64,8 +65,11 @@ export default function Dashboard(): JSX.Element {
     // Analyze match data for achievements and streaks
     const analyzeMatches = (matches: MatchData[]) => {
         const perfectGames = matches.filter(m => 
-            m.isWinner && 
-            ((m.user1Score === 3 && m.user2Score === 0))
+            m.isWinner && (
+                // If current user was user1 and won 3-0 OR user2 and won 3-0
+                (m.user1ID === user?.userID && m.user1Score === 3 && m.user2Score === 0) ||
+                (m.user2ID === user?.userID && m.user2Score === 3 && m.user1Score === 0)
+            )
         ).length;
 
         // Calculate current win streak
@@ -185,7 +189,6 @@ export default function Dashboard(): JSX.Element {
                 if (matchesResponse.data) {
                     setMatches(matchesResponse.data);
                 }
-
                 // Fetch stats
                 const statsResponse = await apiCentral.get(`/user/${user.userID}/stats`);
                 if (statsResponse.data) {
@@ -424,7 +427,11 @@ export default function Dashboard(): JSX.Element {
                                                         </div>
                                                         <div>
                                                             <div className="font-dotgothic text-white font-bold">
-                                                                {match.matchMode === 'single' ? 'Single Player' : '2 Players'}
+                                                                {match.matchMode === 'single'
+                                                                    ? 'Single Player'
+                                                                    : match.matchMode === 'tournament'
+                                                                        ? 'Tournament'
+                                                                        : '2 Players'}
                                                             </div>
                                                             <div className="font-dotgothic text-purple-300 text-sm">
                                                                 vs {match.user2Name}
@@ -432,17 +439,18 @@ export default function Dashboard(): JSX.Element {
                                                         </div>
                                                     </div>
                                                     
+                                                    {/*here add endat*/}
                                                     <div className="text-right">
                                                         <div className="font-pixelify text-white text-xl mb-1">
                                                             {match.user1Score} - {match.user2Score}
+                                                        </div>
+                                                       <div className="font-dotgothic text-xs text-purple-300 mb-1">
+                                                            Played at: {match.endedAt ? new Date(match.endedAt).toLocaleString() : '—'}
                                                         </div>
                                                         <div className={`font-dotgothic text-sm font-bold ${
                                                             match.isWinner ? 'text-green-400' : 'text-red-400'
                                                         }`}>
                                                             {match.isWinner ? 'WIN' : 'LOSS'}
-                                                            {match.isWinner && match.user1Score === 3 && match.user2Score === 0 && (
-                                                                <span className="ml-2 text-yellow-400">DIAMOND PERFECT</span>
-                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>

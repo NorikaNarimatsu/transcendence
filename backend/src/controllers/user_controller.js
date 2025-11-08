@@ -81,12 +81,12 @@ const userController = {
 
             const sanitizedUserID = parseInt(userID);
             if (isNaN(sanitizedUserID)) {
-              return response.code(400).send({ message: "Invalid userID" });
+              return reply.code(400).send({ message: "Invalid userID" });
             }
 
             const ownerError = verifyTokenOwner(request, sanitizedUserID);
             if (ownerError) {
-                return response.code(ownerError.code).send({ error: ownerError.error });
+                return reply.code(ownerError.code).send({ error: ownerError.error });
             }
 
             const result = await userAnon.performAnonymization(sanitizedUserID);
@@ -113,12 +113,12 @@ const userController = {
 
 			const sanitizedUserID = parseInt(userID);
 			if (isNaN(sanitizedUserID)) {
-				return response.code(400).send({ message: "Invalid userID" });
+				return reply.code(400).send({ message: "Invalid userID" });
 			}
 
 			const ownerError = verifyTokenOwner(request, sanitizedUserID);
 			if (ownerError) {
-				return response.code(ownerError.code).send({ error: ownerError.error });
+				return reply.code(ownerError.code).send({ error: ownerError.error });
 			}
 					
 			// getting user's basic info
@@ -234,12 +234,12 @@ const userController = {
 			}
 			const sanitizedUserID = parseInt(userID);
 			if (isNaN(sanitizedUserID)) {
-				return response.code(400).send({ message: "Invalid userID" });
+				return reply.code(400).send({ message: "Invalid userID" });
 			}
 
 			const ownerError = verifyTokenOwner(request, sanitizedUserID);
 			if (ownerError) {
-				return response.code(ownerError.code).send({ error: ownerError.error });
+				return reply.code(ownerError.code).send({ error: ownerError.error });
 			}
 			if (!lang){
 				reply.status(400).send({ error: 'lang is required'});
