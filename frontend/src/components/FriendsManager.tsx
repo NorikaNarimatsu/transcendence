@@ -223,6 +223,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                                                     {friend.lastLoginedAt && (
                                                         <span className="font-dotgothic text-xs text-blue-medium opacity-75">
                                                             Last seen: {new Date(friend.lastLoginedAt).toLocaleDateString('en-US', {
+                                                                timeZone: 'Etc/GMT-2',
                                                                 month: 'short',
                                                                 day: 'numeric',
                                                                 hour: '2-digit',

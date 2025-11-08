@@ -68,11 +68,10 @@ const twoFactorController = {
 		return response.code(ownerError.code).send({ error: ownerError.error });
 	  }
 
-	//   TODO for Gosia -> uncomment the check once the password requirements are back
-    //   const passwordCheck = checkPassword(password);
-    //   if (!passwordCheck.valid) {
-    //     return response.code(400).send({ error: passwordCheck.error });
-    //   }
+    const passwordCheck = checkPassword(password);
+    if (!passwordCheck.valid) {
+      return response.code(400).send({ error: passwordCheck.error });
+    }
 
       const user = db
         .prepare(

@@ -97,6 +97,7 @@ export default function SettingsPongGame({ onBackgroundChange, gameType }: GameS
                     <LeftButton className='!font-dotgothic !mb-4 !text-left' onClick={() => setSelectedOption(selectedOption === 'gameMode' ? null : 'gameMode')}>{translation.pages.gameSettings.gameMode}</LeftButton>
                     <LeftButton className='!font-dotgothic !mb-4 !text-left' onClick={() => setSelectedOption(selectedOption === 'background' ? null : 'background')}>{translation.pages.gameSettings.backgroundColor}</LeftButton>
                     <LeftButton className='!font-dotgothic !mb-4 !text-left' onClick={() => setSelectedOption(selectedOption === 'language' ? null : 'language')}>{translation.pages.gameSettings.language}</LeftButton>
+                    <p className='font-dotgothic text-white text-sm'>*If you change the Game Mode the Game and the Game Scores will be restarted.</p>
                 </div>
                 <div className='flex-1 relative'>
                     <img className='w-full h-full max-h-full object-cover object-bottom rounded border-solid border-blue-deep border-4' src={bgimage} alt='Background images'/>

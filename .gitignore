@@ -12,7 +12,7 @@ ssl/
 *.log
 .vscode
 *.pem
-upload_avatars
+uploadAvatars/
 
 *.db
 
