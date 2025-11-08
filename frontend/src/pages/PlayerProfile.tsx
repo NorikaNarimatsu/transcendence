@@ -28,7 +28,6 @@ import { DeleteAccount } from './user/DeleteUser';
 import Button from '../components/ButtonDarkPink';
 
 import apiCentral from '../utils/apiCentral';
-// import { set } from 'zod';
 
 export default function PlayerProfile(): JSX.Element {
     // UI State
