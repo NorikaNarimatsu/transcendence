@@ -206,8 +206,8 @@ export async function prefillDatabase(db) {
     
     // Tournament matches need tournamentMatchID added to insertMatch
     const insertTournamentMatch = db.prepare(`
-        INSERT INTO match (matchType, matchMode, user1ID, user2ID, user1Score, user2Score, winnerID, startedAt, endedAt, tournamentMatchID)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO match (matchType, matchMode, tournamentBracketID, tournamentMatchID, user1ID, user2ID, user1Score, user2Score, winnerID, startedAt, endedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     // Tournament 1: Completed tournament (bracket ID 1)
@@ -280,14 +280,15 @@ export async function prefillDatabase(db) {
             insertTournamentMatch.run(
                 match.matchType,
                 match.matchMode,
+                match.tournamentBracketID,
+                match.tournamentMatchID,
                 match.user1ID,
                 match.user2ID,
                 match.user1Score,
                 match.user2Score,
                 match.winnerID,
                 timing.startedAt,
-                timing.endedAt,
-                match.tournamentMatchID
+                timing.endedAt
             );
             
             console.log(`Created tournament match (Bracket ${match.tournamentBracketID}, Match ${match.tournamentMatchID}): ${match.user1Score}-${match.user2Score}`);

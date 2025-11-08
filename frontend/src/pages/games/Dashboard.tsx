@@ -433,8 +433,9 @@ export default function Dashboard(): JSX.Element {
                                                                         ? 'Tournament'
                                                                         : '2 Players'}
                                                             </div>
-                                                            <div className="font-dotgothic text-purple-300 text-sm">
-                                                                vs {match.user1ID === user?.userID ? (match.user2Name ?? 'AI') : (match.user1Name ?? 'AI')}
+                                                            <div className="font-dotgothic text-purple-300 text-sm"> { !(match.matchMode === 'single' && match.matchType === 'snake')
+                                                                ? `vs ${match.user1ID === user?.userID ? (match.user2Name ?? 'AI') : (match.user1Name ?? 'AI')}`
+                                                                : ''}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -445,7 +446,13 @@ export default function Dashboard(): JSX.Element {
                                                             {match.user1Score} - {match.user2Score}
                                                         </div>
                                                        <div className="font-dotgothic text-xs text-purple-300 mb-1">
-                                                            Played at: {match.endedAt ? new Date(match.endedAt).toLocaleString() : '—'}
+                                                            Played at: {match.endedAt ? new Date(match.endedAt).toLocaleString('en-US', {
+                                                                timeZone: 'Etc/GMT-2',
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            }) : '—'}
                                                         </div>
                                                         <div className={`font-dotgothic text-sm font-bold ${
                                                             match.isWinner ? 'text-green-400' : 'text-red-400'
