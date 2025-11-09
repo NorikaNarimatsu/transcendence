@@ -313,7 +313,7 @@ export default function Bracket() {
                                     
                                     return (
                                         <div
-                                            key={idx}
+                                            key={player ? player.id : `empty-${roundIdx}-${idx}`}
                                             className={`border border-blue-deep rounded-lg px-4 py-2 font-pixelify text-blue-deep text-lg w-[200px] flex flex-row items-center gap-2 justify-center absolute ${
                                                 player ? 'bg-pink-light' : 'bg-gray-200'
                                             } ${isNextMatchPlayer ? 'ring-2 ring-yellow-400' : ''}`}
