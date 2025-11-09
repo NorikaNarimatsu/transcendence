@@ -88,7 +88,7 @@ export class sanitizeInput {
 			throw new Error("Avatar URL is invalid");
 		}
 
-		if (!trimmed || trimmed.length > 20 || !allowedAvatars.includes(trimmed)) {
+		if (!trimmed || trimmed.length > 30 || !allowedAvatars.includes(trimmed)) {
 			throw new Error("Avatar URL is invalid");
 		}
 

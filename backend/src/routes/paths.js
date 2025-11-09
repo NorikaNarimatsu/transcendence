@@ -22,7 +22,7 @@ export default async function itemRoutes(fastify, options) {
     fastify.post('/addNewUser', itemController.addNewUser);
     fastify.get('/getUserByEmail/:email', itemController.getUserByEmail);
     fastify.get('/getUserInfoByEmail/:email', { preHandler: [authenticateToken] }, itemController.getUserInfoByEmail);
-    fastify.get('/getUserById/:userID', { preHandler: [authenticateToken] }, itemController.getUserById);
+    fastify.get('/getUserById/:userID', itemController.getUserById);
     fastify.get('/users/except/:userID', { preHandler: [authenticateToken] }, itemController.getUsersExceptUserID);
     fastify.get('/getUserEmailById/:userID', { preHandler: [authenticateToken] }, itemController.getUserEmailById);
     fastify.put('/user/updateAvatar', { preHandler: [authenticateToken] }, itemController.updateAvatarUrl); // new avatar route
