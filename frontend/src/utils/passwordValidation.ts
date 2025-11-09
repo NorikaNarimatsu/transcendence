@@ -1,6 +1,5 @@
 import { z, ZodError} from 'zod';
 
-// TODO -> bring back all password rules when done with the project!
 const passwordSchema = z
   .string()
   .min(9, "Password must be at least 9 characters long")
