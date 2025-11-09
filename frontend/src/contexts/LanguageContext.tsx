@@ -30,7 +30,6 @@ export default function TranslationProvider({ children }: {children: ReactNode})
     
     const [lang, setLang] = useState<Language>(() => {
         const currentLang = localStorage.getItem('lang');
-        console.log("Initial language from localStorage:", currentLang);
         if (currentLang && isValidLanguage(currentLang)) {
             return currentLang;
         }
@@ -72,7 +71,6 @@ export default function TranslationProvider({ children }: {children: ReactNode})
 
     // Save language to localStorage when it changes
     useEffect(() => {
-        console.log("Saving language to localStorage:", lang);
         localStorage.setItem('lang', lang);
     }, [lang]);
 

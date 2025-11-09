@@ -45,7 +45,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                         name: aiData.name,
                         avatarUrl: aiData.avatarUrl
                     });
-                    console.log('AI Player loaded:', aiData.userID, aiData.name, aiData.avatarUrl);
                 }                
                 const guestResponse = {
                         userID: 2,
@@ -59,7 +58,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                         name: guestData.name,
                         avatarUrl: guestData.avatarUrl
                     });
-                    console.log('Guest Player loaded:', guestData.userID, guestData.name, guestData.avatarUrl);
                 }
             } catch (error) {
                 console.error('Failed to load special players:', error);
