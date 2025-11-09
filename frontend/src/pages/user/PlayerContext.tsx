@@ -33,22 +33,27 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const initializeSpecialPlayers = async () => {
             try {
-                // Fetch AI Player (userID = 1)
-                const aiResponse = await apiCentral.get('/getUserById/1');
-                if (aiResponse.data) {
-                    const aiData = aiResponse.data;
+                const aiResponse = {
+                        userID: 1,
+                        name: 'AI',
+                        avatarUrl: '/avatars/AI.jpeg'
+                    };
+                if (aiResponse) {
+                    const aiData = aiResponse;
                     setAiPlayer({
                         userID: aiData.userID,
                         name: aiData.name,
                         avatarUrl: aiData.avatarUrl
                     });
                     console.log('AI Player loaded:', aiData.userID, aiData.name, aiData.avatarUrl);
-                }
-
-                // Fetch Guest Player (userID = 2)
-                const guestResponse = await apiCentral.get('/getUserById/2');
-                if (guestResponse.data) {
-                    const guestData = guestResponse.data;
+                }                
+                const guestResponse = {
+                        userID: 2,
+                        name: 'Guest',
+                        avatarUrl: '/avatars/Guest.jpeg'
+                    };
+                if (guestResponse) {
+                    const guestData = guestResponse;
                     setGuestPlayer({
                         userID: guestData.userID,
                         name: guestData.name,
@@ -60,7 +65,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                 console.error('Failed to load special players:', error);
             }
         };
-
         initializeSpecialPlayers();
     }, []); // Run once when context loads
 
