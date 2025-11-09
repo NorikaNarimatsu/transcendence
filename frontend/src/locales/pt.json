@@ -136,6 +136,7 @@
             "instructionsA": "Usa setas para mudar a direcao da cobra",
             "instructionsB": "Objectivo: Comer pelo menos 10 vezes.",
             "instructionsC": "Morres se: te comeres a ti proprio ou se chocares contra uma parede",
+            "instructionsD": "Se estiveres a jogar contra outro jogador, o jogador da esqueda vai usar as teclas w,s,d,a e o jogador da direita vai user as teclas das setas.",
             "pressSpaceToStartTheGame": "Pressiona a Tecla Espaco para comecar o jogo!",
             "note": "No fim da pagina encontras definicoes adicionais para o jogo."
         },

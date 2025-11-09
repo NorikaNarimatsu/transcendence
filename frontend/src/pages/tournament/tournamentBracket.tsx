@@ -232,7 +232,7 @@ export default function Bracket() {
     // Layout constants
     const boxHeight = 60;
     const boxWidth = 200;
-    const baseGap = 10;
+    const baseGap = 20;
     const colGap = 60;
 
     const columnHeights = rounds.map(round => round.length * boxHeight + (round.length - 1) * baseGap);
@@ -296,16 +296,25 @@ export default function Bracket() {
             </header>
             <section className="flex-1 bg-pink-grid flex items-center justify-center">
                 <div
-                    className="relative bg-pink-dark w-full max-w-6xl min-h-[600px] m-[10px] flex justify-center items-center px-[50px]"
+                    className="relative border-2 border-solid border-purple-purple bg-pink-dark shadow-no-blur-50-reverse-no-active w-full max-w-6xl min-h-[600px] flex justify-center items-center p-20"
                     style={{ width: containerWidth }}
                 >
                     {/* Bracket columns */}
-                    <div className="flex flex-row gap-[60px] w-full justify-center items-start" style={{ minHeight: svgHeight }}>
+                    <div className="flex flex-col w-full justify-center items-center gap-4">
+                        {/* Round headers row */}
+                        <div className="flex flex-row gap-8 justify-center text-shadow items-center mb-3">
+                            {rounds.map((round, roundIdx) => (
+                                <div key={roundIdx} className="w-[200px] text-center">
+                                    <h3 className="font-pixelify text-white text-3xl">
+                                        {roundIdx === rounds.length - 1 ? 'Winner' : `Round ${roundIdx + 1}`}
+                                    </h3>
+                                </div>
+                            ))}
+                        </div>
+                    {/* Player boxes columns */}
+                    <div className="flex flex-row gap-8 w-full justify-center items-start" style={{ minHeight: svgHeight, height: svgHeight }}>
                         {rounds.map((round, roundIdx) => (
-                            <div key={roundIdx} className="flex flex-col items-center justify-start h-full w-[200px]" style={{ position: 'relative' }}>
-                                <h3 className="font-pixelify text-blue-deep text-lg mb-4">
-                                    {roundIdx === rounds.length - 1 ? 'Winner' : `Round ${roundIdx + 1}`}
-                                </h3>
+                            <div key={roundIdx} className="w-[200px] relative" style={{ height: svgHeight }}>
                                 {round.map((player, idx) => {
                                     const pos = boxPositions[roundIdx][idx];
                                     const isNextMatchPlayer = nextMatch && 
@@ -314,9 +323,9 @@ export default function Bracket() {
                                     return (
                                         <div
                                             key={player ? player.id : `empty-${roundIdx}-${idx}`}
-                                            className={`border border-blue-deep rounded-lg px-4 py-2 font-pixelify text-blue-deep text-lg w-[200px] flex flex-row items-center gap-2 justify-center absolute ${
+                                            className={`border-4 border-blue-deep rounded-lg px-4 py-2 font-pixelify text-blue-deep text-lg w-[200px] flex flex-row items-center gap-2 justify-center absolute ${
                                                 player ? 'bg-pink-light' : 'bg-gray-200'
-                                            } ${isNextMatchPlayer ? 'ring-2 ring-yellow-400' : ''}`}
+                                            } ${isNextMatchPlayer ? 'ring-4 ring-white' : ''}`}
                                             style={{
                                                 minHeight: `${boxHeight}px`,
                                                 left: 0,
@@ -346,11 +355,11 @@ export default function Bracket() {
                             </div>
                         ))}
                     </div>
-
+                </div>
                     <div className="absolute bottom-4 flex gap-4 items-center">
                         {nextMatch ? (
                             <button
-                                className="button-pp-blue font-pixelify px-8 py-3 rounded mt-2 text-base flex justify-center items-center text-center min-w-[350px] max-w-[500px]"
+                                className="inline-block border-2 border-blue-deep bg-blue-deep px-4 py-2 font-pixelify text-white text-3xl hover:big-blue-200 transition m-4 shadow-no-blur"
                                 onClick={() => startMatch(nextMatch)}
                             >
                                 Start

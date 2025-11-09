@@ -22,6 +22,10 @@
     box-shadow: -4px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
+.shadow-no-blur-no-active {
+    box-shadow: -4px 4px 0 rgba(0, 0, 0, 0.25);
+}
+
 .shadow-no-blur-70 {
     box-shadow: -6px 6px 0 rgba(0, 0, 0, 0.70);
 }

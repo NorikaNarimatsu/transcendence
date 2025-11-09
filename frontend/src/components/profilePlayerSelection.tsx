@@ -57,7 +57,7 @@ export function PlayerSelection({ open, users, onSelect, onCancel }: PlayerSelec
 
     return (
         <div className="absolute inset-0 flex items-center justify-center z-30">
-            <div className="bg-pink-light p-6 rounded-lg max-h-[500px] overflow-y-auto w-[350px]">
+            <div className="bg-pink-light p-6 rounded-lg max-h-[500px] overflow-y-auto w-[350px] border-2 border-solid border-blue-deep">
                 <h3 className="font-pixelify text-blue-deep text-2xl mb-4 text-center">{translation.pages.profile.selectPlayer2}</h3>
                 
                 {/* Friends Filter Toggle */}
@@ -77,7 +77,7 @@ export function PlayerSelection({ open, users, onSelect, onCancel }: PlayerSelec
                     </button>
                 </div>
 
-                <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
+                <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
                     {displayUsers.map((user: SelectedPlayer) => {
                         const isFriend = friendsIDs.has(user.userID);
                         return (

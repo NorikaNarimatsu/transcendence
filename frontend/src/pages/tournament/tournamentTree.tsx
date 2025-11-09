@@ -79,10 +79,10 @@ export default function TournamentTree() {
             </header>
 
             <section className="flex-1 bg-pink-grid flex items-center justify-center">
-                <div className="relative bg-pink-dark w-[825px] h-[600px] m-[10px] flex justify-between items-center px-[50px]">
+                <div className="relative bg-pink-dark shadow-no-blur-50-reverse-no-active w-[825px] h-[600px] m-[10px] flex justify-between items-center px-[50px]">
                     <div className="bg-pink-dark rounded-lg p-8 flex flex-col items-center w-[700px] mx-auto">
                         <div className="w-full mb-8">
-                            <h2 className="font-pixelify text-blue-deep text-xl mb-2 text-center">Participants</h2>
+                            <h2 className="font-pixelify underline text-white text-5xl text-center text-shadow mb-14">Participants:</h2>
                             <div
                                 className="grid gap-4 justify-center"
                                 style={{
@@ -95,12 +95,12 @@ export default function TournamentTree() {
                                 {participants.map((participant: SelectedPlayer, idx: number) => (
                                     <div
                                         key={participant.userID}
-                                        className="bg-pink-light px-4 py-2 font-pixelify text-blue-deep text-lg flex flex-col items-center rounded-lg"
+                                        className="border border-solid border-blue-deep bg-pink-light p-4 font-pixelify text-blue-deep text-lg flex flex-col items-center rounded-lg"
                                     >
                                         <img
                                             src={participant.avatarUrl}
                                             alt={participant.name}
-                                            className="w-10 h-10 rounded-full mb-2"
+                                            className="w-16 h-auto rounded-full mb-2"
                                             style={{ objectFit: 'cover', background: '#fff' }}
                                         />
                                         <div className="flex flex-col items-center gap-1">
@@ -152,7 +152,7 @@ export default function TournamentTree() {
                             </div>
                         </div>
                         <button
-                            className="button-pp-blue font-pixelify px-6 py-2 rounded mt-2 text-lg flex justify-center items-center text-center"
+                            className="inline-block border-2 border-blue-deep bg-blue-deep px-4 py-2 font-pixelify text-white text-3xl hover:big-blue-200 transition mt-2 shadow-no-blur"
                             style={{ minWidth: 100 }}
                             onClick={() => {
                                 // Validate all names before starting tournament

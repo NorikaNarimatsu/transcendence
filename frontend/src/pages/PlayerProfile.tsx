@@ -521,7 +521,7 @@ const handleSelectAvatar = async (avatarUrl: string) => {
                   "inset 8px 0 2px -4px rgba(0, 0, 0, 0.6), inset 0 8px 2px -4px rgba(0, 0, 0, 0.6)",
               }}
             >
-              <div className="absolute inset-0 overflow-y-auto">
+              <div className="absolute inset-0 overflow-y-auto m-4">
                 {/* Game 2 Player Mode */}
                 <PlayerSelection
                   open={showPlayerSelection}
