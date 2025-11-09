@@ -1,6 +1,5 @@
 import { Snake, type Position, type SnakeGameConfig } from './SnakeConfig';
 
-// export const SNAKE_VELOCITY = 200;
 export const WINNING_SCORE = 10; // First to eat 10 times WIN
 
 export interface SnakeDifficultySettings {
@@ -166,21 +165,28 @@ export class SnakeGameEngine {
 
         if (this.gameOver || this.waitingToStart) return;
 
-        // Player 1 controls (Arrow keys)
-        switch (key) {
-            case 'ArrowUp': this.snake1.changeDirection('UP'); break;
-            case 'ArrowDown': this.snake1.changeDirection('DOWN'); break;
-            case 'ArrowLeft': this.snake1.changeDirection('LEFT'); break;
-            case 'ArrowRight': this.snake1.changeDirection('RIGHT'); break;
-        }
-
-        // Player 2 controls (WASD) - only in multiplayer
-        if (this.isMultiplayer && this.snake2) {
+       if (this.isMultiplayer && this.snake2) {
+            // Player 1: WASD
             switch (key) {
-                case 'w': this.snake2.changeDirection('UP'); break;
-                case 's': this.snake2.changeDirection('DOWN'); break;
-                case 'a': this.snake2.changeDirection('LEFT'); break;
-                case 'd': this.snake2.changeDirection('RIGHT'); break;
+                case 'w': this.snake1.changeDirection('UP'); break;
+                case 's': this.snake1.changeDirection('DOWN'); break;
+                case 'a': this.snake1.changeDirection('LEFT'); break;
+                case 'd': this.snake1.changeDirection('RIGHT'); break;
+            }
+            // Player 2: Arrow keys
+            switch (key) {
+                case 'ArrowUp': this.snake2.changeDirection('UP'); break;
+                case 'ArrowDown': this.snake2.changeDirection('DOWN'); break;
+                case 'ArrowLeft': this.snake2.changeDirection('LEFT'); break;
+                case 'ArrowRight': this.snake2.changeDirection('RIGHT'); break;
+            }
+        } else {
+            // Single player: Arrow keys control
+            switch (key) {
+                case 'ArrowUp': this.snake1.changeDirection('UP'); break;
+                case 'ArrowDown': this.snake1.changeDirection('DOWN'); break;
+                case 'ArrowLeft': this.snake1.changeDirection('LEFT'); break;
+                case 'ArrowRight': this.snake1.changeDirection('RIGHT'); break;
             }
         }
     }

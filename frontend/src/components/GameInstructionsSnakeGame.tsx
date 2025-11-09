@@ -9,9 +9,10 @@ export default function GameInstructionsSnakeGame(): JSX.Element {
     return (
         <div className="absolute inset-4 p-4 border-solid border-8 border-purple" style={{backgroundColor: 'rgba(25, 0, 167, 0.5)'}}>
             <div className="h-full flex flex-col justify-between">
-                <h1 className="font-pixelify text-center text-4xl text-shadow text-white bg-purple-purple shadow-no-blur border-solid border-2 border-black p-2">{translation.pages.gameInstructions.gameInstructions}</h1>
+                <h1 className="font-pixelify text-center text-4xl text-shadow text-white bg-purple-purple shadow-no-blur-no-active border-solid border-2 border-black p-2">{translation.pages.gameInstructions.gameInstructions}</h1>
                 <section className="font-dotgothic text-white text-center tracking-wide mt-4 p-4">
                    <p>{translation.pages.gameInstructionsSnake.instructionsA}</p>
+                   <p>{translation.pages.gameInstructionsSnake.instructionsD}</p>
                    <p>{translation.pages.gameInstructionsSnake.instructionsB}</p>
                    <p>{translation.pages.gameInstructionsSnake.instructionsC}</p>
                 </section>

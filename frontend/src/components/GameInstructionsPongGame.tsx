@@ -11,7 +11,7 @@ export default function GameInstructionsPongGame(): JSX.Element {
     return (
         <div className="absolute inset-4 p-4 border-solid border-8 border-purple" style={{backgroundColor: 'rgba(25, 0, 167, 0.5)'}}>
             <div className="h-full flex flex-col justify-between">
-                <h1 className="font-pixelify text-center text-4xl text-shadow text-white bg-purple-purple shadow-no-blur border-solid border-2 border-black p-2">Game Instructions</h1>
+                <h1 className="font-pixelify text-center text-4xl text-shadow text-white bg-purple-purple shadow-no-blur-no-active border-solid border-2 border-black p-2">Game Instructions</h1>
                 <section className="flex justify-around font-pixelify text-white mt-4 p-4">
                     {/* LEFT SIDE */}
                     <section>

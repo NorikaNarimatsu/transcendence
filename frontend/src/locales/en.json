@@ -136,6 +136,7 @@
             "instructionsA": "Use the Arrow Keys to change the snake direction.",
             "instructionsB": "Goal: Eat at least 10 times.",
             "instructionsC": "You die if: you eat yourself or hit a wall.",
+            "instructionsD": "If you are playing against another player, the left player will use de w,s,d,a keys and the right player will use the arrow keys.",
             "pressSpaceToStartTheGame": "Press Space to Start the Game!",
             "note": "On the bottom of the page you can find aditional game settings."
         },

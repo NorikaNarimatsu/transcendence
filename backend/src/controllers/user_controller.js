@@ -1,9 +1,9 @@
 import { start } from 'repl';
 import { db } from '../server.js';
-import gameController from './game_controller.js';
 import { verifyTokenOwner } from '../utils/verifyTokenOwner.js';
 import { sanitizeInput } from '../utils/sanitizeInput.js';
 import { allowedAvatars } from '../utils/avatarsList.js';
+import { time } from 'console';
 
 const userAnon = {
     anonymizeUserData: (userId) => {
@@ -11,12 +11,17 @@ const userAnon = {
         const anonymizedEmail = `deleted_${userId}@anonymized.com`;
         const anonymizedPassword = 'ANONYMIZED';
         const defaultAvatarUrl = '/avatars/Avatar_1.png';
+		const timeNow = new Date().toISOString();
+		const anonymizedLanguage = 'en';
 
         return {
             name: anonymizedName,
             email: anonymizedEmail,
             password: anonymizedPassword,
-            avatarUrl: defaultAvatarUrl
+            avatarUrl: defaultAvatarUrl,
+			createdAt: timeNow,
+			lastLoginAt: timeNow,
+			lang: anonymizedLanguage,
         };
     },
 
@@ -33,9 +38,9 @@ const userAnon = {
         // Update user with anonymized data
         const updateResult = db.prepare(`
             UPDATE users 
-            SET name = ?, email = ?, password = ?, avatarUrl = ? 
+            SET name = ?, email = ?, password = ?, avatarUrl = ? , createdAt = ?, lastLoginAt = ?, lang = ?
             WHERE userID = ?
-        `).run(anonymizedData.name, anonymizedData.email, anonymizedData.password, anonymizedData.avatarUrl, userID);
+        `).run(anonymizedData.name, anonymizedData.email, anonymizedData.password, anonymizedData.avatarUrl, anonymizedData.createdAt, anonymizedData.lastLoginAt, anonymizedData.lang, userID);
 
         if (updateResult.changes === 0) {
             throw new Error('Failed to anonymize user data');

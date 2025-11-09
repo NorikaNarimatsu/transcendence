@@ -260,7 +260,7 @@ export default function Dashboard(): JSX.Element {
 
             {/* Main Content */}
             <section className="flex-1 bg-pink-grid flex items-center justify-center">
-                <div className="relative bg-pink-dark w-[900px] h-[600px] m-[10px] flex flex-col">
+                <div className="relative bg-pink-dark w-[900px] h-[650px] flex flex-col">
                     {/* Tab Navigation */}
                     <div className="flex p-4 gap-2">
                         <button
