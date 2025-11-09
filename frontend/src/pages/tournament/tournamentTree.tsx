@@ -94,7 +94,7 @@ export default function TournamentTree() {
                             >
                                 {participants.map((participant: SelectedPlayer, idx: number) => (
                                     <div
-                                        key={participant.userID + idx}
+                                        key={participant.userID}
                                         className="bg-pink-light px-4 py-2 font-pixelify text-blue-deep text-lg flex flex-col items-center rounded-lg"
                                     >
                                         <img
