@@ -232,7 +232,7 @@ export default function Bracket() {
     // Layout constants
     const boxHeight = 60;
     const boxWidth = 200;
-    const baseGap = 15;
+    const baseGap = 10;
     const colGap = 60;
 
     const columnHeights = rounds.map(round => round.length * boxHeight + (round.length - 1) * baseGap);
