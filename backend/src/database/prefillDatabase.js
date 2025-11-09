@@ -22,7 +22,7 @@ export async function prefillDatabase(db) {
     for (let i = 1; i <= 15; i++) {
         const name = `test${i}`;
         const email = `test${i}@gmail.com`;
-        const password = `Testtest${i}!`; // Testtest1!
+        const password = `test${i}!`; // test1!
         const hashpassword = await hashPassword(password);
         const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
         const createdAt = new Date().toISOString();
