@@ -177,10 +177,14 @@ export class SnakeGameEngine {
         // Player 2 controls (WASD) - only in multiplayer
         if (this.isMultiplayer && this.snake2) {
             switch (key) {
-                case 'w': this.snake2.changeDirection('UP'); break;
-                case 's': this.snake2.changeDirection('DOWN'); break;
-                case 'a': this.snake2.changeDirection('LEFT'); break;
-                case 'd': this.snake2.changeDirection('RIGHT'); break;
+                case 'w': this.snake1.changeDirection('UP'); break;
+                case 's': this.snake1.changeDirection('DOWN'); break;
+                case 'a': this.snake1.changeDirection('LEFT'); break;
+                case 'd': this.snake1.changeDirection('RIGHT'); break;
+                case 'ArrowUp': this.snake2.changeDirection('UP'); break;
+                case 'ArrowDown': this.snake2.changeDirection('DOWN'); break;
+                case 'ArrowLeft': this.snake2.changeDirection('LEFT'); break;
+                case 'ArrowRight': this.snake2.changeDirection('RIGHT'); break;
             }
         }
     }
