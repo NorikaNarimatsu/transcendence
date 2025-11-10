@@ -12,14 +12,11 @@ import { useGameSettings } from '../../contexts/GameSettingsContext';
 import { SnakeGameEngine } from '../../gameEngines/SnakeEngine';
 import { calculateSnakeGameConfig, type SnakeGameConfig } from '../../gameEngines/SnakeConfig';
 
-//Icons import
 import home_icon from '../../assets/icons/Home.png'
 import gear_icon from '../../assets/icons/Settings.png'
 
-//Import Game Instructions + Settings + Stats
 import GameInstructions from '../../components/GameInstructionsSnakeGame';
 import GameSettings from '../../components/SettingsGames';
-import { Translation } from 'react-i18next';
 
 import apiCentral from '../../utils/apiCentral';
 
@@ -29,8 +26,6 @@ export default function SnakeGame(): JSX.Element {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const mode = params.get('mode') || 'single';
-    // const tournamentBracketID = params.get('tournamentBracketID') || null;
-    // const tournamentMatchID  = params.get('tournamentMatchID') || null;
     
     const { selectedPlayer, guestPlayer } = useSelectedPlayer();
     const { currentMatch } = useTournament();
@@ -78,7 +73,7 @@ export default function SnakeGame(): JSX.Element {
     const player2 = getPlayer2();
 
     useEffect(() => {
-        const isMultiplayer = mode === '2players' || mode === 'tournament'; // Add tournament
+        const isMultiplayer = mode === '2players' || mode === 'tournament';
         const player1Name = player1?.name || 'Player 1';
         const player2Name = player2?.name || 'Guest';
 		const snakeSettings = getSnakeSettings();
@@ -110,7 +105,7 @@ export default function SnakeGame(): JSX.Element {
         console.log('========================');
 
         gameEngineRef.current = new SnakeGameEngine(gameConfig, isMultiplayer, player1Name, player2Name, snakeSettings);
-    }, [gameConfig, mode, player1.name, player2?.name, currentDifficulty]); // Fix: Use stable references
+    }, [gameConfig, mode, player1.name, player2?.name, currentDifficulty]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -180,7 +175,7 @@ export default function SnakeGame(): JSX.Element {
         }
     };
 
-    // Add tournament validation
+    // Tournament validation
     useEffect(() => {
         if (mode === 'tournament' && !currentMatch) {
             console.error('Tournament mode requires match info');
@@ -208,13 +203,6 @@ export default function SnakeGame(): JSX.Element {
 				clearInterval(gameLoopIntervalRef.current);
 			}
 		};
-
-        // const interval = setInterval(() => {
-        //     gameEngineRef.current!.update();
-        //     forceUpdate({});
-        // });
-
-        // return () => clearInterval(interval);
     }, [currentDifficulty]);
 
     // Keyboard input
@@ -233,10 +221,8 @@ export default function SnakeGame(): JSX.Element {
     return () => window.removeEventListener('keydown', handleKey);
 }, []);
 
-// Also add a useEffect to reset view when game starts:
 useEffect(() => {
     if (gameEngineRef.current && !gameEngineRef.current.waitingToStart && !gameEngineRef.current.gameOver) {
-        // Game is running, make sure settings are closed
         setView("instructions");
     }
 }, [gameEngineRef.current?.waitingToStart, gameEngineRef.current?.gameOver]);

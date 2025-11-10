@@ -54,14 +54,14 @@ export default function TranslationProvider({ children }: {children: ReactNode})
         // Listen for storage events (changes from other tabs/windows)
         window.addEventListener('storage', handleStorageChange);
 
-        // Also check periodically for changes in same tab (fallback)
+        // Check periodically for changes in same tab (fallback)
         const interval = setInterval(() => {
             const currentLang = localStorage.getItem('lang');
             if (currentLang && isValidLanguage(currentLang) && currentLang !== lang) {
                 console.log("Detected language change via polling:", currentLang);
                 setLang(currentLang);
             }
-        }, 500); // Check every 500ms
+        }, 500);
 
         return () => {
             window.removeEventListener('storage', handleStorageChange);

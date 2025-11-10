@@ -3,7 +3,6 @@ import type { SelectedPlayer } from '../pages/user/PlayerContext';
 import apiCentral from '../utils/apiCentral';
 import type { User } from '../pages/user/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { tr } from 'zod/locales';
 
 interface FriendsManagerProps {
     user: User;
@@ -23,7 +22,6 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
         const [availableUsers, setAvailableUsers] = useState<SelectedPlayer[]>([]);
         const [loading, setLoading] = useState(false);
         
-        // UPDATED: Success popup state - store friend object instead of message
         const [showSuccessPopup, setShowSuccessPopup] = useState(false);
         const [addedFriend, setAddedFriend] = useState<SelectedPlayer | null>(null);
 
@@ -94,11 +92,9 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                 });
 
                 if (response.data) {
-                    // UPDATED: Store friend object and remove timeout
                     setAddedFriend(friend);
                     setShowSuccessPopup(true);
                     setShowAddFriends(false);
-                    // REMOVED: No more auto-hide timeout
                 } else {
                     alert(response.error || 'Failed to add friend');
                 }
@@ -115,14 +111,14 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
 
         return (
             <>
-                {/* UPDATED: Success Popup Modal with Avatar */}
+                {/* Success Popup Modal with Avatar */}
                 {showSuccessPopup && addedFriend && (
                     <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-40">
                         <div className="bg-pink-light p-8 rounded-lg shadow-no-blur-60 border-4 border-blue-deep">
                             <div className="text-center">
                                 <h3 className="font-pixelify text-blue-deep text-2xl mb-4">{translation.common.success}!</h3>
                                 
-                                {/* NEW: Friend's Avatar and Name */}
+                                {/* Friend's Avatar and Name */}
                                 <div className="flex items-center justify-center gap-3 mb-6">
                                     {addedFriend.avatarUrl && (
                                         <img 
@@ -150,7 +146,7 @@ export const FriendsManager = forwardRef<FriendsManagerHandle, FriendsManagerPro
                     </div>
                 )}
 
-                {/* ADD FRIENDS MODAL */}
+                {/* FRIENDS MODAL */}
                 {showAddFriends && (
                     <div className="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center z-30">
                         <div className="bg-pink-light p-6 rounded-lg max-h-[400px] overflow-y-auto w-[300px]">

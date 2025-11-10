@@ -109,7 +109,6 @@ export default function signupUnkownUser() {
 
 	try {
 		const response = await apiCentral.post('/addNewUser', { name, email, password });
-		// console.log ("response.status ==", response.status);
 		if (response.status === 201) {
 			navigate('/login', { state: { email } });
 		}

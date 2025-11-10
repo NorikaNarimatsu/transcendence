@@ -1,5 +1,3 @@
-import React from 'react'
-
 import ArrowIcon from '../assets/icons/arrow.png'
 
 import { useLanguage } from '../contexts/LanguageContext'

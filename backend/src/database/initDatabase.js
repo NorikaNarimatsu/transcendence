@@ -81,8 +81,6 @@ export async function initializeDatabase() {
 
         try {
             const tiePassword = await hashPassword('tie');
-            // db.exec(`INSERT INTO users (userID, name, email, password, avatarUrl, createdAt) 
-            //             VALUES (0, 'TIE', 'tie@gmail.com', '${tiePassword}', '/avatars/AI.jpeg', '${new Date().toISOString()}')`);
 			const insertTie = db.prepare(`
 				INSERT INTO users (userID, name, email, password, avatarUrl, createdAt)
 				VALUES (?, ?, ?, ?, ?, ?)

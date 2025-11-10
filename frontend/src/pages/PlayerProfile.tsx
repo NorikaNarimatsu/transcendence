@@ -211,8 +211,6 @@ export default function PlayerProfile(): JSX.Element {
         }
     };
 
-
-    ///////////////// WORK IN PROGRESS //////////////////
     const [avatarUrlLocal, setAvatarUrlLocal] = useState<string | null>(null);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     
@@ -220,30 +218,19 @@ export default function PlayerProfile(): JSX.Element {
       setAvatarUrlLocal(user?.avatarUrl ?? null);
     }, [user?.avatarUrl]);
 
-    // ...existing code...
-
 const handleSelectAvatar = async (avatarUrl: string) => {
   if (!user?.userID) return;
 
   console.log('🔍 handleSelectAvatar called with:', avatarUrl);
 
-  // IMPORTANT: Update local state FIRST
   setAvatarUrlLocal(avatarUrl);
   
-  // Update user context
   if (user) {
     const updatedUser = { ...user, avatarUrl: avatarUrl };
     setUser(updatedUser);
     console.log('✅ User context updated:', updatedUser);
   }
   
-  // // Check if it's an uploaded avatar (already saved by uploadAvatar endpoint)
-  // if (avatarUrl.startsWith('/uploadAvatars/')) {
-  //   console.log('✅ Uploaded avatar - database already updated by upload endpoint');
-  //   return; // Don't call API again - already saved!
-  // }
-
-  // Only call updateAvatar for preset avatars (from /avatars/)
   setUploadingAvatar(true);
   try {
     const res = await apiCentral.put('/user/updateAvatar', { userID: user.userID, avatarUrl });
@@ -261,52 +248,6 @@ const handleSelectAvatar = async (avatarUrl: string) => {
     setUploadingAvatar(false);
   }
 };
-
-// ...existing code...
-    
-    // const handleSelectAvatar = async (avatarUrl: string) => {
-    //   if (!user?.userID) return;
-
-    //    console.log('🔍 handleSelectAvatar called with:', avatarUrl);
-  
-    //   // IMPORTANT: Update local state FIRST
-    //   setAvatarUrlLocal(avatarUrl);
-      
-    //   // Update user context
-    //   if (user) {
-    //     const updatedUser = { ...user, avatarUrl: avatarUrl };
-    //     setUser(updatedUser);
-    //     console.log('✅ User context updated:', updatedUser);
-    //   }
-      
-    //   // Check if it's an uploaded avatar (already saved by uploadAvatar endpoint)
-    //   if (avatarUrl.startsWith('/uploadAvatars/')) {
-    //     console.log('✅ Uploaded avatar - skipping API call');
-    //     return; // Don't call API again - already saved!
-    //   }
-
-    //   setUploadingAvatar(true);
-    //   try {
-    //     const res = await apiCentral.put('/user/updateAvatar', { userID: user.userID, avatarUrl })
-    //     console.log('SENDING THIS URL:', avatarUrl);
-    //     if (!res.data) {
-    //       console.error('Failed to update avatar:', res.error);
-    //       return;
-    //     }
-    
-    //     setAvatarUrlLocal(avatarUrl);
-    //     // Update the user context with the new avatar URL
-    //     if (user) {
-    //       const updatedUser = { ...user, avatarUrl: avatarUrl };
-    //       setUser(updatedUser); // This will update both state and localStorage automatically
-    //     }
-    //   } catch (err) {
-    //     console.error('Error updating avatar:', err);
-    //   } finally {
-    //     setUploadingAvatar(false);
-    //   }
-    // };
-
 
     useEffect(() => {
         if (user?.userID) {

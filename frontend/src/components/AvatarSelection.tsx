@@ -46,8 +46,6 @@ export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelec
             console.error('No file selected');
             return;
         }
-        // const imageUrl = URL.createObjectURL(file);
-        // onSelect(imageUrl); //TODO: Save uploaded image on the backend.
         if(!user?.userID){
             console.error('No user logged in');
             alert('Please log in to upload an avatar');
@@ -114,7 +112,7 @@ export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelec
                     </button>
                 ))}
             </div>
-            <button type="button"  onClick={handleUploadAvatar} className="font-pixelify text-center text-blue-deep border-solid border-2 border-blue-deep p-2 mt-4 bg-pink-dark font-bold shadow-no-blur flex items-center justify-center gap-2 w-full"> {/* TODO: API CALL BACKEND UPDATE USER AVATAR + UPLOAD FILE */}
+            <button type="button"  onClick={handleUploadAvatar} className="font-pixelify text-center text-blue-deep border-solid border-2 border-blue-deep p-2 mt-4 bg-pink-dark font-bold shadow-no-blur flex items-center justify-center gap-2 w-full">
                 {translation.pages.profile.uploadYourAvatar}
                 <input type="file" name='avatar' ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} accept="image/jpeg,image/jpg,image/png" ></input>
                 <img src={upload_icon} alt="Upload Icon" className="h-8 w-auto"/>
@@ -122,27 +120,4 @@ export default function AvatarSelection({ open, onClose, onSelect }: AvatarSelec
         </div>
     )
 }
-
-/*
-Strategy:
-2 endpoitns:
-- handleAvatarSelect
-            const form = new FormData();
-            form.append('avatar', file);
-            form.append('userID', String(user.userID));
-
-            const res = await fetch('https://localhost:8443/user/upload-avatar', {
-                method: 'POST',
-                body: form
-            });
-
-- handleAvatarUpload
-            const res = await fetch('https://localhost:8443/user/update-avatar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: user.userID, avatarUrl })
-            });
-
-
-*/
  

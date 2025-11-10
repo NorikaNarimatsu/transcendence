@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { JSX } from 'react';
@@ -9,12 +8,8 @@ import { useUser } from '../user/UserContext';
 import { useSelectedPlayer } from '../user/PlayerContext';
 import { useTournament } from '../tournament/tournamentContext';
 import ButtonPink from '../../components/ButtonDarkPink';
-
-//Icons import
 import home_icon from '../../assets/icons/Home.png';
 import gear_icon from '../../assets/icons/Settings.png';
-
-//Game instructions+Settings+Stats components
 import GameInstructions from '../../components/GameInstructionsPongGame';
 import GameSettings from '../../components/SettingsGames';
 import { useGameSettings } from '../../contexts/GameSettingsContext';
@@ -29,11 +24,9 @@ export default function PongGame(): JSX.Element {
     const location = useLocation();
     const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
-    const mode = params.get('mode') || 'single';
-    // const tournamentBracketID = params.get('tournamentBracketID') || null;
-    // const tournamentMatchID  = params.get('tournamentMatchID') || null;    
+    const mode = params.get('mode') || 'single';   
 
-    // ADD: Get all players from global context
+    // Get all players from global context
     const { selectedPlayer, aiPlayer, guestPlayer } = useSelectedPlayer();
 
     const { currentMatch } = useTournament();
@@ -76,10 +69,8 @@ export default function PongGame(): JSX.Element {
 
     const getLeftPlayer = (): SelectedPlayer | null => {
         if (mode === 'tournament') {
-            // For tournament, use selectedPlayer array with index 0 for left player
             return currentMatch?.player1 || null;
         } else {
-            // For single and 2players mode, left player is always the current user
             return user;
         }
     };
@@ -90,7 +81,6 @@ export default function PongGame(): JSX.Element {
         } else if (mode === '2players') {
             return selectedPlayer || guestPlayer;
         } else if (mode === 'tournament') {
-            // For tournament, use selectedPlayer array with index 1 for right player
             return currentMatch?.player2 || null;
         }
         return null;
@@ -166,7 +156,7 @@ export default function PongGame(): JSX.Element {
       }
   };
 
-    // Add tournament mode validation
+    // Tournament mode validation
     useEffect(() => {
         if (mode === 'tournament' && !currentMatch) {
             console.error('Tournament mode requires match info');
@@ -180,33 +170,6 @@ export default function PongGame(): JSX.Element {
         const leftPlayerName = leftPlayer?.name || 'Player 1';
         const rightPlayerName = rightPlayer?.name || 'Player 2';
 		const pongSettings = getPongSettings();
-
-         // SHOULD BE DELETED THESE COMENTS LATER // THIS IS FOR DEGUB
-        console.log('=== PONG GAME STARTED ===');
-        console.log('Game Mode:', mode);
-		console.log('Difficulty Settings:', pongSettings);
-        console.log('Left Player (User):', {
-            name: leftPlayer?.name,
-            userID: leftPlayer?.userID,
-            avatarUrl: leftPlayer?.avatarUrl
-        });
-        console.log('Right Player (Opponent):', {
-            name: rightPlayer?.name,
-            userID: rightPlayer?.userID,
-            avatarUrl: rightPlayer?.avatarUrl,
-            type: mode === 'single' ? 'AI' : (selectedPlayer ? 'Selected Player' : 'Guest')
-        });
-        console.log('Global Context Players:', {
-            selectedPlayer: selectedPlayer,
-            aiPlayer: aiPlayer,
-            guestPlayer: guestPlayer
-        });
-        console.log('Final Player Names:', {
-            leftPlayerName: leftPlayerName,
-            rightPlayerName: rightPlayerName
-        });
-        console.log('========================');
-        // SHOULD BE DELETED THESE COMENTS LATER
 
         engineRef.current = new PongEngine(gameConfig, setGameState, mode, leftPlayerName, rightPlayerName, pongSettings);
 
