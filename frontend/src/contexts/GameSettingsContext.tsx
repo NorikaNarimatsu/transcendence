@@ -34,15 +34,15 @@ interface GameSettingsContextType {
 const GameSettingsContext = createContext<GameSettingsContextType | undefined>(undefined);
 
 const PONG_MODES: Record<GameMode, PongSettings> = {
-	easy: { ballSpeed: 5, paddleSpeed: 6 },
-	medium: { ballSpeed: 10, paddleSpeed: 6 },
-	hard: { ballSpeed: 15, paddleSpeed: 10 }
+	easy: { ballSpeed: 6, paddleSpeed: 6 },
+	medium: { ballSpeed: 9, paddleSpeed: 6 },
+	hard: { ballSpeed: 12, paddleSpeed: 10 }
 };
 
 const SNAKE_MODES: Record<GameMode, SnakeSettings> = {
 	easy: { snakeSpeed: 150 },
-	medium: { snakeSpeed: 100 },
-	hard: {snakeSpeed: 50}
+	medium: { snakeSpeed: 125 },
+	hard: {snakeSpeed: 100}
 };
 
 export function GameSettingsProvider({ children }: { children: ReactNode }) {

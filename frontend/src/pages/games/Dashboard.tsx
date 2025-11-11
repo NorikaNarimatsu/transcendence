@@ -447,7 +447,7 @@ export default function Dashboard(): JSX.Element {
                                                         </div>
                                                        <div className="font-dotgothic text-xs text-purple-300 mb-1">
                                                             Played at: {match.endedAt ? new Date(match.endedAt).toLocaleString('en-US', {
-                                                                timeZone: 'Etc/GMT-2',
+                                                                timeZone: 'Etc/GMT-1',
                                                                 month: 'short',
                                                                 day: 'numeric',
                                                                 hour: '2-digit',
