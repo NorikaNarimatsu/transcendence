@@ -111,7 +111,7 @@ const [email] = useState(() => {
 	}
 
     try {
-      // Step 1: Validate password
+      // Validate password
       const response = await apiCentral.post("/validatePasswordbyEmail", { email, password });
 
 	  if (response.error) {
@@ -130,12 +130,6 @@ const [email] = useState(() => {
               name: response.data.user.name,
               avatarUrl: response.data.user.avatarUrl,
             });
-        //   try {
-        //       const dbLang = await getUserLanguage(response.data.user.userID);
-        //       localStorage.setItem('lang', dbLang);
-        //   }catch(error){
-        //       console.error('Failed to fetch language:', error);
-        //   }
 			setUserID(response.data.user.userID);
           } else {
             try {
@@ -198,7 +192,6 @@ const [email] = useState(() => {
           }
         }
       } else {
-        // const data = await response.json();
         setError("Invalid password");
       }
     } catch (err) {

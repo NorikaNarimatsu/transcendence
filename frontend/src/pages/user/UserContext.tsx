@@ -41,7 +41,7 @@ export function UserProvider({ children }: { children: ReactNode}) {
                 }
             } catch (error) {
                 console.error('Error loading user from localStorage:', error);
-                localStorage.removeItem('currentUser'); // Clean up corrupted data
+                localStorage.removeItem('currentUser');
             } finally {
                 setLoading(false);
             }
@@ -55,12 +55,6 @@ export function UserProvider({ children }: { children: ReactNode}) {
     if (userData) {
         if (userData.userID && userData.name && userData.avatarUrl){
             localStorage.setItem('currentUser', JSON.stringify(userData));
-            // try {
-            //     const dbLang = await getUserLanguage(userData.userID);
-            //     localStorage.setItem('lang', dbLang);
-            // }catch(error){
-            //     console.error('Failed to fetch language:', error);
-            // }
         }
         else
             console.warn('Invalid user data provided to setUser:', userData);

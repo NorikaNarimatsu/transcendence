@@ -56,12 +56,11 @@ export default function TournamentTree() {
         const error = !currentName.trim() ? "Name cannot be empty" : "";
         
         if (error) {
-            // Reset to original name if invalid
             const originalParticipant = participants.find((p:SelectedPlayer) => p.userID.toString() === participantId);
             if (originalParticipant) {
                 setDisplayNames({
                     ...displayNames,
-                    [participantId]: originalParticipant.name.slice(0, 7) // Ensure original name is also limited
+                    [participantId]: originalParticipant.name.slice(0, 7)
                 });
             }
             setNameErrors({

@@ -62,9 +62,6 @@ export interface GameState {
 
 	  this.config.ballSpeed = this.difficultySettings.ballSpeed;
 	  this.config.paddleSpeed = this.difficultySettings.paddleSpeed;
-	  
-    //   this.config = config;
-    //   this.onStateChange = onStateChange;
       
       // Initialize positions properly centered
       this.ballPosition = { 

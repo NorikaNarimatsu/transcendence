@@ -1,7 +1,4 @@
-import React from 'react'
 import { useLanguage } from '../contexts/LanguageContext'
-
-import ArrowIcon from '../assets/icons/arrow.png'
 
 export default function GameInstructionsSnakeGame(): JSX.Element {
     const { lang, t } = useLanguage();

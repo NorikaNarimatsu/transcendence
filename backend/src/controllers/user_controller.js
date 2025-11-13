@@ -3,7 +3,6 @@ import { db } from '../server.js';
 import { verifyTokenOwner } from '../utils/verifyTokenOwner.js';
 import { sanitizeInput } from '../utils/sanitizeInput.js';
 import { allowedAvatars } from '../utils/avatarsList.js';
-import { time } from 'console';
 
 const userAnon = {
     anonymizeUserData: (userId) => {
@@ -26,7 +25,6 @@ const userAnon = {
     },
 
     performAnonymization: async (userID) => {
-        // Check if user exists
         const user = db.prepare('SELECT userID FROM users WHERE userID = ?').get(userID);
         if (!user) {
             throw new Error('User not found');
@@ -125,8 +123,7 @@ const userController = {
 			if (ownerError) {
 				return reply.code(ownerError.code).send({ error: ownerError.error });
 			}
-					
-			// getting user's basic info
+
 			const user = db.prepare(`
 				SELECT userID, name, email, createdAt, lastLoginAt, lang
 				FROM users

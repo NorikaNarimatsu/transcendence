@@ -51,7 +51,6 @@ export const createTournamentBracket = async (request, response) => {
     }
 };
 
-// Add a new match result
 export const addMatch = async (request, response) => {
     console.log("=== addMatch called ===");
     console.log("Request body:", request.body);
@@ -73,7 +72,6 @@ export const addMatch = async (request, response) => {
 
         console.log("Extracted values:", { matchType, matchMode, user1ID, user2ID, user1Score, user2Score, startedAt, endedAt });
 
-        // FIXED: Validate required fields
         if (!matchType || !matchMode || !user1ID || user2ID === undefined || user1Score === undefined || user2Score === undefined) {
             console.log("Validation failed - missing required fields");
             return response.code(400).send({ 
@@ -83,7 +81,6 @@ export const addMatch = async (request, response) => {
 
         console.log("Validation passed, validating inputs...");
 
-        // FIXED: Validate specific values instead of using username sanitizer
         const validMatchTypes = ['pong', 'snake'];
         const validMatchModes = ['single', '2players', 'tournament'];
 
@@ -109,7 +106,6 @@ export const addMatch = async (request, response) => {
             return response.code(400).send({ message: "Winner must be either user1, user2, or 0 (tie) in multiplayer games" });
         }
 
-        // SIMPLIFIED: Validate user IDs exist in database
         const user1 = db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(user1ID);
         const user2 = user2ID !== null ? db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(user2ID) : null;
         
@@ -129,12 +125,10 @@ export const addMatch = async (request, response) => {
             user2: user2 ? user2.name : 'None (Single Player)' 
         });
 
-        // Tournament match, sequential match ID within bracket
         let finalTournamentBracketID = tournamentBracketID;
         let finalTournamentMatchID = tournamentMatchID;
 
         if (matchMode === 'tournament' && tournamentBracketID){
-            // get next match id for the tournament bracket
             const lastMatch = db.prepare(
                 `SELECT MAX(tournamentMatchID) as maxMatchID
                 from match
@@ -164,8 +158,8 @@ export const addMatch = async (request, response) => {
             parseInt(user1Score),
             parseInt(user2Score),
             winnerID,
-            startedAt || new Date().toISOString(), // Default to now if not provided
-            endedAt || new Date().toISOString()     // Default to now if not provided
+            startedAt || new Date().toISOString(),
+            endedAt || new Date().toISOString()
         );
 
         console.log("Insert successful:", result);
@@ -231,7 +225,7 @@ export const getTournamentMatches = async (request, response ) => {
             ORDER BY m.tournamentMatchID ASC
         `).all(bracketID);
 
-        console.log(`Found ${matches.length} matches for bracket ${bracketID}:`, matches); // Add logging
+        console.log(`Found ${matches.length} matches for bracket ${bracketID}:`, matches);
 
         return response.code(200).send({
             tournamentBracketID: bracketID,
@@ -258,7 +252,6 @@ export const getUserMatches = async (request, response) => {
             return response.code(400).send({ message: "Invalid userID" });
         }
 
-        // Verify user exists
         const user = db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(sanitizedUserID);
         if (!user) {
             return response.code(404).send({ message: "User not found" });
@@ -331,7 +324,6 @@ export const getUserStats = async (request, response) => {
             return response.code(400).send({ message: "Invalid userID" });
         }
 
-        // Verify user exists
         const user = db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(sanitizedUserID);
         if (!user) {
             return response.code(404).send({ message: "User not found" });

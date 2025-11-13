@@ -7,14 +7,9 @@ import bcrypt from 'bcrypt';
 import { verifyTokenOwner } from "../utils/verifyTokenOwner.js";
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-//////// Avatar Array //////
+//Avatar Array:
 const avatars = allowedAvatars;
-
 
 const isAllowedImgType = (buffer) => {
 	if (!buffer || buffer.length < 8) {
@@ -181,7 +176,6 @@ export const validatePasswordByUserID = async (request, response) => {
             return response.code(400).send({ message: "Invalid userID" });
         }
         
-        // Get user by userID
         const user = db
             .prepare("SELECT userID, password FROM users WHERE userID = ?")
             .get(sanitizedUserID);
@@ -287,11 +281,11 @@ export const getUserInfoByEmail = async (request, reply) => {
         const sanitiziedEmail = sanitizeInput.sanitizeEmail(email);
         
         const user = db
-            .prepare("SELECT userID, name, avatarUrl FROM users WHERE email = ?") // ADD userID
+            .prepare("SELECT userID, name, avatarUrl FROM users WHERE email = ?")
             .get(sanitiziedEmail);
         if (user) {
             return reply.code(200).send({
-                userID: user.userID,  // ADD userID to response
+                userID: user.userID,
                 name: sanitizeInput.sanitizeUsername(user.name),
                 avatarUrl: sanitizeInput.avatarPathCheck(user.avatarUrl, avatars)
             });
@@ -320,13 +314,11 @@ export const getUserById = async (request, reply) => {
             return reply.code(400).send({ message: "Invalid userID format" });
         }
 
-        const user = db.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID = ?").get(sanitizedUserID); // TODO? userID
+        const user = db.prepare("SELECT userID, name, avatarUrl FROM users WHERE userID = ?").get(sanitizedUserID);
         
         if (!user) {
             return reply.code(404).send({ message: "User not found" });
         }
-
-
 
         return reply.code(200).send({
           userID: user.userID,
@@ -381,7 +373,6 @@ export const getUsersExceptUserID = async (request, reply) => {
     }
 };
 
-// Simplified version for one-sided friendship
 export const getUserFriendsByUserID = async (request, reply) => {
     try {
         const { userID } = request.params;
@@ -390,8 +381,7 @@ export const getUserFriendsByUserID = async (request, reply) => {
         if (isNaN(sanitizedUserID)) {
             return reply.code(400).send({ message: "Invalid userID" });
         }
-        
-        // Get friends where this user is user1ID (one-sided friendship)
+
         const friends = db.prepare(`
             SELECT u.userID, u.name, u.avatarUrl, u.lastLoginAt
             FROM friends f
@@ -401,7 +391,6 @@ export const getUserFriendsByUserID = async (request, reply) => {
             ORDER BY u.name
         `).all(sanitizedUserID);
         
-        // Format response to match SelectedPlayer interface
         const formattedFriends = friends.map(friend => ({
             userID: friend.userID,
             name: sanitizeInput.sanitizeUsername(friend.name),
@@ -496,17 +485,6 @@ export function updateAvatarUrl(request, response) {
 			return response.code(ownerError.code).send({ error: ownerError.error });
 		}
 
-        // if (!avatarUrl.startsWith('/avatars/') && !avatarUrl.startsWith('/uploadAvatars/')) {
-        //     return response.code(400).send({ error: 'Invalid avatar URL' });
-        // }
-
-		// let sanitizedAvatarUrl;
-		// try {
-		// 	sanitizedAvatarUrl = sanitizeInput.avatarPathCheck(avatarUrl, avatars);
-		// } catch (error) {
-		// 	return response.code(400).send({ error: error.message || "Invalid avatarUrl" });
-		// }
-
 		let sanitizedAvatarUrl = avatarUrl.trim();
 
 		try {
@@ -548,7 +526,6 @@ export const uploadAvatar = async (request, response) => {
         let fileBuffer;
         let fileMimetype;
 
-        // Process all parts of the multipart request
         const parts = request.parts();
         
         for await (const part of parts) {
@@ -603,35 +580,6 @@ export const uploadAvatar = async (request, response) => {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
 
-        // const fileExtension = fileMimetype.split('/')[1];
-        
-        // // Simple naming: current and old
-        // const currentFileName = `avatar_${sanitizedUserID}_current.${fileExtension}`;
-        // const oldFileName = `avatar_${sanitizedUserID}_old.${fileExtension}`;
-        
-        // const currentFilePath = path.join(uploadDir, currentFileName);
-        // const oldFilePath = path.join(uploadDir, oldFileName);
-
-        // // Step 1: Delete the old file if it exists
-        // if (fs.existsSync(oldFilePath)) {
-        //     try {
-        //         fs.unlinkSync(oldFilePath);
-        //         console.log(`✅ Deleted old avatar: ${oldFilePath}`);
-        //     } catch (err) {
-        //         request.log.warn('Failed to delete old avatar:', err);
-        //     }
-        // }
-
-        // // Step 2: Rename current to old (if current exists)
-        // if (fs.existsSync(currentFilePath)) {
-        //     try {
-        //         fs.renameSync(currentFilePath, oldFilePath);
-        //         console.log(`✅ Renamed current to old: ${currentFilePath} -> ${oldFilePath}`);
-        //     } catch (err) {
-        //         request.log.warn('Failed to rename current to old:', err);
-        //     }
-        // }
-
         const fileExtension = fileMimetype.split('/')[1];
         const fileName = `avatar_${sanitizedUserID}.${fileExtension}`;
         const filePath = path.join(uploadDir, fileName);
@@ -650,7 +598,7 @@ export const uploadAvatar = async (request, response) => {
             }
         }
 
-        // Step 3: Save the new file as current
+        // Save the new file as current
         await fs.promises.writeFile(filePath, fileBuffer);
         console.log(`✅ Saved new avatar as current: ${filePath}`);
         const timestamp = Date.now();
@@ -671,121 +619,6 @@ export const uploadAvatar = async (request, response) => {
     }
 }
 
-// ...existing code...
-
-// export const uploadAvatar = async (request, response) => {
-//     try {
-//         let userIDValue;
-//         let fileBuffer;
-//         let fileMimetype;
-
-//         // Process all parts of the multipart request
-//         const parts = request.parts();
-        
-//         for await (const part of parts) {
-//             console.log('Processing part:', part.fieldname, 'type:', part.type);
-            
-//             if (part.type === 'field') {
-//                 // This is a form field (like userID)
-//                 if (part.fieldname === 'userID') {
-//                     userIDValue = part.value;
-//                     console.log('✅ Found userID field:', userIDValue);
-//                 }
-//             } else if (part.type === 'file') {
-//                 // This is the file
-//                 if (part.fieldname === 'avatar') {
-//                     fileBuffer = await part.toBuffer();
-//                     fileMimetype = part.mimetype;
-//                     console.log('✅ Found file:', part.filename, 'type:', fileMimetype);
-//                 }
-//             }
-//         }
-
-//         console.log('=== After processing all parts ===');
-//         console.log('userIDValue:', userIDValue);
-//         console.log('fileBuffer size:', fileBuffer?.length);
-//         console.log('fileMimetype:', fileMimetype);
-
-//         // Validate we have both userID and file
-//         if (!userIDValue) {
-//             return response.code(400).send({ error: 'userID is required' });
-//         }
-
-//         if (!fileBuffer) {
-//             return response.code(400).send({ error: 'No file uploaded' });
-//         }
-
-//         const sanitizedUserID = parseInt(userIDValue);
-//         console.log('Parsed userID:', sanitizedUserID);
-
-
-
-//         // const userIDField = data.fields.userID;
-//         // const sanitizedUserID = parseInt(userIDField?.value || userIDField);
-
-//         if(isNaN(sanitizedUserID)){
-//             return response.code(400).send({ error: 'Invalid userID' });
-//         }
-
-//         const ownerError = verifyTokenOwner(request, sanitizedUserID);
-//         if (ownerError){
-//             return response.code(ownerError.code).send({ error: ownerError.error });
-//         }
-
-//         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-//         if(!allowedTypes.includes(fileMimetype)){
-//             return response.code(400).send({ error: 'Only JPEG and PNG images are allowed' });
-//         }
-
-//         // const buffer = await data.toBuffer();
-//         const fileSizeInMB = fileBuffer.length / (1024 * 1024);
-//         if (fileSizeInMB > 2){
-//             return response.code(400).send({ error: 'File size must be less than 2MB' });
-//         }
-
-//         const uploadDir = path.join(process.cwd(), 'uploadAvatars');
-//         if(!fs.existsSync(uploadDir)){
-//             fs.mkdirSync(uploadDir, { recursive: true });
-//         }
-
-//         const fileExtension = fileMimetype.split('/')[1];
-//         const fileName = `${sanitizedUserID}_avatar.${fileExtension}`;
-//         const filePath = path.join(uploadDir, fileName);
-
-//         const oldUser = db.prepare('SELECT avatarUrl FROM users WHERE userID = ?').get(sanitizedUserID);
-//         console.log("USER ID LALALAL:", oldUser?.userID, oldUser?.avatarUrl, oldUser.avatarUrl.startsWith('/uploadAvatars/'));
-//         if(oldUser?.avatarUrl && oldUser.avatarUrl.startsWith('/uploadAvatars/')) {
-//             console.log("HELLO!");
-//             const oldFilePath = path.join(process.cwd(), oldUser.avatarUrl);
-//             console.log("OLD FILE PATH:", oldFilePath);
-//             if(fs.existsSync(oldFilePath)){
-//                 try{
-//                     fs.unlinkSync(oldFilePath);
-//                     console.log(`✅ Deleted old avatar: ${oldFilePath}`);
-//                 }catch(err){
-//                     request.log.warn('Failed to delete old avatar:', err);
-//                 }
-//             }
-//         }
-
-//         await fs.promises.writeFile(filePath, fileBuffer);
-
-//         const avatarUrl = `/uploadAvatars/${fileName}`;
-//         const result = db.prepare('UPDATE users SET avatarUrl = ? WHERE userID = ?').run(avatarUrl, sanitizedUserID);
-//         if(result.changes === 0){
-//             fs.unlinkSync(filePath);
-//             return response.code(404).send({ error: 'User not found' });
-//         }
-//         return response.code(200).send({
-//             message: 'Avatar uploaded successfully',
-//             avatarUrl: avatarUrl
-//         });
-//     } catch (error) {
-//         request.log.error('Upload avatar error:', error);
-//         return response.code(500).send({ error: 'Failed to upload avatar' });
-//     }
-// }
-
 export const updateUserName = async (request, response) => {
     try {
         const { userID, name } = request.body;
@@ -804,13 +637,11 @@ export const updateUserName = async (request, response) => {
 			return response.code(ownerError.code).send({ error: ownerError.error });
 		}
 
-        // Check if user exists
         const existingUser = db.prepare("SELECT userID, name FROM users WHERE userID = ?").get(sanitizedUserID);
         if (!existingUser) {
             return response.code(404).send({ message: "User not found" });
         }
 
-        // Validate and check for conflicts
         let sanitizedName;
         try {
             sanitizedName = sanitizeInput.sanitizeUsername(name);
@@ -866,13 +697,11 @@ export const updateUserEmail = async (request, response) => {
 			return response.code(ownerError.code).send({ error: ownerError.error });
 		}
 
-        // Check if user exists
         const existingUser = db.prepare("SELECT userID, email FROM users WHERE userID = ?").get(sanitizedUserID);
         if (!existingUser) {
             return response.code(404).send({ message: "User not found" });
         }
 
-        // Validate and check for conflicts
         let sanitizedEmail;
         try {
             sanitizedEmail = sanitizeInput.sanitizeEmail(email);
@@ -956,131 +785,3 @@ const itemController = {
 };
 
 export default itemController;
-
-
-
-
-
-
-
-// ////////////////////////////// POST //////////////////////////////
-
-// export function addItem(request, response) {
-// 	const { name, email, password } = request.body;
-
-// 	const sanitiziedName = sanitizeInput.sanitizeUsername(name);
-// 	const sanitiziedEmail = sanitizeInput.sanitizeEmail(email);
-
-// 	const randomAvatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
-// 	const createdAt = new Date().toISOString();
-// 	const result = db
-// 	.prepare(
-// 		"INSERT INTO users (name, email, password, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)"
-// 	)
-// 	.run(sanitiziedName, sanitiziedEmail, password, randomAvatarUrl, createdAt);
-// 	response.code(201).send({
-// 	id: result.lastInsertRowid,
-// 	name: sanitiziedName,
-// 	email: sanitiziedEmail,
-// 	avatarUrl: randomAvatarUrl,
-// 	createdAt: createdAt,
-// 	});
-// }
-
-// ////////////////////////////// PUT //////////////////////////////
-
-// export function updateItem(request, response) {
-// 	try {
-//     const { id } = request.params;
-//     const { name } = request.body;
-//     const { email } = request.body;
-//     const { password } = request.body;
-//     const { avatarUrl } = request.body;
-//     // TODO for Gosia -> is this really needed here?
-//     if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
-//       return response.code(400).send({ error: "Invalid or missing id" });
-//     }
-//     const sanitiziedName = name ? sanitizeInput.sanitizeUsername(name) : null;
-//     const sanitiziedEmail = email ? sanitizeInput.sanitizeEmail(email) : null;
-
-//     const responseult = db
-//       .prepare(
-//         "UPDATE users SET name = COALESCE(?, name), avatarUrl = COALESCE(?, avatarUrl) WHERE userID = ?"
-//       )
-//       .run(sanitiziedName, avatarUrl, id);
-//     if (responseult.changes === 0) {
-//       response.code(404).send({ error: "Item not found" });
-//     } else {
-//       response.send({
-//         id,
-//         name: sanitiziedName,
-//         email: sanitiziedEmail,
-//         password,
-//         avatarUrl: avatarUrl,
-//       });
-//     }
-//   } catch (error) {
-// 		request.log.error("update error: ", error);
-// 		return response.code(400).send({ 
-// 			error: error.message || "Invalid input data" });
-// 	}
-// }
-
-// ////////////////////////////// DELETE //////////////////////////////
-
-// export function deleteItem(request, response) {
-// 	try {
-// 		const { id } = request.params;
-// 		// TODO for Gosia -> is this really needed here?
-// 		if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
-// 			return response.code(400).send({ error: "Invalid or missing id" });
-// 		}
-	
-// 		const responseult = db.prepare("DELETE FROM users WHERE userID = ?").run(parseInt(id));
-// 		if (responseult.changes === 0) {
-// 		response.code(404).send({ error: "Item not found" });
-// 		} else {
-// 		response.code(204).send({ message: `Item has been removed` });
-// 		}
-// 	} catch (error) {
-// 		request.log.error("deleteItem error: ", error);
-// 		return response.code(500).send({ error: "Internal server error" });
-// 	}
-// }
-
-
-//TODO for Gosia - should this also be sanitizied, or can sanitizeName be used in the next function instead
-// export const validateItem = (name) => {
-// 	if (typeof name !== "string") throw new Error("Invalid name");
-// 	const sanitiziedName = sanitizeInput.sanitizeUsername(name);
-// 	if (!sanitiziedName.match(/^[A-Za-z0-9]+$/))
-// 		throw new Error("Name must contain only letters and numbers");
-// 	if (sanitiziedName.length < 2 || sanitiziedName.length > 7)
-// 		throw new Error("Name must be between 2 and 7 characters");
-// 	return true;
-// };
-
-// // Combined function using existing addItem
-// export const validateAndAddItem = async (request, response) => {
-// 	try {
-// 		const { name } = request.body; // request.body now contains: { name: "whatever user typed" }
-// 		validateItem(name);
-// 		return addItem(request, response);
-// 	} catch (error) {
-// 		request.log.error(error);
-// 		return response.code(400).send({
-// 			message: error.message || "Validation failed",
-// 		});
-// 	}
-// };
-
-// Frontend                        Backend
-//    |                               |
-//    |-- POST /validateName ------->|
-//    |   { "name": "Norika" }        |
-//    |                               |
-//    |                         Validates name
-//    |                         Storesponse in DB
-//    |                               |
-//    |<- responseponse 200 ---------------|
-//    |   { "message": "success" }    |

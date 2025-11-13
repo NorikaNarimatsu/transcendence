@@ -57,10 +57,8 @@ async function handleBlobResponse(response: Response): Promise<Response | null> 
 		if (window.location.pathname !== '/signup') {
 			window.location.href = '/signup';
 		}
-
 		return null;
 	}
-
 	return response;
 }
 
