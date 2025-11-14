@@ -132,7 +132,7 @@ const twoFactorController = {
         return response.code(400).send({ error: "2FA not enabled" });
       }
 
-      const maxCodesInTenMin = 3;
+      const maxCodesInTenMin = 5;
 
       const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
       const recentCodesCount = db

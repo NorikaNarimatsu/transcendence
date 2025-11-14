@@ -295,14 +295,14 @@ const [email] = useState(() => {
 						</p>
 					)}
                 {passwordError && (
-					<p className="mt-1 text-red-300 text-sm font-dotgothic">
+					<p className="mt-1 text-red-600 text-sm font-dotgothic">
 						{passwordError}
 					</p>
                 )}
                 {error && !passwordError && (
                   <SafeError
                     error={error}
-                    className="mt-1 text-red-300 text-sm font-dotgothic"
+                    className="mt-1 text-red-600 text-sm font-dotgothic"
                   />
                 )}
               </div>

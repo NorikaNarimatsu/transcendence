@@ -33,7 +33,6 @@ await app.register(cors, {
 	'https://localhost'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
   exposedHeaders: ['Renewed-Token']
 });
 
